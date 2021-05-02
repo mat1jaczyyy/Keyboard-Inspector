@@ -128,7 +128,7 @@ namespace Keyboard_Inspector {
             this.Controls.Add(this.status);
             this.Controls.Add(this.rec);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(600, 150);
+            this.MinimumSize = new System.Drawing.Size(700, 150);
             this.Name = "MainForm";
             this.Text = "Keyboard Inspector";
             this.Resize += new System.EventHandler(this.MainForm_Resize);
