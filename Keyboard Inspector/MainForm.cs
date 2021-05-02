@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -52,19 +53,15 @@ namespace Keyboard_Inspector {
                 t_Tick(sender, e);
                 t.Enabled = true;
 
-                if (realtime.Checked) live.Enabled = true;
-
             } else {
                 rec.Text = "Start Recording";
                 status.Text = "";
 
-                time = KeyRecorder.StopRecording();
-                result = KeyRecorder.Events;
+                result = KeyRecorder.StopRecording(out time);
 
                 processResult();
 
                 t.Enabled = false;
-                live.Enabled = false;
             }
 
             freeze.Enabled = !KeyRecorder.IsRecording;
@@ -73,24 +70,6 @@ namespace Keyboard_Inspector {
             Redraw();
             UpdateScroll();
         }
-
-
-        void live_Tick(object sender, EventArgs e) {
-            if (!KeyRecorder.IsRecording) {
-                live.Enabled = false;
-                return;
-            }
-
-            time = KeyRecorder.Time;
-            result = KeyRecorder.Events;
-
-            processResult();
-
-            Redraw();
-        }
-
-        void realtime_CheckedChanged(object sender, EventArgs e)
-            => live.Enabled = realtime.Checked;
 
         void t_Tick(object sender, EventArgs e)
             => status.Text = $"Recording... {TimeSpan.FromSeconds(++elapsed):hh\\:mm\\:ss}";
@@ -342,13 +321,17 @@ namespace Keyboard_Inspector {
 
         static readonly double[] PollRates = new double[] {62.5, 125, 250, 500, 1000, 2000, 4000};
 
-        void poll_Click(object sender, EventArgs e) {
+        void TestPollRate(bool outputToFile) {
             if (result == null) return;
+
+            StringBuilder file = new StringBuilder();
 
             // Filter Windows auto-repeat
             List<KeyEvent> no_repeat = result
                 .Where((x, i) => x.Pressed != true || result.Take(i).Where(j => j.Key == x.Key).LastOrDefault().Pressed != true)
                 .ToList();
+
+            file.Append($"no_repeat:\n{string.Join("\n", no_repeat)}\n\n");
 
             // Get differences between inputs
             List<double> delta = no_repeat
@@ -356,11 +339,15 @@ namespace Keyboard_Inspector {
                 .Select((x, i) => x.Timestamp - no_repeat[i].Timestamp)
                 .ToList();
 
+            file.Append($"delta:\n{string.Join("\n", delta.Select(i => i.ToString("0.00000")))}\n\n");
+
             List<double> stddev = new List<double>();
             List<double> amount = new List<double>();
 
             // Assume polling rate
             foreach (double hz in PollRates) {
+                file.Append($"Testing {hz}Hz\n\n\t");
+
                 double ms = 1 / hz;
 
                 // Offset from closest poll on assumed polling rate
@@ -383,14 +370,20 @@ namespace Keyboard_Inspector {
                     no_outliers.Add(off[i]);
                 }
 
+                file.Append($"off:\n\t{string.Join("\n\t", off.Select(i => i.ToString("0.00000")))}\n\n\t");
+                file.Append($"no_outliers:\n\t{string.Join("\n\t", no_outliers.Select(i => i.ToString("0.00000")))}\n\n\t");
+
                 // Amount of samples close to poll rate
                 amount.Add((double)no_outliers.Count(j => Math.Abs(j) < ms / 6) / no_outliers.Count);
 
                 // Standard deviation
                 stddev.Add(no_outliers.StandardDeviation());
+
+                file.Append($"amount: {amount.Last() * 100:0.00}%\n\t");
+                file.Append($"stddev: {stddev.Last():0.00000000} {stddev.Last() < ms / 4}\n\n");
             }
 
-            List<bool> stddev_results = stddev.Select((x, i) => x < 1 / PollRates[i] / 4).ToList();
+            List<bool> stddev_results = stddev.Select((x, i) => x < (1 / PollRates[i]) / 4).ToList();
             List<bool> amount_results = amount.Select(i => i >= 0.8).ToList();
 
             int stddev_result = stddev_results.TakeWhile(i => !i).Count();
@@ -401,6 +394,16 @@ namespace Keyboard_Inspector {
 
             int results = Convert.ToInt32(stddev_hasresult) + Convert.ToInt32(amount_hasresult);
 
+            file.Append($"stddev_results: {string.Join(", ", stddev_results)}\n");
+            file.Append($"stddev_result: {stddev_result}\n");
+            file.Append($"stddev_hasresult: {amount_hasresult}\n\n");
+
+            file.Append($"amount_results: {string.Join(", ", amount_results)}\n");
+            file.Append($"amount_result: {amount_result}\n");
+            file.Append($"amount_hasresult: {amount_hasresult}\n\n");
+
+            file.Append($"results: {results}\n");
+
             status.TextAlign = ContentAlignment.TopLeft;
 
             if (results == 2) {
@@ -410,10 +413,30 @@ namespace Keyboard_Inspector {
                     status.Text = $"Either {PollRates[stddev_result]}Hz or {PollRates[amount_result]}Hz... Try again with more data.";
                 }
             } else if (results == 1) {
-                status.Text = $"Not sure, maybe {PollRates[stddev_hasresult? stddev_result : amount_result]}Hz? Try again with more data.";
+                status.Text = $"Not sure, maybe {PollRates[stddev_hasresult ? stddev_result : amount_result]}Hz? Try again with more data.";
             } else {
                 status.Text = $"Wasn't able to tell at all... Try again with more data.";
             }
+
+            file.Append($"{status.Text}\n");
+
+            SaveFileDialog ofd = new SaveFileDialog();
+            ofd.Filter = "Text Files (*.txt)|*.txt";
+
+            if (outputToFile && ofd.ShowDialog() == DialogResult.OK)
+                File.WriteAllText(ofd.FileName, file.ToString());
+        }
+
+        private void poll_MouseUp(object sender, MouseEventArgs e) {
+            if (result == null || e.Button != MouseButtons.Right) return;
+
+            TestPollRate(true);
+        }
+
+        void poll_Click(object sender, EventArgs e) {
+            if (result == null) return;
+
+            TestPollRate(false);
         }
     }
 }

@@ -28,5 +28,8 @@ namespace Keyboard_Inspector {
 
             Key = (Keys)lParam;
         }
+
+        public override string ToString()
+            => $"{Timestamp:0.00000} {(Pressed == true? "DN" : "UP")} {Key}";
     }
 }

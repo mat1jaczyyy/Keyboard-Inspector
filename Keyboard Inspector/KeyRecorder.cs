@@ -51,7 +51,7 @@ namespace Keyboard_Inspector {
 
         public static void StartRecording() {
             if (IsRecording)
-                StopRecording();
+                StopRecording(out _);
 
             time?.Stop();
             time = new Stopwatch();
@@ -62,19 +62,20 @@ namespace Keyboard_Inspector {
             _hookID = SetHook(hook);
         }
 
-        public static double StopRecording() {
-            if (!IsRecording) return 0;
+        public static IReadOnlyList<KeyEvent> StopRecording(out double result) {
+            result = 0;
+            if (!IsRecording) return null;
 
             UnhookWindowsHookEx(_hookID);
             _hookID = IntPtr.Zero;
 
             time.Stop();
 
-            return time.ElapsedPrecise();
+            result = time.ElapsedPrecise();
+
+            return keys;
         }
 
         public static bool IsRecording => _hookID != IntPtr.Zero;
-        public static IReadOnlyList<KeyEvent> Events => keys;
-        public static double Time => time?.ElapsedPrecise()?? 0;
     }
 }

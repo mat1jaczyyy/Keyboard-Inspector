@@ -33,8 +33,6 @@ namespace Keyboard_Inspector {
             this.scroll = new System.Windows.Forms.HScrollBar();
             this.freeze = new System.Windows.Forms.CheckBox();
             this.poll = new System.Windows.Forms.Button();
-            this.realtime = new System.Windows.Forms.CheckBox();
-            this.live = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.screen)).BeginInit();
             this.SuspendLayout();
             // 
@@ -58,9 +56,9 @@ namespace Keyboard_Inspector {
             // 
             this.status.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.status.Location = new System.Drawing.Point(402, 155);
+            this.status.Location = new System.Drawing.Point(274, 155);
             this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(285, 18);
+            this.status.Size = new System.Drawing.Size(413, 18);
             this.status.TabIndex = 1;
             this.status.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
@@ -108,30 +106,14 @@ namespace Keyboard_Inspector {
             // 
             this.poll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.poll.Enabled = false;
-            this.poll.Location = new System.Drawing.Point(274, 150);
+            this.poll.Location = new System.Drawing.Point(146, 150);
             this.poll.Name = "poll";
             this.poll.Size = new System.Drawing.Size(122, 23);
             this.poll.TabIndex = 5;
             this.poll.Text = "Analyze Polling Rate";
             this.poll.UseVisualStyleBackColor = true;
             this.poll.Click += new System.EventHandler(this.poll_Click);
-            // 
-            // realtime
-            // 
-            this.realtime.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.realtime.AutoSize = true;
-            this.realtime.Location = new System.Drawing.Point(146, 154);
-            this.realtime.Name = "realtime";
-            this.realtime.Size = new System.Drawing.Size(122, 17);
-            this.realtime.TabIndex = 6;
-            this.realtime.Text = "Display in Real Time";
-            this.realtime.UseVisualStyleBackColor = true;
-            this.realtime.CheckedChanged += new System.EventHandler(this.realtime_CheckedChanged);
-            // 
-            // live
-            // 
-            this.live.Interval = 1;
-            this.live.Tick += new System.EventHandler(this.live_Tick);
+            this.poll.MouseUp += new System.Windows.Forms.MouseEventHandler(this.poll_MouseUp);
             // 
             // MainForm
             // 
@@ -139,7 +121,6 @@ namespace Keyboard_Inspector {
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(827, 178);
-            this.Controls.Add(this.realtime);
             this.Controls.Add(this.poll);
             this.Controls.Add(this.freeze);
             this.Controls.Add(this.scroll);
@@ -147,7 +128,7 @@ namespace Keyboard_Inspector {
             this.Controls.Add(this.status);
             this.Controls.Add(this.rec);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(843, 150);
+            this.MinimumSize = new System.Drawing.Size(600, 150);
             this.Name = "MainForm";
             this.Text = "Keyboard Inspector";
             this.Resize += new System.EventHandler(this.MainForm_Resize);
@@ -165,7 +146,5 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.HScrollBar scroll;
         private System.Windows.Forms.CheckBox freeze;
         private System.Windows.Forms.Button poll;
-        private System.Windows.Forms.CheckBox realtime;
-        private System.Windows.Forms.Timer live;
     }
 }
