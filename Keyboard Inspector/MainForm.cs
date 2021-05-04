@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using MathNet.Numerics.Statistics;
@@ -18,11 +16,16 @@ namespace Keyboard_Inspector {
             InitializeComponent();
 
             screen.AllowDrop = true;
+
+            key.DropDown.Closing += (s, e) => {
+                if (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked)
+                    e.Cancel = true;
+            };
         }
 
         int elapsed;
-        IReadOnlyList<KeyEvent> result = null;
-        double time, zoom, viewport;
+        Result result = null;
+        double zoom, viewport;
         float areaWidth, areaX;
         List<Keys> keys;
         List<RectangleF> textRects = new List<RectangleF>();
@@ -30,9 +33,18 @@ namespace Keyboard_Inspector {
 
         void processResult() {
             if (!freeze.Checked) {
-                keys = result.Select(i => i.Key).Distinct().ToList();
+                keys = result.Events.Select(i => i.Key).Distinct().ToList();
                 colors.Clear();
             }
+        }
+
+        void resultLoaded() {
+            key.Enabled = recording.Enabled = open.Enabled = !KeyRecorder.IsRecording;
+            poll.Enabled = result?.Events.Count() >= 60;
+            save.Enabled = result?.Events.Any() == true;
+
+            Redraw();
+            UpdateScroll();
         }
 
         void rec_Click(object sender, EventArgs e) {
@@ -57,18 +69,14 @@ namespace Keyboard_Inspector {
                 rec.Text = "Start Recording";
                 status.Text = "";
 
-                result = KeyRecorder.StopRecording(out time);
+                result = KeyRecorder.StopRecording();
 
                 processResult();
 
                 t.Enabled = false;
             }
 
-            freeze.Enabled = !KeyRecorder.IsRecording;
-            poll.Enabled = result?.Count() >= 60;
-
-            Redraw();
-            UpdateScroll();
+            resultLoaded();
         }
 
         void t_Tick(object sender, EventArgs e)
@@ -154,14 +162,14 @@ namespace Keyboard_Inspector {
                 float px;
 
                 for (;;) {
-                    px = (float)(increment / time * areaWidth * zoom);
+                    px = (float)(increment / result.Time * areaWidth * zoom);
 
                     if (px < 40) increment *= 2;
                     else if (px >= 80) increment /= 2;
                     else break;
                 }
 
-                double pos = viewport * time / increment;
+                double pos = viewport * result.Time / increment;
                 int k = (int)Math.Ceiling(pos);
 
                 for (float s = (float)((k - pos) * px); s < areaWidth; s = (float)(++k - pos) * px) {
@@ -203,13 +211,13 @@ namespace Keyboard_Inspector {
                         Margin + keyHeight * (k + 0.5f)
                     );
 
-                    KeyEvent[] events = result.Where(i => i.Key == keys[k]).ToArray();
+                    KeyEvent[] events = result.Events.Where(i => i.Key == keys[k]).ToArray();
                     Brush brush = colors.ContainsKey(keys[k])? new SolidBrush(colors[keys[k]]) : keyBrush;
 
                     if (events.Any()) {
                         void drawBar(double start, double end) {
-                            start = (start - viewport * time) * zoom / time;
-                            end = (end - viewport * time) * zoom / time;
+                            start = (start - viewport * result.Time) * zoom / result.Time;
+                            end = (end - viewport * result.Time) * zoom / result.Time;
 
                             if (start <= 0) start = 0;
                             if (start >= 1) return;
@@ -237,7 +245,7 @@ namespace Keyboard_Inspector {
 
                             drawBar(
                                 events[e].Timestamp,
-                                f < events.Length ? events[f].Timestamp : time
+                                f < events.Length ? events[f].Timestamp : result.Time
                             );
 
                             e = f + 1;
@@ -264,30 +272,63 @@ namespace Keyboard_Inspector {
             return false;
         }
 
-        void screen_MouseDoubleClick(object sender, MouseEventArgs e) {
+        void screen_MouseMove(object sender, MouseEventArgs e) {
+            if (result == null) return;
+
+            screen.Cursor = IntersectKey(e.Location, out _)
+                ? Cursors.NoMoveVert
+                : Cursors.Default;
+        }
+
+        void screen_MouseClick(object sender, MouseEventArgs e) {
             if (result == null || e.Button != MouseButtons.Right) return;
 
             if (IntersectKey(e.Location, out int i)) {
-                keys.RemoveAt(i);
+                screen.Cursor = Cursors.Default;
+
+                keymenu.Tag = i;
+                keymenu.Show(screen.PointToScreen(e.Location));
+            }
+        }
+
+        void color_Click(object sender, EventArgs e) {
+            if (!(keymenu.Tag is int i)) return;
+
+            ColorDialog cd = new ColorDialog();
+            cd.Color = colors.ContainsKey(keys[i]) ? colors[keys[i]] : Color.Gray;
+
+            if (cd.ShowDialog() == DialogResult.OK) {
+                colors[keys[i]] = cd.Color;
                 Redraw();
             }
         }
 
+        void hide_Click(object sender, EventArgs e) {
+            if (!(keymenu.Tag is int i)) return;
+
+            keys.RemoveAt(i);
+            Redraw();
+        }
+
+        void unhide_Click(object sender, EventArgs e) {
+            if (sender is ToolStripMenuItem item && item.GetCurrentParent() is ToolStripDropDownMenu menu)
+                menu.Close();
+
+            IEnumerable<Keys> unhidden = result.Events.Select(i => i.Key);
+
+            if (freeze.Checked)
+                unhidden = keys.Concat(unhidden);
+
+            keys = unhidden.Distinct().ToList();
+
+            Redraw();
+        }
+
         void screen_MouseDown(object sender, MouseEventArgs e) {
-            if (result == null || (e.Button != MouseButtons.Left && e.Button != MouseButtons.Middle)) return;
+            if (result == null || e.Button != MouseButtons.Left) return;
 
-            if (IntersectKey(e.Location, out int i)) {
-                if (e.Button == MouseButtons.Middle) {
-                    ColorDialog cd = new ColorDialog();
-                    cd.Color = colors.ContainsKey(keys[i])? colors[keys[i]] : Color.Gray;
-
-                    if (cd.ShowDialog() == DialogResult.OK) {
-                        colors[keys[i]] = cd.Color;
-                        Redraw();
-                    }
-
-                } else screen.DoDragDrop(i, DragDropEffects.Move);
-            }
+            if (IntersectKey(e.Location, out int i))
+                screen.DoDragDrop(i, DragDropEffects.Move);
         }
 
         bool ValidateDrag(DragEventArgs e, out int result) {
@@ -321,14 +362,14 @@ namespace Keyboard_Inspector {
 
         static readonly double[] PollRates = new double[] {62.5, 125, 250, 500, 1000, 2000, 4000};
 
-        void TestPollRate(bool outputToFile) {
+        void analyze_Click(object sender, EventArgs e) {
             if (result == null) return;
 
             StringBuilder file = new StringBuilder();
 
             // Filter Windows auto-repeat
-            List<KeyEvent> no_repeat = result
-                .Where((x, i) => x.Pressed != true || result.Take(i).Where(j => j.Key == x.Key).LastOrDefault().Pressed != true)
+            List<KeyEvent> no_repeat = result.Events
+                .Where((x, i) => x.Pressed != true || result.Events.Take(i).Where(j => j.Key == x.Key).LastOrDefault().Pressed != true)
                 .ToList();
 
             file.Append($"no_repeat:\n{string.Join("\n", no_repeat)}\n\n");
@@ -420,23 +461,43 @@ namespace Keyboard_Inspector {
 
             file.Append($"{status.Text}\n");
 
-            SaveFileDialog ofd = new SaveFileDialog();
-            ofd.Filter = "Text Files (*.txt)|*.txt";
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "Text Files (*.txt)|*.txt";
+            sfd.Title = "Export Polling Rate Details";
 
-            if (outputToFile && ofd.ShowDialog() == DialogResult.OK)
-                File.WriteAllText(ofd.FileName, file.ToString());
+            if (sender == export && sfd.ShowDialog() == DialogResult.OK)
+                File.WriteAllText(sfd.FileName, file.ToString());
         }
 
-        private void poll_MouseUp(object sender, MouseEventArgs e) {
-            if (result == null || e.Button != MouseButtons.Right) return;
+        void open_Click(object sender, EventArgs e) {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "XML Files (*.xml)|*.xml";
+            ofd.Title = "Open Recording";
 
-            TestPollRate(true);
+            if (ofd.ShowDialog() == DialogResult.OK) {
+                try {
+                    using (FileStream read = new FileStream(ofd.FileName, FileMode.Open))
+                        if (new DataContractSerializer(typeof(Result)).ReadObject(read) is Result loaded) {
+                            result = loaded;
+
+                            processResult();
+                            resultLoaded();
+                        }
+
+                } catch {
+                    status.Text = "Couldn't load file, it might be invalid?";
+                }
+            }
         }
 
-        void poll_Click(object sender, EventArgs e) {
-            if (result == null) return;
+        void save_Click(object sender, EventArgs e) {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "XML Files (*.xml)|*.xml";
+            sfd.Title = "Save Recording";
 
-            TestPollRate(false);
+            if (sfd.ShowDialog() == DialogResult.OK)
+                using (FileStream write = new FileStream(sfd.FileName, FileMode.Create))
+                    new DataContractSerializer(typeof(Result)).WriteObject(write, result);
         }
     }
 }

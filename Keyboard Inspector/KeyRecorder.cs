@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Keyboard_Inspector {
     static class KeyRecorder {
@@ -51,7 +47,7 @@ namespace Keyboard_Inspector {
 
         public static void StartRecording() {
             if (IsRecording)
-                StopRecording(out _);
+                StopRecording();
 
             time?.Stop();
             time = new Stopwatch();
@@ -62,8 +58,7 @@ namespace Keyboard_Inspector {
             _hookID = SetHook(hook);
         }
 
-        public static IReadOnlyList<KeyEvent> StopRecording(out double result) {
-            result = 0;
+        public static Result StopRecording() {
             if (!IsRecording) return null;
 
             UnhookWindowsHookEx(_hookID);
@@ -71,9 +66,7 @@ namespace Keyboard_Inspector {
 
             time.Stop();
 
-            result = time.ElapsedPrecise();
-
-            return keys;
+            return new Result(time.ElapsedPrecise(), new ReadOnlyCollection<KeyEvent>(keys));
         }
 
         public static bool IsRecording => _hookID != IntPtr.Zero;

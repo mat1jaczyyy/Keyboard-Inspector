@@ -1,8 +1,7 @@
-﻿using System.Diagnostics;
-using System.Windows.Forms;
+﻿using System.Windows.Forms;
 
 namespace Keyboard_Inspector {
-    struct KeyEvent {
+    public struct KeyEvent {
         const int WM_KEYDOWN = 0x0100;
         const int WM_KEYUP = 0x0101;
         /*
@@ -11,9 +10,9 @@ namespace Keyboard_Inspector {
         */
         const int MASK = 0xFFFB;
 
-        public readonly double Timestamp;
-        public readonly bool? Pressed;
-        public readonly Keys Key;
+        public double Timestamp;
+        public bool? Pressed;
+        public Keys Key;
 
         public KeyEvent(double ticks, int wParam, int lParam) {
             Timestamp = ticks;
