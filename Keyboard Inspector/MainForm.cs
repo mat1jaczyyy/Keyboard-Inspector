@@ -138,124 +138,127 @@ namespace Keyboard_Inspector {
         const int BarMargin = 1;
 
         void Redraw() {
-            screen.Image = new Bitmap(screen.Width, screen.Height);
+            if (screen.Width <= 0 || screen.Height <= 0) return;
 
-            if (result == null || !keys.Any()) return;
+            Bitmap img = new Bitmap(screen.Width, screen.Height);
 
-            textRects.Clear();
+            if (result != null && keys.Any()) {
+                textRects.Clear();
 
-            Font font = status.Font;
-            Brush textBrush = new SolidBrush(status.ForeColor);
-            Brush keyBrush = new SolidBrush(Color.Gray);
-            Pen pen = new Pen(Color.LightGray);
+                Font font = status.Font;
+                Brush textBrush = new SolidBrush(status.ForeColor);
+                Brush keyBrush = new SolidBrush(Color.Gray);
+                Pen pen = new Pen(Color.LightGray);
 
-            using (Graphics gfx = Graphics.FromImage(screen.Image)) {
-                gfx.FillRectangle(new SolidBrush(screen.BackColor), 0, 0, screen.Width, screen.Height);
+                using (Graphics gfx = Graphics.FromImage(img)) {
+                    gfx.FillRectangle(new SolidBrush(screen.BackColor), 0, 0, screen.Width, screen.Height);
 
-                SizeF[] textSize = keys.Select(i => gfx.MeasureString(i.ToString(), status.Font)).ToArray();
-                float textWidth = textSize.Max(i => i.Width);
-                float textHeight = textSize[0].Height;
-                areaX = 2 * Margin + textWidth;
-                areaWidth = screen.Width - Margin - areaX;
+                    SizeF[] textSize = keys.Select(i => gfx.MeasureString(i.ToString(), status.Font)).ToArray();
+                    float textWidth = textSize.Max(i => i.Width);
+                    float textHeight = textSize[0].Height;
+                    areaX = 2 * Margin + textWidth;
+                    areaWidth = screen.Width - Margin - areaX;
 
-                float increment = 0.5f;
-                float px;
+                    float increment = 0.5f;
+                    float px;
 
-                for (;;) {
-                    px = (float)(increment / result.Time * areaWidth * zoom);
+                    for (;;) {
+                        px = (float)(increment / result.Time * areaWidth * zoom);
 
-                    if (px < 40) increment *= 2;
-                    else if (px >= 80) increment /= 2;
-                    else break;
-                }
+                        if (px < 40) increment *= 2;
+                        else if (px >= 80) increment /= 2;
+                        else break;
+                    }
 
-                double pos = viewport * result.Time / increment;
-                int k = (int)Math.Ceiling(pos);
+                    double pos = viewport * result.Time / increment;
+                    int k = (int)Math.Ceiling(pos);
 
-                for (float s = (float)((k - pos) * px); s < areaWidth; s = (float)(++k - pos) * px) {
-                    gfx.DrawLine(
-                        pen,
-                        2 * Margin + textWidth + s,
-                        Margin,
-                        2 * Margin + textWidth + s,
-                        screen.Height - 2 * Margin - textHeight
-                    );
+                    for (float s = (float)((k - pos) * px); s < areaWidth; s = (float)(++k - pos) * px) {
+                        gfx.DrawLine(
+                            pen,
+                            2 * Margin + textWidth + s,
+                            Margin,
+                            2 * Margin + textWidth + s,
+                            screen.Height - 2 * Margin - textHeight
+                        );
 
-                    string t = (increment * k).ToString("0.####");
+                        string t = (increment * k).ToString("0.####");
 
-                    gfx.DrawString(
-                        t, font, textBrush,
-                        2 * Margin + textWidth + s - gfx.MeasureString(t, font).Width / 2,
-                        screen.Height - Margin - textHeight
-                    );
-                }
+                        gfx.DrawString(
+                            t, font, textBrush,
+                            2 * Margin + textWidth + s - gfx.MeasureString(t, font).Width / 2,
+                            screen.Height - Margin - textHeight
+                        );
+                    }
 
-                float keyHeight = (float)(screen.Height - 3 * Margin - textHeight) / keys.Count;
+                    float keyHeight = (float)(screen.Height - 3 * Margin - textHeight) / keys.Count;
 
-                for (k = 0; k < keys.Count; k++) {
-                    textRects.Add(new RectangleF(new PointF(
-                        Margin + textWidth - textSize[k].Width,
-                        Margin + keyHeight * k + (keyHeight - textHeight) / 2
-                    ), textSize[k]));
+                    for (k = 0; k < keys.Count; k++) {
+                        textRects.Add(new RectangleF(new PointF(
+                            Margin + textWidth - textSize[k].Width,
+                            Margin + keyHeight * k + (keyHeight - textHeight) / 2
+                        ), textSize[k]));
 
-                    gfx.DrawString(
-                        keys[k].ToString(), font, textBrush,
-                        textRects[k].X, textRects[k].Y
-                    );
+                        gfx.DrawString(
+                            keys[k].ToString(), font, textBrush,
+                            textRects[k].X, textRects[k].Y
+                        );
 
-                    gfx.DrawLine(
-                        pen,
-                        2 * Margin + textWidth,
-                        Margin + keyHeight * (k + 0.5f),
-                        screen.Width - Margin,
-                        Margin + keyHeight * (k + 0.5f)
-                    );
+                        gfx.DrawLine(
+                            pen,
+                            2 * Margin + textWidth,
+                            Margin + keyHeight * (k + 0.5f),
+                            screen.Width - Margin,
+                            Margin + keyHeight * (k + 0.5f)
+                        );
 
-                    KeyEvent[] events = result.Events.Where(i => i.Key == keys[k]).ToArray();
-                    Brush brush = colors.ContainsKey(keys[k])? new SolidBrush(colors[keys[k]]) : keyBrush;
+                        KeyEvent[] events = result.Events.Where(i => i.Key == keys[k]).ToArray();
+                        Brush brush = colors.ContainsKey(keys[k])? new SolidBrush(colors[keys[k]]) : keyBrush;
 
-                    if (events.Any()) {
-                        void drawBar(double start, double end) {
-                            start = (start - viewport * result.Time) * zoom / result.Time;
-                            end = (end - viewport * result.Time) * zoom / result.Time;
+                        if (events.Any()) {
+                            void drawBar(double start, double end) {
+                                start = (start - viewport * result.Time) * zoom / result.Time;
+                                end = (end - viewport * result.Time) * zoom / result.Time;
 
-                            if (start <= 0) start = 0;
-                            if (start >= 1) return;
-                            if (end <= 0) return;
-                            if (end >= 1) end = 1;
+                                if (start <= 0) start = 0;
+                                if (start >= 1) return;
+                                if (end <= 0) return;
+                                if (end >= 1) end = 1;
 
-                            gfx.FillRectangle(
-                                brush,
-                                2 * Margin + textWidth + (float)(start * areaWidth),
-                                Margin + keyHeight * k + BarMargin,
-                                (float)((end - start) * areaWidth),
-                                keyHeight - 2 * BarMargin
-                            );
-                        }
+                                gfx.FillRectangle(
+                                    brush,
+                                    2 * Margin + textWidth + (float)(start * areaWidth),
+                                    Margin + keyHeight * k + BarMargin,
+                                    (float)((end - start) * areaWidth),
+                                    keyHeight - 2 * BarMargin
+                                );
+                            }
 
-                        int e = 0;
-                        if (events[0].Pressed == false) {
-                            e = 1;
-                            drawBar(0, events[0].Timestamp);
-                        }
+                            int e = 0;
+                            if (events[0].Pressed == false) {
+                                e = 1;
+                                drawBar(0, events[0].Timestamp);
+                            }
 
-                        while (e < events.Length) {
-                            int f;
-                            for (f = e + 1; f < events.Length && events[f].Pressed == true; f++);
+                            while (e < events.Length) {
+                                int f;
+                                for (f = e + 1; f < events.Length && events[f].Pressed == true; f++);
 
-                            drawBar(
-                                events[e].Timestamp,
-                                f < events.Length ? events[f].Timestamp : result.Time
-                            );
+                                drawBar(
+                                    events[e].Timestamp,
+                                    f < events.Length ? events[f].Timestamp : result.Time
+                                );
 
-                            e = f + 1;
+                                e = f + 1;
+                            }
                         }
                     }
-                }
 
-                gfx.Flush();
+                    gfx.Flush();
+                }
             }
 
+            screen.Image = img;
             Update();
         }
 
