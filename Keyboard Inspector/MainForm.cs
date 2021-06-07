@@ -1,18 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using MathNet.Numerics.Statistics;
 
 namespace Keyboard_Inspector {
-    public partial class MainForm : Form {
+    partial class MainForm: Form {
+        public static MainForm Instance { get; private set; }
+
+        public static void InvokeIfRequired(Control control, MethodInvoker action) {
+            if (control.InvokeRequired) control.Invoke(action);
+            else action();
+        }
+
         public MainForm() {
+            if (Instance != null) throw new Exception("Can't have more than one MainForm");
+            Instance = this;
+
             InitializeComponent();
 
             screen.AllowDrop = true;
@@ -27,20 +39,20 @@ namespace Keyboard_Inspector {
         Result result = null;
         double zoom, viewport;
         float areaWidth, areaX;
-        List<Keys> keys;
+        List<Input> inputs;
         List<RectangleF> textRects = new List<RectangleF>();
-        Dictionary<Keys, Color> colors = new Dictionary<Keys, Color>();
+        Dictionary<Input, Color> colors = new Dictionary<Input, Color>();
 
         void processResult() {
             if (!freeze.Checked) {
-                keys = result.Events.Select(i => i.Key).Distinct().ToList();
+                inputs = result.Events.Select(i => i.Input).Distinct().ToList();
                 colors.Clear();
             }
         }
 
         void resultLoaded() {
-            key.Enabled = recording.Enabled = open.Enabled = !KeyRecorder.IsRecording;
-            poll.Enabled = result?.Events.Count() >= 60;
+            integrations.Enabled = key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
+            poll.Enabled = result?.Events.Count(i => i.Input is KeyInput) >= 60;
             save.Enabled = result?.Events.Any() == true;
 
             Redraw();
@@ -50,13 +62,13 @@ namespace Keyboard_Inspector {
         void rec_Click(object sender, EventArgs e) {
             status.TextAlign = ContentAlignment.TopRight;
 
-            if (!KeyRecorder.IsRecording) {
+            if (!Recorder.IsRecording) {
                 rec.Text = "Stop Recording";
                 status.Text = "Recording... 00:00:00";
 
                 result = null;
 
-                KeyRecorder.StartRecording();
+                Recorder.StartRecording();
 
                 zoom = 1;
                 viewport = 0;
@@ -69,7 +81,7 @@ namespace Keyboard_Inspector {
                 rec.Text = "Start Recording";
                 status.Text = "";
 
-                result = KeyRecorder.StopRecording();
+                result = Recorder.StopRecording();
 
                 processResult();
 
@@ -79,8 +91,10 @@ namespace Keyboard_Inspector {
             resultLoaded();
         }
 
-        void t_Tick(object sender, EventArgs e)
-            => status.Text = $"Recording... {TimeSpan.FromSeconds(++elapsed):hh\\:mm\\:ss}";
+        void t_Tick(object sender, EventArgs e) {
+            status.TextAlign = ContentAlignment.TopRight;
+            status.Text = $"Recording... {TimeSpan.FromSeconds(++elapsed):hh\\:mm\\:ss}";
+        }
 
         void MainForm_Resize(object sender, EventArgs e) => Redraw();
 
@@ -142,18 +156,19 @@ namespace Keyboard_Inspector {
 
             Bitmap img = new Bitmap(screen.Width, screen.Height);
 
-            if (result != null && keys.Any()) {
+            if (result != null && inputs.Any()) {
                 textRects.Clear();
 
                 Font font = status.Font;
                 Brush textBrush = new SolidBrush(status.ForeColor);
-                Brush keyBrush = new SolidBrush(Color.Gray);
                 Pen pen = new Pen(Color.LightGray);
+
+                bool multipleSources = inputs.Select(i => i.Source).Distinct().Count() > 1;
 
                 using (Graphics gfx = Graphics.FromImage(img)) {
                     gfx.FillRectangle(new SolidBrush(screen.BackColor), 0, 0, screen.Width, screen.Height);
 
-                    SizeF[] textSize = keys.Select(i => gfx.MeasureString(i.ToString(), status.Font)).ToArray();
+                    SizeF[] textSize = inputs.Select(i => gfx.MeasureString(i.ToString(multipleSources), status.Font)).ToArray();
                     float textWidth = textSize.Max(i => i.Width);
                     float textHeight = textSize[0].Height;
                     areaX = 2 * Margin + textWidth;
@@ -191,16 +206,16 @@ namespace Keyboard_Inspector {
                         );
                     }
 
-                    float keyHeight = (float)(screen.Height - 3 * Margin - textHeight) / keys.Count;
+                    float keyHeight = (float)(screen.Height - 3 * Margin - textHeight) / inputs.Count;
 
-                    for (k = 0; k < keys.Count; k++) {
+                    for (k = 0; k < inputs.Count; k++) {
                         textRects.Add(new RectangleF(new PointF(
                             Margin + textWidth - textSize[k].Width,
                             Margin + keyHeight * k + (keyHeight - textHeight) / 2
                         ), textSize[k]));
 
                         gfx.DrawString(
-                            keys[k].ToString(), font, textBrush,
+                            inputs[k].ToString(multipleSources), font, textBrush,
                             textRects[k].X, textRects[k].Y
                         );
 
@@ -212,8 +227,8 @@ namespace Keyboard_Inspector {
                             Margin + keyHeight * (k + 0.5f)
                         );
 
-                        KeyEvent[] events = result.Events.Where(i => i.Key == keys[k]).ToArray();
-                        Brush brush = colors.ContainsKey(keys[k])? new SolidBrush(colors[keys[k]]) : keyBrush;
+                        Event[] events = result.Events.Where(i => i.Input == inputs[k]).ToArray();
+                        Brush brush = new SolidBrush(colors.ContainsKey(inputs[k])? colors[inputs[k]] : inputs[k].DefaultColor);
 
                         if (events.Any()) {
                             void drawBar(double start, double end) {
@@ -235,18 +250,18 @@ namespace Keyboard_Inspector {
                             }
 
                             int e = 0;
-                            if (events[0].Pressed == false) {
+                            if (!events[0].Pressed) {
                                 e = 1;
-                                drawBar(0, events[0].Timestamp);
+                                drawBar(0, events[0].Time);
                             }
 
                             while (e < events.Length) {
                                 int f;
-                                for (f = e + 1; f < events.Length && events[f].Pressed == true; f++);
+                                for (f = e + 1; f < events.Length && events[f].Pressed; f++);
 
                                 drawBar(
-                                    events[e].Timestamp,
-                                    f < events.Length ? events[f].Timestamp : result.Time
+                                    events[e].Time,
+                                    f < events.Length ? events[f].Time : result.Time
                                 );
 
                                 e = f + 1;
@@ -298,10 +313,10 @@ namespace Keyboard_Inspector {
             if (!(keymenu.Tag is int i)) return;
 
             ColorDialog cd = new ColorDialog();
-            cd.Color = colors.ContainsKey(keys[i]) ? colors[keys[i]] : Color.Gray;
+            cd.Color = colors.ContainsKey(inputs[i])? colors[inputs[i]] : inputs[i].DefaultColor;
 
             if (cd.ShowDialog() == DialogResult.OK) {
-                colors[keys[i]] = cd.Color;
+                colors[inputs[i]] = cd.Color;
                 Redraw();
             }
         }
@@ -309,7 +324,7 @@ namespace Keyboard_Inspector {
         void hide_Click(object sender, EventArgs e) {
             if (!(keymenu.Tag is int i)) return;
 
-            keys.RemoveAt(i);
+            inputs.RemoveAt(i);
             Redraw();
         }
 
@@ -317,12 +332,12 @@ namespace Keyboard_Inspector {
             if (sender is ToolStripMenuItem item && item.GetCurrentParent() is ToolStripDropDownMenu menu)
                 menu.Close();
 
-            IEnumerable<Keys> unhidden = result.Events.Select(i => i.Key);
+            IEnumerable<Input> unhidden = result.Events.Select(i => i.Input);
 
             if (freeze.Checked)
-                unhidden = keys.Concat(unhidden);
+                unhidden = inputs.Concat(unhidden);
 
-            keys = unhidden.Distinct().ToList();
+            inputs = unhidden.Distinct().ToList();
 
             Redraw();
         }
@@ -355,9 +370,9 @@ namespace Keyboard_Inspector {
             if (result == null || !ValidateDrag(e, out int d)) return;
 
             if (IntersectKey(screen.PointToClient(new Point(e.X, e.Y)), out int i)) {
-                Keys k = keys[d];
-                keys.RemoveAt(d);
-                keys.Insert(i, k);
+                Input k = inputs[d];
+                inputs.RemoveAt(d);
+                inputs.Insert(i, k);
 
                 Redraw();
             }
@@ -371,8 +386,9 @@ namespace Keyboard_Inspector {
             StringBuilder file = new StringBuilder();
 
             // Filter Windows auto-repeat
-            List<KeyEvent> no_repeat = result.Events
-                .Where((x, i) => x.Pressed != true || result.Events.Take(i).Where(j => j.Key == x.Key).LastOrDefault().Pressed != true)
+            List<Event> no_repeat = result.Events
+                .Where(i => i.Input is KeyInput)
+                .Where((x, i) => !x.Pressed || !(result.Events.Take(i).Where(j => j.Input == x.Input).LastOrDefault()?.Pressed?? false))
                 .ToList();
 
             file.Append($"no_repeat:\n{string.Join("\n", no_repeat)}\n\n");
@@ -380,7 +396,7 @@ namespace Keyboard_Inspector {
             // Get differences between inputs
             List<double> delta = no_repeat
                 .Skip(1)
-                .Select((x, i) => x.Timestamp - no_repeat[i].Timestamp)
+                .Select((x, i) => x.Time - no_repeat[i].Time)
                 .ToList();
 
             file.Append($"delta:\n{string.Join("\n", delta.Select(i => i.ToString("0.00000")))}\n\n");
@@ -501,6 +517,88 @@ namespace Keyboard_Inspector {
             if (sfd.ShowDialog() == DialogResult.OK)
                 using (FileStream write = new FileStream(sfd.FileName, FileMode.Create))
                     new DataContractSerializer(typeof(Result)).WriteObject(write, result);
+        }
+
+        async void ConnectNestopia(object sender, EventArgs e) {
+            if (Recorder.IsRecording) return;
+
+            integrations.Enabled = recording.Enabled = rec.Enabled = false;
+
+            status.TextAlign = ContentAlignment.TopLeft;
+            status.Text = "Connecting to Nestopia...";
+
+            Process nestopia = Process.GetProcessesByName("nestopia").FirstOrDefault();
+
+            if (nestopia != null) {
+                NestopiaListener.AttachResult result = await NestopiaListener.AttachDebugger(nestopia.Id);
+
+                if (result == NestopiaListener.AttachResult.SUCCESS) {
+                    status.Text = "Connected to Nestopia!";
+
+                } else if (result == NestopiaListener.AttachResult.FAILED) {
+                    status.Text = "Failed to connect Nestopia!";
+
+                } else if (result == NestopiaListener.AttachResult.BAD_VER) {
+                    status.Text = "Incorrect Nestopia version (use 1.50)";
+                }
+
+            } else status.Text = "Couldn't find a Nestopia process!";
+
+            status.TextAlign = ContentAlignment.TopLeft;
+
+            integrations.Enabled = recording.Enabled = rec.Enabled = true;
+        }
+
+        async Task DisconnectNestopia(object sender, EventArgs e) {
+            if (Recorder.IsRecording) return;
+
+            status.TextAlign = ContentAlignment.TopLeft;
+            status.Text = "Disconnecting from Nestopia...";
+
+            await NestopiaListener.DetachDebugger();
+
+            NestopiaWasDisconnected();
+        }
+
+        public void NestopiaWasDisconnected()
+            => InvokeIfRequired(status, () => {
+                status.TextAlign = ContentAlignment.TopLeft;
+                status.Text = "Disconnected from Nestopia.";
+            });
+
+        void integrations_DropDownOpening(object sender, EventArgs e) {
+            if (Recorder.IsRecording) return;
+
+            ToolStripMenuItem nestopia = new ToolStripMenuItem();
+
+            if (NestopiaListener.IsConnected) {
+                nestopia.Text = "Disconnect from &Nestopia";
+                nestopia.Click += async (_, __) => await DisconnectNestopia(_, __);
+
+            } else {
+                nestopia.Text = "Connect to &Nestopia";
+                nestopia.Click += ConnectNestopia;
+            }
+
+            integrations.DropDownItems.Add(nestopia);
+        }
+
+        void integrations_DropDownClosed(object sender, EventArgs e)
+            => integrations.DropDownItems.Clear();
+
+        async void MainForm_FormClosing(object sender, FormClosingEventArgs e) {
+            if (Recorder.IsRecording) {
+                e.Cancel = true;
+                return;
+            }
+
+            if (NestopiaListener.IsConnected) {
+                e.Cancel = true;
+                
+                await DisconnectNestopia(sender, e);
+
+                Close();
+            }
         }
     }
 }

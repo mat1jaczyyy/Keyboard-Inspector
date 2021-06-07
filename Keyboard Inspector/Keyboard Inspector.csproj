@@ -59,8 +59,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="KeyEvent.cs" />
-    <Compile Include="KeyRecorder.cs" />
+    <Compile Include="Input.cs" />
+    <Compile Include="Event.cs" />
+    <Compile Include="Keyboard\Win32 Hook.cs" />
+    <Compile Include="Nestopia\NESInput.cs" />
+    <Compile Include="Nestopia\Win32 Debug.cs" />
+    <Compile Include="Nestopia\NestopiaListener.cs" />
+    <Compile Include="Keyboard\KeyInput.cs" />
+    <Compile Include="Keyboard\KeyListener.cs" />
+    <Compile Include="Recorder.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

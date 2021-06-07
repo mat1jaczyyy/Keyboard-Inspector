@@ -1,14 +1,14 @@
 ﻿using System.Collections.ObjectModel;
 
 namespace Keyboard_Inspector {
-    public class Result {
+    class Result {
         public double Time;
 
-        public ReadOnlyCollection<KeyEvent> Events;
+        public ReadOnlyCollection<Event> Events;
 
         public Result() {}
 
-        public Result(double time, ReadOnlyCollection<KeyEvent> events) {
+        public Result(double time, ReadOnlyCollection<Event> events) {
             Time = time;
             Events = events;
         }

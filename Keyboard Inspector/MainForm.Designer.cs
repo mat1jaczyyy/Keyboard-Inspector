@@ -34,6 +34,7 @@ namespace Keyboard_Inspector {
             this.color = new System.Windows.Forms.ToolStripMenuItem();
             this.hide = new System.Windows.Forms.ToolStripMenuItem();
             this.mainmenu = new System.Windows.Forms.MenuStrip();
+            this.integrations = new System.Windows.Forms.ToolStripMenuItem();
             this.recording = new System.Windows.Forms.ToolStripMenuItem();
             this.open = new System.Windows.Forms.ToolStripMenuItem();
             this.save = new System.Windows.Forms.ToolStripMenuItem();
@@ -120,6 +121,7 @@ namespace Keyboard_Inspector {
             // mainmenu
             // 
             this.mainmenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.integrations,
             this.recording,
             this.key,
             this.poll});
@@ -129,6 +131,14 @@ namespace Keyboard_Inspector {
             this.mainmenu.Size = new System.Drawing.Size(827, 24);
             this.mainmenu.TabIndex = 7;
             this.mainmenu.Text = "menuStrip1";
+            // 
+            // integrations
+            // 
+            this.integrations.Name = "integrations";
+            this.integrations.Size = new System.Drawing.Size(82, 20);
+            this.integrations.Text = "&Integrations";
+            this.integrations.DropDownClosed += new System.EventHandler(this.integrations_DropDownClosed);
+            this.integrations.DropDownOpening += new System.EventHandler(this.integrations_DropDownOpening);
             // 
             // recording
             // 
@@ -150,6 +160,7 @@ namespace Keyboard_Inspector {
             // 
             // save
             // 
+            this.save.Enabled = false;
             this.save.Name = "save";
             this.save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
             this.save.Size = new System.Drawing.Size(180, 22);
@@ -208,9 +219,9 @@ namespace Keyboard_Inspector {
             this.status.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.status.BackColor = System.Drawing.Color.Transparent;
-            this.status.Location = new System.Drawing.Point(258, 5);
+            this.status.Location = new System.Drawing.Point(345, 5);
             this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(440, 17);
+            this.status.Size = new System.Drawing.Size(353, 17);
             this.status.TabIndex = 1;
             this.status.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
@@ -227,9 +238,10 @@ namespace Keyboard_Inspector {
             this.Controls.Add(this.mainmenu);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.mainmenu;
-            this.MinimumSize = new System.Drawing.Size(700, 150);
+            this.MinimumSize = new System.Drawing.Size(820, 150);
             this.Name = "MainForm";
             this.Text = "Keyboard Inspector";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             ((System.ComponentModel.ISupportInitialize)(this.screen)).EndInit();
             this.keymenu.ResumeLayout(false);
@@ -259,5 +271,6 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.ToolStripMenuItem save;
         private System.Windows.Forms.ToolStripMenuItem export;
         private System.Windows.Forms.Label status;
+        private System.Windows.Forms.ToolStripMenuItem integrations;
     }
 }
