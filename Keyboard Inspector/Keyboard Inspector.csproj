@@ -61,6 +61,9 @@
   <ItemGroup>
     <Compile Include="Input.cs" />
     <Compile Include="Event.cs" />
+    <Compile Include="Wiitar\WiitarInput.cs" />
+    <Compile Include="Wiitar\WiitarListener.cs" />
+    <Compile Include="Wiitar\Win32 RawInput.cs" />
     <Compile Include="Keyboard\Win32 Hook.cs" />
     <Compile Include="Nestopia\NESInput.cs" />
     <Compile Include="Nestopia\Win32 Debug.cs" />

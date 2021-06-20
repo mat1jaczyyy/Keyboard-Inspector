@@ -30,6 +30,7 @@ namespace Keyboard_Inspector {
 
             KeyListener.Start();
             NestopiaListener.Start();
+            WiitarListener.Start();
         }
 
         public static Result StopRecording() {
@@ -37,6 +38,7 @@ namespace Keyboard_Inspector {
 
             KeyListener.Stop();
             NestopiaListener.Stop();
+            WiitarListener.Stop();
 
             time.Stop();
 

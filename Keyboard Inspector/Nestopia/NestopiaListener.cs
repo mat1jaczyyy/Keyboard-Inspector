@@ -121,7 +121,7 @@ namespace Keyboard_Inspector {
 
                         if (i == 0) {
                             if (reporting) {
-                                for (uint i1 = last, i2 = c.Eax, n = 0; n < 8; i1 >>= 1, i2 >>= 1, n++) {
+                                for (uint i1 = last, i2 = c.Eax, n = 0; n < Enum.GetNames(typeof(NESKeys)).Length; i1 >>= 1, i2 >>= 1, n++) {
                                     if ((i1 & 1) != (i2 & 1))
                                         Recorder.RecordInput((i2 & 1) == 1, new NESInput((NESKeys)n));
                                 }
