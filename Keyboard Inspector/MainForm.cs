@@ -61,7 +61,7 @@ namespace Keyboard_Inspector {
 
         void resultLoaded() {
             integrations.Enabled = key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
-            poll.Enabled = result?.Events.Count(i => i.Input is KeyInput) >= 60;
+            poll.Enabled = (result?.Events.All(i => i.Input is KeyInput) == true || result?.Events.All(i => i.Input is WiitarInput) == true) && result?.Events.Count >= 60;
             save.Enabled = result?.Events.Any() == true;
 
             Redraw();
@@ -396,7 +396,7 @@ namespace Keyboard_Inspector {
 
             // Filter Windows auto-repeat
             List<Event> no_repeat = result.Events
-                .Where(i => i.Input is KeyInput)
+                .Where(i => i.Input is KeyInput || i.Input is WiitarInput)
                 .Where((x, i) => !x.Pressed || !(result.Events.Take(i).Where(j => j.Input == x.Input).LastOrDefault()?.Pressed?? false))
                 .ToList();
 
