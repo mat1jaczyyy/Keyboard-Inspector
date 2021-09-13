@@ -341,6 +341,9 @@ namespace Keyboard_Inspector {
             if (sender is ToolStripMenuItem item && item.GetCurrentParent() is ToolStripDropDownMenu menu)
                 menu.Close();
 
+            if (result == null)
+                return;
+
             IEnumerable<Input> unhidden = result.Events.Select(i => i.Input);
 
             if (freeze.Checked)
