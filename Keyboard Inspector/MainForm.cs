@@ -221,22 +221,6 @@ namespace Keyboard_Inspector {
                             );
                         }
                     }
-                    
-                    if (nesPollsGrid.Checked) {
-                        for (int j = 0; j < result.Polls.Count; j++) {
-                            // TODO optimize...?
-                            if (result.Polls[j] < increment * pos) continue;
-                            if (result.Polls[j] > increment * (pos + areaWidth / px)) break;
-
-                            gfx.DrawLine(
-                                pollPen,
-                                2 * Margin + textWidth + (float)((result.Polls[j] - increment * pos) * (px / increment)),
-                                Margin,
-                                2 * Margin + textWidth + (float)((result.Polls[j] - increment * pos) * (px / increment)),
-                                screen.Height - 2 * Margin - textHeight
-                            );
-                        }
-                    }
 
                     float keyHeight = (float)(screen.Height - 3 * Margin - textHeight) / inputs.Count;
 
@@ -258,7 +242,25 @@ namespace Keyboard_Inspector {
                             screen.Width - Margin,
                             Margin + keyHeight * (k + 0.5f)
                         );
+                    }
 
+                    if (nesPollsGrid.Checked) {
+                        for (int j = 0; j < result.Polls.Count; j++) {
+                            // TODO optimize...?
+                            if (result.Polls[j] < increment * pos) continue;
+                            if (result.Polls[j] > increment * (pos + areaWidth / px)) break;
+
+                            gfx.DrawLine(
+                                pollPen,
+                                2 * Margin + textWidth + (float)((result.Polls[j] - increment * pos) * (px / increment)),
+                                Margin,
+                                2 * Margin + textWidth + (float)((result.Polls[j] - increment * pos) * (px / increment)),
+                                screen.Height - 2 * Margin - textHeight
+                            );
+                        }
+                    }
+
+                    for (int k = 0; k < inputs.Count; k++) {
                         Event[] events = result.Events.Where(i => i.Input == inputs[k]).ToArray();
                         Brush brush = new SolidBrush(colors.ContainsKey(inputs[k])? colors[inputs[k]] : inputs[k].DefaultColor);
 
