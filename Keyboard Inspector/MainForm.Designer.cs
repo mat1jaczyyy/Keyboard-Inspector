@@ -41,6 +41,9 @@ namespace Keyboard_Inspector {
             this.key = new System.Windows.Forms.ToolStripMenuItem();
             this.freeze = new System.Windows.Forms.ToolStripMenuItem();
             this.unhide = new System.Windows.Forms.ToolStripMenuItem();
+            this.gridView = new System.Windows.Forms.ToolStripMenuItem();
+            this.realtimeGrid = new System.Windows.Forms.ToolStripMenuItem();
+            this.nesPollsGrid = new System.Windows.Forms.ToolStripMenuItem();
             this.poll = new System.Windows.Forms.ToolStripMenuItem();
             this.analyze = new System.Windows.Forms.ToolStripMenuItem();
             this.export = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,7 +56,7 @@ namespace Keyboard_Inspector {
             // rec
             // 
             this.rec.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.rec.Location = new System.Drawing.Point(704, 0);
+            this.rec.Location = new System.Drawing.Point(765, 0);
             this.rec.Name = "rec";
             this.rec.Size = new System.Drawing.Size(122, 23);
             this.rec.TabIndex = 0;
@@ -74,7 +77,7 @@ namespace Keyboard_Inspector {
             this.screen.BackColor = System.Drawing.Color.White;
             this.screen.Location = new System.Drawing.Point(0, 24);
             this.screen.Name = "screen";
-            this.screen.Size = new System.Drawing.Size(827, 137);
+            this.screen.Size = new System.Drawing.Size(888, 137);
             this.screen.TabIndex = 2;
             this.screen.TabStop = false;
             this.screen.DragDrop += new System.Windows.Forms.DragEventHandler(this.screen_DragDrop);
@@ -92,7 +95,7 @@ namespace Keyboard_Inspector {
             this.scroll.Location = new System.Drawing.Point(0, 161);
             this.scroll.Maximum = 1000000000;
             this.scroll.Name = "scroll";
-            this.scroll.Size = new System.Drawing.Size(827, 17);
+            this.scroll.Size = new System.Drawing.Size(888, 17);
             this.scroll.TabIndex = 3;
             this.scroll.Scroll += new System.Windows.Forms.ScrollEventHandler(this.scroll_Scroll);
             // 
@@ -124,11 +127,12 @@ namespace Keyboard_Inspector {
             this.integrations,
             this.recording,
             this.key,
+            this.gridView,
             this.poll});
             this.mainmenu.Location = new System.Drawing.Point(0, 0);
             this.mainmenu.Name = "mainmenu";
             this.mainmenu.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.mainmenu.Size = new System.Drawing.Size(827, 24);
+            this.mainmenu.Size = new System.Drawing.Size(888, 24);
             this.mainmenu.TabIndex = 7;
             this.mainmenu.Text = "menuStrip1";
             // 
@@ -154,7 +158,7 @@ namespace Keyboard_Inspector {
             this.open.Name = "open";
             this.open.ShortcutKeyDisplayString = "";
             this.open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.open.Size = new System.Drawing.Size(180, 22);
+            this.open.Size = new System.Drawing.Size(155, 22);
             this.open.Text = "&Open...";
             this.open.Click += new System.EventHandler(this.open_Click);
             // 
@@ -163,7 +167,7 @@ namespace Keyboard_Inspector {
             this.save.Enabled = false;
             this.save.Name = "save";
             this.save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.save.Size = new System.Drawing.Size(180, 22);
+            this.save.Size = new System.Drawing.Size(155, 22);
             this.save.Text = "&Save...";
             this.save.Click += new System.EventHandler(this.save_Click);
             // 
@@ -180,15 +184,42 @@ namespace Keyboard_Inspector {
             // 
             this.freeze.CheckOnClick = true;
             this.freeze.Name = "freeze";
-            this.freeze.Size = new System.Drawing.Size(134, 22);
+            this.freeze.Size = new System.Drawing.Size(180, 22);
             this.freeze.Text = "&Freeze Keys";
             // 
             // unhide
             // 
             this.unhide.Name = "unhide";
-            this.unhide.Size = new System.Drawing.Size(134, 22);
+            this.unhide.Size = new System.Drawing.Size(180, 22);
             this.unhide.Text = "&Unhide All";
             this.unhide.Click += new System.EventHandler(this.unhide_Click);
+            // 
+            // gridView
+            // 
+            this.gridView.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.realtimeGrid,
+            this.nesPollsGrid});
+            this.gridView.Name = "gridView";
+            this.gridView.Size = new System.Drawing.Size(69, 20);
+            this.gridView.Text = "&Grid View";
+            // 
+            // realtimeGrid
+            // 
+            this.realtimeGrid.Checked = true;
+            this.realtimeGrid.CheckOnClick = true;
+            this.realtimeGrid.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.realtimeGrid.Name = "realtimeGrid";
+            this.realtimeGrid.Size = new System.Drawing.Size(180, 22);
+            this.realtimeGrid.Text = "&Real-Time";
+            this.realtimeGrid.Click += new System.EventHandler(this.gridViewItem_Click);
+            // 
+            // nesPollsGrid
+            // 
+            this.nesPollsGrid.CheckOnClick = true;
+            this.nesPollsGrid.Name = "nesPollsGrid";
+            this.nesPollsGrid.Size = new System.Drawing.Size(180, 22);
+            this.nesPollsGrid.Text = "&Nestopia Input Polls";
+            this.nesPollsGrid.Click += new System.EventHandler(this.gridViewItem_Click);
             // 
             // poll
             // 
@@ -203,14 +234,14 @@ namespace Keyboard_Inspector {
             // analyze
             // 
             this.analyze.Name = "analyze";
-            this.analyze.Size = new System.Drawing.Size(155, 22);
+            this.analyze.Size = new System.Drawing.Size(180, 22);
             this.analyze.Text = "&Analyze";
             this.analyze.Click += new System.EventHandler(this.analyze_Click);
             // 
             // export
             // 
             this.export.Name = "export";
-            this.export.Size = new System.Drawing.Size(155, 22);
+            this.export.Size = new System.Drawing.Size(180, 22);
             this.export.Text = "&Export Details...";
             this.export.Click += new System.EventHandler(this.analyze_Click);
             // 
@@ -219,7 +250,7 @@ namespace Keyboard_Inspector {
             this.status.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.status.BackColor = System.Drawing.Color.Transparent;
-            this.status.Location = new System.Drawing.Point(345, 5);
+            this.status.Location = new System.Drawing.Point(406, 5);
             this.status.Name = "status";
             this.status.Size = new System.Drawing.Size(353, 17);
             this.status.TabIndex = 1;
@@ -230,7 +261,7 @@ namespace Keyboard_Inspector {
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(827, 178);
+            this.ClientSize = new System.Drawing.Size(888, 178);
             this.Controls.Add(this.rec);
             this.Controls.Add(this.scroll);
             this.Controls.Add(this.screen);
@@ -238,7 +269,7 @@ namespace Keyboard_Inspector {
             this.Controls.Add(this.mainmenu);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.mainmenu;
-            this.MinimumSize = new System.Drawing.Size(820, 150);
+            this.MinimumSize = new System.Drawing.Size(880, 150);
             this.Name = "MainForm";
             this.Text = "Keyboard Inspector";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
@@ -272,5 +303,8 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.ToolStripMenuItem export;
         private System.Windows.Forms.Label status;
         private System.Windows.Forms.ToolStripMenuItem integrations;
+        private System.Windows.Forms.ToolStripMenuItem gridView;
+        private System.Windows.Forms.ToolStripMenuItem realtimeGrid;
+        private System.Windows.Forms.ToolStripMenuItem nesPollsGrid;
     }
 }

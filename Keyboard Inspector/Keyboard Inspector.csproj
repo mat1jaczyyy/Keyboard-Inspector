@@ -59,8 +59,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Poll.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="Event.cs" />
+    <Compile Include="IXML.cs" />
     <Compile Include="Wiitar\WiitarInput.cs" />
     <Compile Include="Wiitar\WiitarListener.cs" />
     <Compile Include="Wiitar\Win32 RawInput.cs" />

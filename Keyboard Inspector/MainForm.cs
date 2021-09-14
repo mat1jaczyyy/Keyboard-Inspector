@@ -5,11 +5,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml;
 
 using MathNet.Numerics.Statistics;
 
@@ -30,6 +30,11 @@ namespace Keyboard_Inspector {
             else action();
         }
 
+        void CancelDropDownClose(object sender, ToolStripDropDownClosingEventArgs e) {
+            if (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked)
+                e.Cancel = true;
+        }
+
         public MainForm() {
             if (Instance != null) throw new Exception("Can't have more than one MainForm");
             Instance = this;
@@ -38,10 +43,8 @@ namespace Keyboard_Inspector {
 
             screen.AllowDrop = true;
 
-            key.DropDown.Closing += (s, e) => {
-                if (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked)
-                    e.Cancel = true;
-            };
+            key.DropDown.Closing += CancelDropDownClose;
+            gridView.DropDown.Closing += CancelDropDownClose;
         }
 
         int elapsed;
@@ -171,6 +174,7 @@ namespace Keyboard_Inspector {
                 Font font = status.Font;
                 Brush textBrush = new SolidBrush(status.ForeColor);
                 Pen pen = new Pen(Color.LightGray);
+                Pen pollPen = new Pen(Color.Blue);
 
                 bool multipleSources = inputs.Select(i => i.Source).Distinct().Count() > 1;
 
@@ -195,29 +199,48 @@ namespace Keyboard_Inspector {
                     }
 
                     double pos = viewport * result.Time / increment;
-                    int k = (int)Math.Ceiling(pos);
+                    
+                    if (realtimeGrid.Checked) {
+                        int k = (int)Math.Ceiling(pos);
 
-                    for (float s = (float)((k - pos) * px); s < areaWidth; s = (float)(++k - pos) * px) {
-                        gfx.DrawLine(
-                            pen,
-                            2 * Margin + textWidth + s,
-                            Margin,
-                            2 * Margin + textWidth + s,
-                            screen.Height - 2 * Margin - textHeight
-                        );
+                        for (float s = (float)((k - pos) * px); s < areaWidth; s = (float)(++k - pos) * px) {
+                            gfx.DrawLine(
+                                pen,
+                                2 * Margin + textWidth + s,
+                                Margin,
+                                2 * Margin + textWidth + s,
+                                screen.Height - 2 * Margin - textHeight
+                            );
 
-                        string t = (increment * k).ToString("0.####");
+                            string t = (increment * k).ToString("0.####");
 
-                        gfx.DrawString(
-                            t, font, textBrush,
-                            2 * Margin + textWidth + s - gfx.MeasureString(t, font).Width / 2,
-                            screen.Height - Margin - textHeight
-                        );
+                            gfx.DrawString(
+                                t, font, textBrush,
+                                2 * Margin + textWidth + s - gfx.MeasureString(t, font).Width / 2,
+                                screen.Height - Margin - textHeight
+                            );
+                        }
+                    }
+                    
+                    if (nesPollsGrid.Checked) {
+                        for (int j = 0; j < result.Polls.Count; j++) {
+                            // TODO optimize...?
+                            if (result.Polls[j] < increment * pos) continue;
+                            if (result.Polls[j] > increment * (pos + areaWidth / px)) break;
+
+                            gfx.DrawLine(
+                                pollPen,
+                                2 * Margin + textWidth + (float)((result.Polls[j] - increment * pos) * (px / increment)),
+                                Margin,
+                                2 * Margin + textWidth + (float)((result.Polls[j] - increment * pos) * (px / increment)),
+                                screen.Height - 2 * Margin - textHeight
+                            );
+                        }
                     }
 
                     float keyHeight = (float)(screen.Height - 3 * Margin - textHeight) / inputs.Count;
 
-                    for (k = 0; k < inputs.Count; k++) {
+                    for (int k = 0; k < inputs.Count; k++) {
                         textRects.Add(new RectangleF(new PointF(
                             Margin + textWidth - textSize[k].Width,
                             Margin + keyHeight * k + (keyHeight - textHeight) / 2
@@ -507,13 +530,16 @@ namespace Keyboard_Inspector {
 
             if (ofd.ShowDialog() == DialogResult.OK) {
                 try {
-                    using (FileStream read = new FileStream(ofd.FileName, FileMode.Open))
-                        if (new DataContractSerializer(typeof(Result)).ReadObject(read) is Result loaded) {
-                            result = loaded;
+                    XmlDocument xml = new XmlDocument();
+                    xml.LoadXml(File.ReadAllText(ofd.FileName));
 
-                            processResult();
-                            resultLoaded();
-                        }
+                    result = Result.FromXML(xml.GetNode("r"));
+
+                    zoom = 1;
+                    viewport = 0;
+
+                    processResult();
+                    resultLoaded();
 
                 } catch {
                     status.Text = "Couldn't load file, it might be invalid?";
@@ -527,8 +553,7 @@ namespace Keyboard_Inspector {
             sfd.Title = "Save Recording";
 
             if (sfd.ShowDialog() == DialogResult.OK)
-                using (FileStream write = new FileStream(sfd.FileName, FileMode.Create))
-                    new DataContractSerializer(typeof(Result)).WriteObject(write, result);
+                File.WriteAllText(sfd.FileName, result.ToXML().ToString());
         }
 
         async void ConnectNestopia(object sender, EventArgs e) {
@@ -597,6 +622,9 @@ namespace Keyboard_Inspector {
 
         void integrations_DropDownClosed(object sender, EventArgs e)
             => integrations.DropDownItems.Clear();
+
+        void gridViewItem_Click(object sender, EventArgs e)
+            => Redraw();
 
         async void MainForm_FormClosing(object sender, FormClosingEventArgs e) {
             if (Recorder.IsRecording) {

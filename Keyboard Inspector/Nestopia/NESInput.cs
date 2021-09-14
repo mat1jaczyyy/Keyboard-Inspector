@@ -1,5 +1,5 @@
 ﻿using System.Drawing;
-using System.Windows.Forms;
+using System.Xml;
 
 namespace Keyboard_Inspector {
     enum NESKeys {
@@ -19,5 +19,13 @@ namespace Keyboard_Inspector {
         public override string Source => "NES";
 
         public override Color DefaultColor => Color.Red;
+
+        protected override string XMLName => "ni";
+
+        public static NESInput FromXMLDerived(XmlNode node) {
+            node.Ensure("ni");
+
+            return new NESInput(node.InnerText.ToEnum<NESKeys>());
+        }
     }
 }

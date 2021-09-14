@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
+using System.Text;
+using System.Windows.Forms;
+using System.Xml;
 
 namespace Keyboard_Inspector {
-    abstract class Input: IEquatable<Input> {
+    abstract class Input: IEquatable<Input>, IXML {
         public abstract string Source { get; }
 
         protected abstract bool EqualsDerived(Input other);
@@ -29,6 +33,38 @@ namespace Keyboard_Inspector {
         public string ToString(bool includeSource) => includeSource? $"[{Source}] {ToString()}" : ToString();
 
         public abstract Color DefaultColor { get; }
+
+        protected abstract StringBuilder ToXMLDerived(StringBuilder sb = null);
+
+        public StringBuilder ToXML(StringBuilder sb = null) {
+            if (sb == null) sb = new StringBuilder();
+
+            sb.Append("<i>");
+
+            ToXMLDerived(sb);
+
+            sb.Append("</i>");
+
+            return sb;
+        }
+
+        public static Input FromXML(XmlNode node) {
+            node.Ensure("i");
+            node.FirstChild.Ensure("ki", "ni", "wi");
+
+            switch (node.FirstChild.Name) {
+                case "ki":
+                    return KeyInput.FromXMLDerived(node.FirstChild);
+
+                case "ni":
+                    return NESInput.FromXMLDerived(node.FirstChild);
+
+                case "wi":
+                    return WiitarInput.FromXMLDerived(node.FirstChild);
+            }
+
+            throw new InvalidDataException();
+        }
     }
 
     abstract class Input<T>: Input, IEquatable<Input<T>> {
@@ -48,5 +84,15 @@ namespace Keyboard_Inspector {
 
         public override string ToString()
             => Key.ToString();
+
+        protected abstract string XMLName { get; }
+
+        protected override StringBuilder ToXMLDerived(StringBuilder sb = null) {
+            if (sb == null) sb = new StringBuilder();
+
+            sb.Append($"<{XMLName}>{ToString()}</{XMLName}>");
+
+            return sb;
+        }
     }
 }
