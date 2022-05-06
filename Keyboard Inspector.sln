@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31005.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Keyboard Inspector", "Keyboard Inspector\Keyboard Inspector.csproj", "{720B25AA-4F97-499E-9921-9CE2B6BAD78C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Keyboard Inspector", "Keyboard Inspector\Keyboard Inspector.csproj", "{EE27F90A-2FF5-4EBB-BEDD-FBA3E1942296}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{720B25AA-4F97-499E-9921-9CE2B6BAD78C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{720B25AA-4F97-499E-9921-9CE2B6BAD78C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{720B25AA-4F97-499E-9921-9CE2B6BAD78C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{720B25AA-4F97-499E-9921-9CE2B6BAD78C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE27F90A-2FF5-4EBB-BEDD-FBA3E1942296}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE27F90A-2FF5-4EBB-BEDD-FBA3E1942296}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE27F90A-2FF5-4EBB-BEDD-FBA3E1942296}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE27F90A-2FF5-4EBB-BEDD-FBA3E1942296}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {7CCF3F77-1E7E-4F93-A245-ED76B597D5F0}
+		SolutionGuid = {D66CDF49-DA61-467C-ABBE-C5A513E40D41}
 	EndGlobalSection
 EndGlobal

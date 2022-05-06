@@ -9,6 +9,7 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 using System.Xml;
 
 using MathNet.Numerics.Statistics;
@@ -63,8 +64,8 @@ namespace Keyboard_Inspector {
         }
 
         void resultLoaded() {
-            integrations.Enabled = key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
-            poll.Enabled = (result?.Events.All(i => i.Input is KeyInput) == true || result?.Events.All(i => i.Input is WiitarInput) == true) && result?.Events.Count >= 60;
+            key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
+            analyze.Enabled = (result?.Events.All(i => i.Input is KeyInput) == true || result?.Events.All(i => i.Input is WiitarInput) == true) && result?.Events.Count >= 60;
             save.Enabled = result?.Events.Any() == true;
 
             Redraw();
@@ -244,22 +245,6 @@ namespace Keyboard_Inspector {
                         );
                     }
 
-                    if (nesPollsGrid.Checked) {
-                        for (int j = 0; j < result.Polls.Count; j++) {
-                            // TODO optimize...?
-                            if (result.Polls[j] < increment * pos) continue;
-                            if (result.Polls[j] > increment * (pos + areaWidth / px)) break;
-
-                            gfx.DrawLine(
-                                pollPen,
-                                2 * Margin + textWidth + (float)((result.Polls[j] - increment * pos) * (px / increment)),
-                                Margin,
-                                2 * Margin + textWidth + (float)((result.Polls[j] - increment * pos) * (px / increment)),
-                                screen.Height - 2 * Margin - textHeight
-                            );
-                        }
-                    }
-
                     for (int k = 0; k < inputs.Count; k++) {
                         Event[] events = result.Events.Where(i => i.Input == inputs[k]).ToArray();
                         Brush brush = new SolidBrush(colors.ContainsKey(inputs[k])? colors[inputs[k]] : inputs[k].DefaultColor);
@@ -417,34 +402,32 @@ namespace Keyboard_Inspector {
 
         static readonly double[] PollRates = new double[] {62.5, 125, 250, 500, 1000, 2000, 4000};
 
-        void analyze_Click(object sender, EventArgs e) {
-            if (result == null) return;
-
-            StringBuilder file = new StringBuilder();
+        List<double> GetDelta() {
+            if (result == null) return null;
 
             // Filter Windows auto-repeat
             List<Event> no_repeat = result.Events
                 .Where(i => i.Input is KeyInput || i.Input is WiitarInput)
-                .Where((x, i) => !x.Pressed || !(result.Events.Take(i).Where(j => j.Input == x.Input).LastOrDefault()?.Pressed?? false))
+                .Where((x, i) => !x.Pressed || !(result.Events.Take(i).Where(j => j.Input == x.Input).LastOrDefault()?.Pressed ?? false))
                 .ToList();
 
-            file.Append($"no_repeat:\n{string.Join("\n", no_repeat)}\n\n");
-
             // Get differences between inputs
-            List<double> delta = no_repeat
+            return no_repeat
                 .Skip(1)
                 .Select((x, i) => x.Time - no_repeat[i].Time)
                 .ToList();
+        }
 
-            file.Append($"delta:\n{string.Join("\n", delta.Select(i => i.ToString("0.00000")))}\n\n");
+        void analyze_Click(object sender, EventArgs e) {
+            if (result == null) return;
+
+            List<double> delta = GetDelta();
 
             List<double> stddev = new List<double>();
             List<double> amount = new List<double>();
 
             // Assume polling rate
             foreach (double hz in PollRates) {
-                file.Append($"Testing {hz}Hz\n\n\t");
-
                 double ms = 1 / hz;
 
                 // Offset from closest poll on assumed polling rate
@@ -467,17 +450,11 @@ namespace Keyboard_Inspector {
                     no_outliers.Add(off[i]);
                 }
 
-                file.Append($"off:\n\t{string.Join("\n\t", off.Select(i => i.ToString("0.00000")))}\n\n\t");
-                file.Append($"no_outliers:\n\t{string.Join("\n\t", no_outliers.Select(i => i.ToString("0.00000")))}\n\n\t");
-
                 // Amount of samples close to poll rate
                 amount.Add((double)no_outliers.Count(j => Math.Abs(j) < ms / 6) / no_outliers.Count);
 
                 // Standard deviation
                 stddev.Add(no_outliers.StandardDeviation());
-
-                file.Append($"amount: {amount.Last() * 100:0.00}%\n\t");
-                file.Append($"stddev: {stddev.Last():0.00000000} {stddev.Last() < ms / 4}\n\n");
             }
 
             List<bool> stddev_results = stddev.Select((x, i) => x < (1 / PollRates[i]) / 4).ToList();
@@ -490,16 +467,6 @@ namespace Keyboard_Inspector {
             bool amount_hasresult = amount_result < PollRates.Length && !amount_results.Skip(amount_result).Take(2).Any(i => !i);
 
             int results = Convert.ToInt32(stddev_hasresult) + Convert.ToInt32(amount_hasresult);
-
-            file.Append($"stddev_results: {string.Join(", ", stddev_results)}\n");
-            file.Append($"stddev_result: {stddev_result}\n");
-            file.Append($"stddev_hasresult: {amount_hasresult}\n\n");
-
-            file.Append($"amount_results: {string.Join(", ", amount_results)}\n");
-            file.Append($"amount_result: {amount_result}\n");
-            file.Append($"amount_hasresult: {amount_hasresult}\n\n");
-
-            file.Append($"results: {results}\n");
 
             status.TextAlign = ContentAlignment.TopLeft;
 
@@ -514,15 +481,15 @@ namespace Keyboard_Inspector {
             } else {
                 status.Text = $"Wasn't able to tell at all... Try again with more data.";
             }
+        }
 
-            file.Append($"{status.Text}\n");
+        void delta_Click(object sender, EventArgs e) {
+            if (result == null) return;
 
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Text Files (*.txt)|*.txt";
-            sfd.Title = "Export Polling Rate Details";
+            List<int> delta = GetDelta().Select(i => (int)Math.Round(i * 1000)).ToList();
+            List<int> freq = Enumerable.Range(0, 101).Select(i => delta.Count(j => i == j)).ToList();
 
-            if (sender == export && sfd.ShowDialog() == DialogResult.OK)
-                File.WriteAllText(sfd.FileName, file.ToString());
+            new DeltaForm(freq).ShowDialog();
         }
 
         void open_Click(object sender, EventArgs e) {
@@ -558,88 +525,13 @@ namespace Keyboard_Inspector {
                 File.WriteAllText(sfd.FileName, result.ToXML().ToString());
         }
 
-        async void ConnectNestopia(object sender, EventArgs e) {
-            if (Recorder.IsRecording) return;
-
-            integrations.Enabled = recording.Enabled = rec.Enabled = false;
-
-            status.TextAlign = ContentAlignment.TopLeft;
-            status.Text = "Connecting to Nestopia...";
-
-            Process nestopia = Process.GetProcessesByName("nestopia").FirstOrDefault();
-
-            if (nestopia != null) {
-                NestopiaListener.AttachResult result = await NestopiaListener.AttachDebugger(nestopia.Id);
-
-                if (result == NestopiaListener.AttachResult.SUCCESS) {
-                    status.Text = "Connected to Nestopia!";
-
-                } else if (result == NestopiaListener.AttachResult.FAILED) {
-                    status.Text = "Failed to connect Nestopia!";
-
-                } else if (result == NestopiaListener.AttachResult.BAD_VER) {
-                    status.Text = "Incorrect Nestopia version (use 1.50)";
-                }
-
-            } else status.Text = "Couldn't find a Nestopia process!";
-
-            status.TextAlign = ContentAlignment.TopLeft;
-
-            integrations.Enabled = recording.Enabled = rec.Enabled = true;
-        }
-
-        async Task DisconnectNestopia(object sender, EventArgs e) {
-            if (Recorder.IsRecording) return;
-
-            status.TextAlign = ContentAlignment.TopLeft;
-            status.Text = "Disconnecting from Nestopia...";
-
-            await NestopiaListener.DetachDebugger();
-
-            NestopiaWasDisconnected();
-        }
-
-        public void NestopiaWasDisconnected()
-            => InvokeIfRequired(status, () => {
-                status.TextAlign = ContentAlignment.TopLeft;
-                status.Text = "Disconnected from Nestopia.";
-            });
-
-        void integrations_DropDownOpening(object sender, EventArgs e) {
-            if (Recorder.IsRecording) return;
-
-            ToolStripMenuItem nestopia = new ToolStripMenuItem();
-
-            if (NestopiaListener.IsConnected) {
-                nestopia.Text = "Disconnect from &Nestopia";
-                nestopia.Click += async (_, __) => await DisconnectNestopia(_, __);
-
-            } else {
-                nestopia.Text = "Connect to &Nestopia";
-                nestopia.Click += ConnectNestopia;
-            }
-
-            integrations.DropDownItems.Add(nestopia);
-        }
-
-        void integrations_DropDownClosed(object sender, EventArgs e)
-            => integrations.DropDownItems.Clear();
-
         void gridViewItem_Click(object sender, EventArgs e)
             => Redraw();
 
-        async void MainForm_FormClosing(object sender, FormClosingEventArgs e) {
+        void MainForm_FormClosing(object sender, FormClosingEventArgs e) {
             if (Recorder.IsRecording) {
                 e.Cancel = true;
                 return;
-            }
-
-            if (NestopiaListener.IsConnected) {
-                e.Cancel = true;
-                
-                await DisconnectNestopia(sender, e);
-
-                Close();
             }
         }
     }

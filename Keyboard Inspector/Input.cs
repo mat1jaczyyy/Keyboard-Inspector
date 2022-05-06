@@ -50,14 +50,11 @@ namespace Keyboard_Inspector {
 
         public static Input FromXML(XmlNode node) {
             node.Ensure("i");
-            node.FirstChild.Ensure("ki", "ni", "wi");
+            node.FirstChild.Ensure("ki", "wi");
 
             switch (node.FirstChild.Name) {
                 case "ki":
                     return KeyInput.FromXMLDerived(node.FirstChild);
-
-                case "ni":
-                    return NESInput.FromXMLDerived(node.FirstChild);
 
                 case "wi":
                     return WiitarInput.FromXMLDerived(node.FirstChild);

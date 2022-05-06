@@ -34,7 +34,6 @@ namespace Keyboard_Inspector {
             this.color = new System.Windows.Forms.ToolStripMenuItem();
             this.hide = new System.Windows.Forms.ToolStripMenuItem();
             this.mainmenu = new System.Windows.Forms.MenuStrip();
-            this.integrations = new System.Windows.Forms.ToolStripMenuItem();
             this.recording = new System.Windows.Forms.ToolStripMenuItem();
             this.open = new System.Windows.Forms.ToolStripMenuItem();
             this.save = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,10 +42,9 @@ namespace Keyboard_Inspector {
             this.unhide = new System.Windows.Forms.ToolStripMenuItem();
             this.gridView = new System.Windows.Forms.ToolStripMenuItem();
             this.realtimeGrid = new System.Windows.Forms.ToolStripMenuItem();
-            this.nesPollsGrid = new System.Windows.Forms.ToolStripMenuItem();
-            this.poll = new System.Windows.Forms.ToolStripMenuItem();
             this.analyze = new System.Windows.Forms.ToolStripMenuItem();
-            this.export = new System.Windows.Forms.ToolStripMenuItem();
+            this.poll = new System.Windows.Forms.ToolStripMenuItem();
+            this.delta = new System.Windows.Forms.ToolStripMenuItem();
             this.status = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.screen)).BeginInit();
             this.keymenu.SuspendLayout();
@@ -124,25 +122,16 @@ namespace Keyboard_Inspector {
             // mainmenu
             // 
             this.mainmenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.integrations,
             this.recording,
             this.key,
             this.gridView,
-            this.poll});
+            this.analyze});
             this.mainmenu.Location = new System.Drawing.Point(0, 0);
             this.mainmenu.Name = "mainmenu";
             this.mainmenu.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.mainmenu.Size = new System.Drawing.Size(888, 24);
             this.mainmenu.TabIndex = 7;
             this.mainmenu.Text = "menuStrip1";
-            // 
-            // integrations
-            // 
-            this.integrations.Name = "integrations";
-            this.integrations.Size = new System.Drawing.Size(82, 20);
-            this.integrations.Text = "&Integrations";
-            this.integrations.DropDownClosed += new System.EventHandler(this.integrations_DropDownClosed);
-            this.integrations.DropDownOpening += new System.EventHandler(this.integrations_DropDownOpening);
             // 
             // recording
             // 
@@ -184,21 +173,20 @@ namespace Keyboard_Inspector {
             // 
             this.freeze.CheckOnClick = true;
             this.freeze.Name = "freeze";
-            this.freeze.Size = new System.Drawing.Size(180, 22);
+            this.freeze.Size = new System.Drawing.Size(134, 22);
             this.freeze.Text = "&Freeze Keys";
             // 
             // unhide
             // 
             this.unhide.Name = "unhide";
-            this.unhide.Size = new System.Drawing.Size(180, 22);
+            this.unhide.Size = new System.Drawing.Size(134, 22);
             this.unhide.Text = "&Unhide All";
             this.unhide.Click += new System.EventHandler(this.unhide_Click);
             // 
             // gridView
             // 
             this.gridView.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.realtimeGrid,
-            this.nesPollsGrid});
+            this.realtimeGrid});
             this.gridView.Name = "gridView";
             this.gridView.Size = new System.Drawing.Size(69, 20);
             this.gridView.Text = "&Grid View";
@@ -209,50 +197,42 @@ namespace Keyboard_Inspector {
             this.realtimeGrid.CheckOnClick = true;
             this.realtimeGrid.CheckState = System.Windows.Forms.CheckState.Checked;
             this.realtimeGrid.Name = "realtimeGrid";
-            this.realtimeGrid.Size = new System.Drawing.Size(180, 22);
+            this.realtimeGrid.Size = new System.Drawing.Size(127, 22);
             this.realtimeGrid.Text = "&Real-Time";
             this.realtimeGrid.Click += new System.EventHandler(this.gridViewItem_Click);
             // 
-            // nesPollsGrid
+            // analyze
             // 
-            this.nesPollsGrid.CheckOnClick = true;
-            this.nesPollsGrid.Name = "nesPollsGrid";
-            this.nesPollsGrid.Size = new System.Drawing.Size(180, 22);
-            this.nesPollsGrid.Text = "&Nestopia Input Polls";
-            this.nesPollsGrid.Click += new System.EventHandler(this.gridViewItem_Click);
+            this.analyze.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.poll,
+            this.delta});
+            this.analyze.Enabled = false;
+            this.analyze.Name = "analyze";
+            this.analyze.Size = new System.Drawing.Size(60, 20);
+            this.analyze.Text = "&Analyze";
             // 
             // poll
             // 
-            this.poll.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.analyze,
-            this.export});
-            this.poll.Enabled = false;
             this.poll.Name = "poll";
-            this.poll.Size = new System.Drawing.Size(82, 20);
-            this.poll.Text = "&Polling Rate";
+            this.poll.Size = new System.Drawing.Size(167, 22);
+            this.poll.Text = "&Polling Rate Fitter";
+            this.poll.Click += new System.EventHandler(this.analyze_Click);
             // 
-            // analyze
+            // delta
             // 
-            this.analyze.Name = "analyze";
-            this.analyze.Size = new System.Drawing.Size(180, 22);
-            this.analyze.Text = "&Analyze";
-            this.analyze.Click += new System.EventHandler(this.analyze_Click);
-            // 
-            // export
-            // 
-            this.export.Name = "export";
-            this.export.Size = new System.Drawing.Size(180, 22);
-            this.export.Text = "&Export Details...";
-            this.export.Click += new System.EventHandler(this.analyze_Click);
+            this.delta.Name = "delta";
+            this.delta.Size = new System.Drawing.Size(167, 22);
+            this.delta.Text = "Delta Graph";
+            this.delta.Click += new System.EventHandler(this.delta_Click);
             // 
             // status
             // 
             this.status.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.status.BackColor = System.Drawing.Color.Transparent;
-            this.status.Location = new System.Drawing.Point(406, 5);
+            this.status.Location = new System.Drawing.Point(303, 5);
             this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(353, 17);
+            this.status.Size = new System.Drawing.Size(456, 17);
             this.status.TabIndex = 1;
             this.status.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
@@ -296,15 +276,13 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.ToolStripMenuItem key;
         private System.Windows.Forms.ToolStripMenuItem freeze;
         private System.Windows.Forms.ToolStripMenuItem unhide;
-        private System.Windows.Forms.ToolStripMenuItem poll;
         private System.Windows.Forms.ToolStripMenuItem analyze;
+        private System.Windows.Forms.ToolStripMenuItem poll;
         private System.Windows.Forms.ToolStripMenuItem open;
         private System.Windows.Forms.ToolStripMenuItem save;
-        private System.Windows.Forms.ToolStripMenuItem export;
         private System.Windows.Forms.Label status;
-        private System.Windows.Forms.ToolStripMenuItem integrations;
         private System.Windows.Forms.ToolStripMenuItem gridView;
         private System.Windows.Forms.ToolStripMenuItem realtimeGrid;
-        private System.Windows.Forms.ToolStripMenuItem nesPollsGrid;
+        private System.Windows.Forms.ToolStripMenuItem delta;
     }
 }
