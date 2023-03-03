@@ -84,6 +84,10 @@ namespace Keyboard_Inspector {
             this.label19 = new System.Windows.Forms.Label();
             this.label20 = new System.Windows.Forms.Label();
             this.precisionPanel = new System.Windows.Forms.Panel();
+            this.label25 = new System.Windows.Forms.Label();
+            this.label24 = new System.Windows.Forms.Label();
+            this.hps = new System.Windows.Forms.NumericUpDown();
+            this.label23 = new System.Windows.Forms.Label();
             this.precisionHalf = new System.Windows.Forms.Button();
             this.precisionDouble = new System.Windows.Forms.Button();
             this.labelN = new System.Windows.Forms.Label();
@@ -106,6 +110,7 @@ namespace Keyboard_Inspector {
             ((System.ComponentModel.ISupportInitialize)(this.chartDiffsFreq)).BeginInit();
             this.fitter.SuspendLayout();
             this.precisionPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.hps)).BeginInit();
             this.SuspendLayout();
             // 
             // rec
@@ -258,6 +263,7 @@ namespace Keyboard_Inspector {
             // split.Panel1
             // 
             this.split.Panel1.Controls.Add(this.tlp);
+            this.split.Panel1MinSize = 400;
             // 
             // split.Panel2
             // 
@@ -396,7 +402,6 @@ namespace Keyboard_Inspector {
             chartArea4.AxisX.MinorGrid.Interval = 10D;
             chartArea4.AxisX.MinorGrid.LineColor = System.Drawing.Color.Gainsboro;
             chartArea4.AxisY.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(232)))), ((int)(((byte)(232)))), ((int)(((byte)(232)))));
-            chartArea4.AxisY.Minimum = 0D;
             chartArea4.Name = "area";
             this.chartCircularFreq.ChartAreas.Add(chartArea4);
             this.chartCircularFreq.Location = new System.Drawing.Point(865, 221);
@@ -426,7 +431,6 @@ namespace Keyboard_Inspector {
             chartArea5.AxisX.MinorGrid.Interval = 10D;
             chartArea5.AxisX.MinorGrid.LineColor = System.Drawing.Color.Gainsboro;
             chartArea5.AxisY.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(232)))), ((int)(((byte)(232)))), ((int)(((byte)(232)))));
-            chartArea5.AxisY.Minimum = 0D;
             chartArea5.Name = "area";
             this.chartCompoundFreq.ChartAreas.Add(chartArea5);
             this.chartCompoundFreq.Location = new System.Drawing.Point(434, 221);
@@ -456,7 +460,6 @@ namespace Keyboard_Inspector {
             chartArea6.AxisX.MinorGrid.Interval = 10D;
             chartArea6.AxisX.MinorGrid.LineColor = System.Drawing.Color.Gainsboro;
             chartArea6.AxisY.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(232)))), ((int)(((byte)(232)))), ((int)(((byte)(232)))));
-            chartArea6.AxisY.Minimum = 0D;
             chartArea6.Name = "area";
             this.chartDiffsFreq.ChartAreas.Add(chartArea6);
             this.chartDiffsFreq.Location = new System.Drawing.Point(3, 221);
@@ -735,6 +738,10 @@ namespace Keyboard_Inspector {
             // 
             // precisionPanel
             // 
+            this.precisionPanel.Controls.Add(this.label25);
+            this.precisionPanel.Controls.Add(this.label24);
+            this.precisionPanel.Controls.Add(this.hps);
+            this.precisionPanel.Controls.Add(this.label23);
             this.precisionPanel.Controls.Add(this.precisionHalf);
             this.precisionPanel.Controls.Add(this.precisionDouble);
             this.precisionPanel.Controls.Add(this.labelN);
@@ -747,11 +754,58 @@ namespace Keyboard_Inspector {
             this.precisionPanel.Size = new System.Drawing.Size(425, 77);
             this.precisionPanel.TabIndex = 5;
             // 
+            // label25
+            // 
+            this.label25.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label25.AutoSize = true;
+            this.label25.Location = new System.Drawing.Point(234, 57);
+            this.label25.Name = "label25";
+            this.label25.Size = new System.Drawing.Size(49, 13);
+            this.label25.TabIndex = 12;
+            this.label25.Text = "iterations";
+            this.label25.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+            // 
+            // label24
+            // 
+            this.label24.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label24.Location = new System.Drawing.Point(33, 6);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(123, 13);
+            this.label24.TabIndex = 11;
+            this.label24.Text = "Event Count:";
+            this.label24.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // hps
+            // 
+            this.hps.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.hps.Location = new System.Drawing.Point(162, 55);
+            this.hps.Maximum = new decimal(new int[] {
+            4,
+            0,
+            0,
+            0});
+            this.hps.Name = "hps";
+            this.hps.Size = new System.Drawing.Size(71, 20);
+            this.hps.TabIndex = 10;
+            this.hps.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.hps.ValueChanged += new System.EventHandler(this.hps_ValueChanged);
+            // 
+            // label23
+            // 
+            this.label23.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label23.Location = new System.Drawing.Point(33, 57);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(123, 13);
+            this.label23.TabIndex = 9;
+            this.label23.Text = "HPS Partial Elimination:";
+            this.label23.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // precisionHalf
             // 
-            this.precisionHalf.Location = new System.Drawing.Point(130, 49);
+            this.precisionHalf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.precisionHalf.Location = new System.Drawing.Point(245, 27);
             this.precisionHalf.Name = "precisionHalf";
-            this.precisionHalf.Size = new System.Drawing.Size(29, 23);
+            this.precisionHalf.Size = new System.Drawing.Size(29, 22);
             this.precisionHalf.TabIndex = 8;
             this.precisionHalf.Tag = "";
             this.precisionHalf.Text = "/ 2";
@@ -760,9 +814,10 @@ namespace Keyboard_Inspector {
             // 
             // precisionDouble
             // 
-            this.precisionDouble.Location = new System.Drawing.Point(159, 49);
+            this.precisionDouble.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.precisionDouble.Location = new System.Drawing.Point(274, 27);
             this.precisionDouble.Name = "precisionDouble";
-            this.precisionDouble.Size = new System.Drawing.Size(29, 23);
+            this.precisionDouble.Size = new System.Drawing.Size(29, 22);
             this.precisionDouble.TabIndex = 8;
             this.precisionDouble.Tag = "";
             this.precisionDouble.Text = "* 2";
@@ -772,17 +827,16 @@ namespace Keyboard_Inspector {
             // labelN
             // 
             this.labelN.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.labelN.AutoSize = true;
-            this.labelN.Location = new System.Drawing.Point(31, 55);
+            this.labelN.Location = new System.Drawing.Point(162, 6);
             this.labelN.Name = "labelN";
-            this.labelN.Size = new System.Drawing.Size(0, 13);
+            this.labelN.Size = new System.Drawing.Size(57, 13);
             this.labelN.TabIndex = 4;
-            this.labelN.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+            this.labelN.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // tbPrecision
             // 
             this.tbPrecision.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.tbPrecision.Location = new System.Drawing.Point(131, 29);
+            this.tbPrecision.Location = new System.Drawing.Point(162, 28);
             this.tbPrecision.MaxLength = 5;
             this.tbPrecision.Name = "tbPrecision";
             this.tbPrecision.Size = new System.Drawing.Size(56, 20);
@@ -794,23 +848,20 @@ namespace Keyboard_Inspector {
             // label21
             // 
             this.label21.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label21.AutoSize = true;
-            this.label21.Location = new System.Drawing.Point(31, 26);
+            this.label21.Location = new System.Drawing.Point(33, 31);
             this.label21.Name = "label21";
-            this.label21.Padding = new System.Windows.Forms.Padding(0, 6, 0, 0);
-            this.label21.Size = new System.Drawing.Size(94, 19);
+            this.label21.Size = new System.Drawing.Size(123, 13);
             this.label21.TabIndex = 4;
             this.label21.Text = "Analysis Precision:";
-            this.label21.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+            this.label21.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label22
             // 
             this.label22.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label22.AutoSize = true;
-            this.label22.Location = new System.Drawing.Point(188, 26);
+            this.label22.Location = new System.Drawing.Point(219, 31);
             this.label22.Name = "label22";
-            this.label22.Padding = new System.Windows.Forms.Padding(0, 6, 0, 0);
-            this.label22.Size = new System.Drawing.Size(20, 19);
+            this.label22.Size = new System.Drawing.Size(20, 13);
             this.label22.TabIndex = 6;
             this.label22.Text = "Hz";
             this.label22.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
@@ -851,6 +902,7 @@ namespace Keyboard_Inspector {
             this.fitter.PerformLayout();
             this.precisionPanel.ResumeLayout(false);
             this.precisionPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.hps)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -909,5 +961,9 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Button precisionHalf;
         private System.Windows.Forms.Button precisionDouble;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.NumericUpDown hps;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.Label label25;
     }
 }
