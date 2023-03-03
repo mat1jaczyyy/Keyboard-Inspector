@@ -82,6 +82,7 @@ namespace Keyboard_Inspector {
             if (!Recorder.IsRecording) {
                 rec.Text = "Stop Recording";
                 status.Text = "Recording... 00:00:00";
+                split.Enabled = false; 
 
                 result = null;
 
@@ -97,6 +98,7 @@ namespace Keyboard_Inspector {
             } else {
                 rec.Text = "Start Recording";
                 status.Text = "";
+                split.Enabled = true;
 
                 result = Recorder.StopRecording();
 
@@ -542,13 +544,13 @@ namespace Keyboard_Inspector {
                     a.MinorGrid.Interval = precision / 100;
 
                     if (EstimatePeak(magData, out int result))
-                        estimate = $"- estimated {result} Hz";
+                        estimate = $" - estimated {result} Hz";
                 }
 
                 for (int i = Convert.ToInt32(isFreq); i < magData.Length; i++)
                     chart.Series[0].Points.AddXY(i * (isFreq? 1 : (1000.0 / precision)), magData[i]);
 
-                chart.Titles.Add(isFreq? $"{title} (frequency domain {estimate})" : $"{title} (time domain)");
+                chart.Titles.Add(isFreq? $"{title} (frequency domain{estimate})" : $"{title} (time domain)");
             }
 
             foreach (var g in gen().GroupBy(i => i).Where(i => i.Key < precision))
