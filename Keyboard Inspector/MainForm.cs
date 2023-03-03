@@ -9,9 +9,11 @@ using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Control = System.Windows.Forms.Control;
 using System.Windows.Forms.DataVisualization.Charting;
-using System.Xml;
 
+using MathNet.Numerics;
+using MathNet.Numerics.IntegralTransforms;
 using MathNet.Numerics.Statistics;
 
 namespace Keyboard_Inspector {
@@ -45,7 +47,6 @@ namespace Keyboard_Inspector {
             screen.AllowDrop = true;
 
             key.DropDown.Closing += CancelDropDownClose;
-            gridView.DropDown.Closing += CancelDropDownClose;
         }
 
         int elapsed;
@@ -65,11 +66,14 @@ namespace Keyboard_Inspector {
 
         void resultLoaded() {
             key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
-            analyze.Enabled = (result?.Events.All(i => i.Input is KeyInput) == true || result?.Events.All(i => i.Input is WiitarInput) == true) && result?.Events.Count >= 60;
             save.Enabled = result?.Events.Any() == true;
 
             Redraw();
             UpdateScroll();
+
+            labelN.Text = result != null? $"n = {result.Events.Count}" : "";
+
+            CreateCharts();
         }
 
         void rec_Click(object sender, EventArgs e) {
@@ -108,8 +112,6 @@ namespace Keyboard_Inspector {
             status.TextAlign = ContentAlignment.TopRight;
             status.Text = $"Recording... {TimeSpan.FromSeconds(++elapsed):hh\\:mm\\:ss}";
         }
-
-        void MainForm_Resize(object sender, EventArgs e) => Redraw();
 
         void screen_MouseWheel(object sender, MouseEventArgs e) {
             if (result == null) return;
@@ -164,6 +166,19 @@ namespace Keyboard_Inspector {
         new const int Margin = 5;
         const int BarMargin = 1;
 
+        double GetUnitIncrement(int index) {
+            if (index <= 3) return Math.Pow(2, index) / 1000;
+            if (index <= 12) {
+                double ret = Math.Pow(10, (index / 3) - 3);
+                if (index % 3 == 1) ret *= 2;
+                if (index % 3 == 2) ret *= 5;
+                return ret;
+            }
+            if (index <= 15) return Math.Pow(2, index - 14) * 60;
+            if (index <= 17) return Math.Pow(2, index - 16) * 300;
+            return Math.Pow(2, index - 18) * 1800;
+        }
+
         void Redraw() {
             if (screen.Width <= 0 || screen.Height <= 0) return;
 
@@ -188,39 +203,39 @@ namespace Keyboard_Inspector {
                     areaX = 2 * Margin + textWidth;
                     areaWidth = screen.Width - Margin - areaX;
 
-                    float increment = 0.5f;
-                    float px;
+                    int incIndex = 8; // 0.5s
+                    float increment, px;
 
                     for (;;) {
+                        increment = (float)GetUnitIncrement(incIndex);
+
                         px = (float)(increment / result.Time * areaWidth * zoom);
 
-                        if (px < 40) increment *= 2;
-                        else if (px >= 80) increment /= 2;
+                        if (px < 30) incIndex++;
+                        else if (px >= 90 && incIndex > 0) incIndex--;
                         else break;
                     }
 
                     double pos = viewport * result.Time / increment;
                     
-                    if (realtimeGrid.Checked) {
-                        int k = (int)Math.Ceiling(pos);
+                    int posCeil = (int)Math.Ceiling(pos);
 
-                        for (float s = (float)((k - pos) * px); s < areaWidth; s = (float)(++k - pos) * px) {
-                            gfx.DrawLine(
-                                pen,
-                                2 * Margin + textWidth + s,
-                                Margin,
-                                2 * Margin + textWidth + s,
-                                screen.Height - 2 * Margin - textHeight
-                            );
+                    for (float s = (float)((posCeil - pos) * px); s < areaWidth; s = (float)(++posCeil - pos) * px) {
+                        gfx.DrawLine(
+                            pen,
+                            2 * Margin + textWidth + s,
+                            Margin,
+                            2 * Margin + textWidth + s,
+                            screen.Height - 2 * Margin - textHeight
+                        );
 
-                            string t = (increment * k).ToString("0.####");
+                        string t = (increment * posCeil).ToString("0.###");
 
-                            gfx.DrawString(
-                                t, font, textBrush,
-                                2 * Margin + textWidth + s - gfx.MeasureString(t, font).Width / 2,
-                                screen.Height - Margin - textHeight
-                            );
-                        }
+                        gfx.DrawString(
+                            t, font, textBrush,
+                            2 * Margin + textWidth + s - gfx.MeasureString(t, font).Width / 2,
+                            screen.Height - Margin - textHeight
+                        );
                     }
 
                     float keyHeight = (float)(screen.Height - 3 * Margin - textHeight) / inputs.Count;
@@ -400,109 +415,195 @@ namespace Keyboard_Inspector {
             }
         }
 
-        static readonly double[] PollRates = new double[] {62.5, 125, 250, 500, 1000, 2000, 4000};
+        bool EstimatePeak(float[] arr, out int result) {
+            int i;
 
-        List<double> GetDelta() {
+            float max = float.MaxValue;
+            bool search = false;
+            result = -1;
+
+            for (i = 0; i < arr.Length; i++) {
+                float v = arr[i];
+                if (search) {
+                    if (v > max) {
+                        max = v;
+                        result = i;
+                    }
+                } else {
+                    if (v > max) search = true;
+                    max = v;
+                }
+            }
+            
+            return result != -1;
+        }
+
+        void CalcDelta()
+            => deltaCache = result?.Events
+                ?.Skip(1)
+                ?.Select((x, i) => x.Time - result.Events[i].Time)
+                ?.ToList();
+
+        List<int> GetDiffs()
+            => deltaCache.Select(i => (int)Math.Round(i * precision)).ToList();
+
+        List<int> GetCompound() {
+            if (result == null) return null;
+            
+            var ret = new List<int>();
+
+            for (int i = 0; i < result.Events.Count - 1; i++) {
+                for (int j = i + 1; j < result.Events.Count; j++) {
+                    int diff = (int)Math.Round((result.Events[j].Time - result.Events[i].Time) * precision);
+
+                    if (j > i + 1 && diff >= 1000)
+                        break;
+
+                    ret.Add(diff);
+                }
+            }
+
+            return ret;
+        }
+        
+        List<int> GetCircular() {
             if (result == null) return null;
 
-            // Filter Windows auto-repeat
-            List<Event> no_repeat = result.Events
-                .Where(i => i.Input is KeyInput || i.Input is WiitarInput)
-                .Where((x, i) => !x.Pressed || !(result.Events.Take(i).Where(j => j.Input == x.Input).LastOrDefault()?.Pressed ?? false))
-                .ToList();
-
-            // Get differences between inputs
-            return no_repeat
-                .Skip(1)
-                .Select((x, i) => x.Time - no_repeat[i].Time)
+            return result.Events
+                .Select(x => ((int)Math.Round(x.Time * precision)) % precision)
                 .ToList();
         }
+            
+        void RunFitter(int col) {
+            Control stddevCtrl = fitter.GetControlFromPosition(col, 1);
+            Control amountCtrl = fitter.GetControlFromPosition(col, 2);
 
-        void analyze_Click(object sender, EventArgs e) {
-            if (result == null) return;
+            double.TryParse(fitter.GetControlFromPosition(col, 0).Text, out double hz);
 
-            List<double> delta = GetDelta();
-
-            List<double> stddev = new List<double>();
-            List<double> amount = new List<double>();
+            if (hz <= 0) {
+                stddevCtrl.Text = amountCtrl.Text = "";
+                return;
+            }
+            
+            double stddev, amount;
 
             // Assume polling rate
-            foreach (double hz in PollRates) {
-                double ms = 1 / hz;
+            double ms = 1 / hz;
 
-                // Offset from closest poll on assumed polling rate
-                List<double> off = delta.Select(j => ((j + ms / 2) % ms - ms / 2)).ToList();
+            // Offset from closest poll on assumed polling rate
+            List<double> off = deltaCache.Select(j => ((j + ms / 2) % ms - ms / 2)).ToList();
 
-                // Remove outliers (two values next to each other that are odd, but cancel themselves out)
-                List<double> no_outliers = new List<double>() { off[0], off[1], off[2] };
+            // Remove outliers (two values next to each other that are odd, but cancel themselves out)
+            List<double> no_outliers = off.Take(3).ToList();
 
-                for (int i = 3; i < off.Count; i++) {
-                    if (Math.Abs(off[i - 2]) > ms / 6 && Math.Abs(off[i]) < ms / 10 && Math.Abs(off[i - 3]) < ms / 10) {
-                        double fix = (off[i - 2] + off[i - 1] + 3 * ms) % ms;
+            for (int i = 3; i < off.Count; i++) {
+                if (Math.Abs(off[i - 2]) > ms / 6 && Math.Abs(off[i]) < ms / 10 && Math.Abs(off[i - 3]) < ms / 10) {
+                    double fix = (off[i - 2] + off[i - 1] + 3 * ms) % ms;
 
-                        if (Math.Abs(fix) < ms / 10) {
-                            no_outliers.RemoveAt(no_outliers.Count - 1);
-                            no_outliers.RemoveAt(no_outliers.Count - 2);
+                    if (Math.Abs(fix) < ms / 10) {
+                        no_outliers.RemoveAt(no_outliers.Count - 1);
+                        no_outliers.RemoveAt(no_outliers.Count - 2);
 
-                            no_outliers.Add(fix);
-                        }
+                        no_outliers.Add(fix);
                     }
-                    no_outliers.Add(off[i]);
                 }
-
-                // Amount of samples close to poll rate
-                amount.Add((double)no_outliers.Count(j => Math.Abs(j) < ms / 6) / no_outliers.Count);
-
-                // Standard deviation
-                stddev.Add(no_outliers.StandardDeviation());
+                no_outliers.Add(off[i]);
             }
+            
+            // Standard deviation
+            stddev = no_outliers.StandardDeviation();
 
-            List<bool> stddev_results = stddev.Select((x, i) => x < (1 / PollRates[i]) / 4).ToList();
-            List<bool> amount_results = amount.Select(i => i >= 0.8).ToList();
+            // Amount of samples close to poll rate
+            amount = (double)no_outliers.Count(j => Math.Abs(j) < ms / 6) / no_outliers.Count;
 
-            int stddev_result = stddev_results.TakeWhile(i => !i).Count();
-            int amount_result = amount_results.TakeWhile(i => !i).Count();
+            stddevCtrl.Text = stddev.ToString("0.00E0");
+            amountCtrl.Text = amount.ToString("0.00%");
 
-            bool stddev_hasresult = stddev_result < PollRates.Length && !stddev_results.Skip(stddev_result).Take(2).Any(i => !i);
-            bool amount_hasresult = amount_result < PollRates.Length && !amount_results.Skip(amount_result).Take(2).Any(i => !i);
-
-            int results = Convert.ToInt32(stddev_hasresult) + Convert.ToInt32(amount_hasresult);
-
-            status.TextAlign = ContentAlignment.TopLeft;
-
-            if (results == 2) {
-                if (stddev_result == amount_result) {
-                    status.Text = $"Definitely {PollRates[stddev_result]}Hz!";
-                } else {
-                    status.Text = $"Either {PollRates[stddev_result]}Hz or {PollRates[amount_result]}Hz... Try again with more data.";
-                }
-            } else if (results == 1) {
-                status.Text = $"Not sure, maybe {PollRates[stddev_hasresult ? stddev_result : amount_result]}Hz? Try again with more data.";
-            } else {
-                status.Text = $"Wasn't able to tell at all... Try again with more data.";
-            }
+            stddevCtrl.ForeColor = stddev < ms / 4? Color.DarkGreen : SystemColors.ControlText;
+            amountCtrl.ForeColor = amount >= 0.8? Color.DarkGreen : SystemColors.ControlText;
         }
 
-        void delta_Click(object sender, EventArgs e) {
-            if (result == null) return;
+        void fitterCustomHz_TextChanged(object sender, EventArgs e) {
+            if (result == null || deltaCache == null) return;
+            RunFitter(fitter.ColumnCount - 1);
+        }
 
-            List<int> delta = GetDelta().Select(i => (int)Math.Round(i * 1000)).ToList();
-            List<int> freq = Enumerable.Range(0, 101).Select(i => delta.Count(j => i == j)).ToList();
+        void RunGraphJob(Func<List<int>> gen, Chart timeDomain, Chart freqDomain, string title) {
+            Complex32[] data = new Complex32[precision];
 
-            new DeltaForm(freq).ShowDialog();
+            void DrawGraph(Chart chart, bool isFreq = false) {
+                string estimate = "";
+                float[] magData = data.Take(data.Length / 2 + 1).Select(i => i.Magnitude).ToArray();
+
+                if (isFreq) {
+                    Axis a = chart.ChartAreas.First().AxisX;
+                    a.Maximum = precision / 2;
+                    a.Interval = a.MajorGrid.Interval = a.MajorTickMark.Interval = precision / 20;
+                    a.MinorGrid.Interval = precision / 100;
+
+                    if (EstimatePeak(magData, out int result))
+                        estimate = $"- estimated {result} Hz";
+                }
+
+                for (int i = Convert.ToInt32(isFreq); i < magData.Length; i++)
+                    chart.Series[0].Points.AddXY(i * (isFreq? 1 : (1000.0 / precision)), magData[i]);
+
+                chart.Titles.Add(isFreq? $"{title} (frequency domain {estimate})" : $"{title} (time domain)");
+            }
+
+            foreach (var g in gen().GroupBy(i => i).Where(i => i.Key < precision))
+                data[g.Key] = g.Count();
+
+            DrawGraph(timeDomain);
+
+            Fourier.Forward(data);
+            DrawGraph(freqDomain, true);
+        }
+
+        void tbPrecision_TextChanged(object sender, EventArgs e) {
+            int.TryParse(tbPrecision.Text, out precision);
+            CreateCharts();
+        }
+
+        int precision = 4000;
+        List<double> deltaCache;
+
+        void CreateCharts() {
+            bool hasResult = result != null && result.Events.Any();
+
+            int.TryParse(tbPrecision.Text, out precision);
+
+            CalcDelta();
+            tlp.Visible = hasResult;
+
+            foreach (var chart in tlp.Controls.OfType<Chart>()) {
+                chart.Series[0].Points.Clear();
+                chart.Titles.Clear();
+            }
+
+            if (!hasResult || precision <= 0)
+                return;
+
+            for (int i = 1; i < fitter.ColumnCount; i++)
+                RunFitter(i);
+
+            RunGraphJob(GetDiffs, chartDiffs, chartDiffsFreq, "Differences between consecutive events");
+            RunGraphJob(GetCompound, chartCompound, chartCompoundFreq, "Differences between all events");
+            RunGraphJob(GetCircular, chartCircular, chartCircularFreq, "Events wrapped around a second");
         }
 
         void open_Click(object sender, EventArgs e) {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "XML Files (*.xml)|*.xml";
+            ofd.Filter = "Keyboard Inspector Files (*.kbi)|*.kbi";
             ofd.Title = "Open Recording";
 
             if (ofd.ShowDialog() == DialogResult.OK) {
                 try {
-                    XmlDocument xml = new XmlDocument();
-                    xml.LoadXml(File.ReadAllText(ofd.FileName));
-
-                    result = Result.FromXML(xml.GetNode("r"));
+                    using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(ofd.FileName))) {
+                        using (BinaryReader br = new BinaryReader(ms)) {
+                            result = Result.FromBinary(br);
+                        }
+                    }
 
                     zoom = 1;
                     viewport = 0;
@@ -518,14 +619,42 @@ namespace Keyboard_Inspector {
 
         void save_Click(object sender, EventArgs e) {
             SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "XML Files (*.xml)|*.xml";
+            sfd.Filter = "Keyboard Inspector Files (*.kbi)|*.kbi";
             sfd.Title = "Save Recording";
 
-            if (sfd.ShowDialog() == DialogResult.OK)
-                File.WriteAllText(sfd.FileName, result.ToXML().ToString());
+            if (sfd.ShowDialog() == DialogResult.OK) {
+                using (MemoryStream ms = new MemoryStream()) {
+                    using (BinaryWriter bw = new BinaryWriter(ms)) {
+                        result.ToBinary(bw);
+                        File.WriteAllBytes(sfd.FileName, ms.ToArray());
+                    }
+                }
+            }
         }
 
-        void gridViewItem_Click(object sender, EventArgs e)
+        private void precisionDouble_Click(object sender, EventArgs e) {
+            if (precision <= 0) return;
+            precision *= 2;
+            tbPrecision.Text = precision.ToString();
+        }
+
+        private void precisionHalf_Click(object sender, EventArgs e) {
+            if (precision <= 0) return;
+            precision /= 2;
+            tbPrecision.Text = precision.ToString();
+        }
+
+        void chart_MouseWheel(object sender, MouseEventArgs e) {
+            if (result == null || precision <= 0) return;
+
+            Chart c = sender as Chart;
+            Axis a = c.ChartAreas.First().AxisX;
+
+            double change = Math.Pow(1.05, -e.Delta / 120.0);
+            a.Maximum = Math.Min(a.Maximum * change, c.Series[0].Points.Last().XValue);
+        }
+
+        private void screen_SizeChanged(object sender, EventArgs e)
             => Redraw();
 
         void MainForm_FormClosing(object sender, FormClosingEventArgs e) {

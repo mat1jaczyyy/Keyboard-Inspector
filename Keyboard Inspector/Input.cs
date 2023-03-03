@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
-using System.Text;
-using System.Windows.Forms;
-using System.Xml;
 
 namespace Keyboard_Inspector {
-    abstract class Input: IEquatable<Input>, IXML {
+    abstract class Input: IEquatable<Input>, IBinary {
         public abstract string Source { get; }
 
         protected abstract bool EqualsDerived(Input other);
@@ -34,30 +31,15 @@ namespace Keyboard_Inspector {
 
         public abstract Color DefaultColor { get; }
 
-        protected abstract StringBuilder ToXMLDerived(StringBuilder sb = null);
+        public abstract void ToBinary(BinaryWriter bw);
 
-        public StringBuilder ToXML(StringBuilder sb = null) {
-            if (sb == null) sb = new StringBuilder();
+        public static Input FromBinary(BinaryReader br) {
+            switch (br.ReadChar()) {
+                case 'k':
+                    return KeyInput.FromBinaryDerived(br);
 
-            sb.Append("<i>");
-
-            ToXMLDerived(sb);
-
-            sb.Append("</i>");
-
-            return sb;
-        }
-
-        public static Input FromXML(XmlNode node) {
-            node.Ensure("i");
-            node.FirstChild.Ensure("ki", "wi");
-
-            switch (node.FirstChild.Name) {
-                case "ki":
-                    return KeyInput.FromXMLDerived(node.FirstChild);
-
-                case "wi":
-                    return WiitarInput.FromXMLDerived(node.FirstChild);
+                case 'w':
+                    return WiitarInput.FromBinaryDerived(br);
             }
 
             throw new InvalidDataException();
@@ -82,14 +64,11 @@ namespace Keyboard_Inspector {
         public override string ToString()
             => Key.ToString();
 
-        protected abstract string XMLName { get; }
+        protected abstract char BinaryID { get; }
 
-        protected override StringBuilder ToXMLDerived(StringBuilder sb = null) {
-            if (sb == null) sb = new StringBuilder();
-
-            sb.Append($"<{XMLName}>{ToString()}</{XMLName}>");
-
-            return sb;
+        public override void ToBinary(BinaryWriter bw) {
+            bw.Write(BinaryID);
+            bw.Write(Convert.ToInt32(Key));
         }
     }
 }

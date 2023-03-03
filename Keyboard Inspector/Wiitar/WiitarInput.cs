@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Xml;
+using System.IO;
 
 namespace Keyboard_Inspector {
     enum WiitarKeys {
@@ -34,12 +34,10 @@ namespace Keyboard_Inspector {
 
         public override Color DefaultColor => colors[Key];
 
-        protected override string XMLName => "wi";
+        protected override char BinaryID => 'w';
 
-        public static WiitarInput FromXMLDerived(XmlNode node) {
-            node.Ensure("wi");
-
-            return new WiitarInput(node.InnerText.ToEnum<WiitarKeys>());
+        public static WiitarInput FromBinaryDerived(BinaryReader br) {
+            return new WiitarInput((WiitarKeys)br.ReadInt32());
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
-using System.Xml;
 
 namespace Keyboard_Inspector {
     class KeyInput: Input<Keys> {
@@ -10,12 +10,10 @@ namespace Keyboard_Inspector {
 
         public override Color DefaultColor => Color.Gray;
 
-        protected override string XMLName => "ki";
+        protected override char BinaryID => 'k';
 
-        public static KeyInput FromXMLDerived(XmlNode node) {
-            node.Ensure("ki");
-
-            return new KeyInput(node.InnerText.ToEnum<Keys>());
+        public static KeyInput FromBinaryDerived(BinaryReader br) {
+            return new KeyInput((Keys)br.ReadInt32());
         }
     }
 }

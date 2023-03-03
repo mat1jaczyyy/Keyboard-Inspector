@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
+﻿using System.Collections.Generic;
+using System.IO;
 
 namespace Keyboard_Inspector {
-    class Event: IXML {
+    class Event: IBinary {
         public readonly double Time;
         public readonly bool Pressed;
         public readonly Input Input;
@@ -19,26 +16,25 @@ namespace Keyboard_Inspector {
         public override string ToString()
             => $"{Time:0.00000} {(Pressed? "DN" : "UP")} {Input}";
 
-        public StringBuilder ToXML(StringBuilder sb = null) {
-            if (sb == null) sb = new StringBuilder();
-
-            sb.Append($"<e><t>{Time}</t><b>{Convert.ToInt32(Pressed)}</b>");
-            
-            Input.ToXML(sb);
-
-            sb.Append("</e>");
-
-            return sb;
+        public void ToBinary(BinaryWriter bw) {
+            bw.Write(Time);
+            bw.Write(Pressed);
+            Input.ToBinary(bw);
         }
 
-        public static List<Event> ListFromXML(XmlNode node) {
-            node.Ensure("es");
+        public static List<Event> ListFromBinary(BinaryReader br) {
+            int n = br.ReadInt32();
+            var ret = new List<Event>();
 
-            return node.GetNodes("e").Select(i => new Event(
-                double.Parse(i.GetNode("t").InnerText),
-                Convert.ToBoolean(int.Parse(i.GetNode("b").InnerText)),
-                Input.FromXML(i.GetNode("i"))
-            )).ToList();
+            for (int i = 0; i < n; i++) {
+                ret.Add(new Event(
+                    br.ReadDouble(),
+                    br.ReadBoolean(),
+                    Input.FromBinary(br)
+                ));
+            }
+
+            return ret;
         }
     }
 }
