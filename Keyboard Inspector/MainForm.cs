@@ -554,13 +554,15 @@ namespace Keyboard_Inspector {
             chart.Titles.Add(title);
         }
 
-        void RunGraphJob(IEnumerable<int> source, Chart timeDomain, Chart freqDomain, string title) {
+        void RunGraphJob(IEnumerable<int> source, Chart timeDomain, Chart freqDomain, string title, Func<IEnumerable<double>, IEnumerable<double>> timeTransform = null) {
+            timeTransform = timeTransform?? (i => i);
+            
             Complex32[] data = new Complex32[precision];
 
             foreach (var g in source.GroupBy(i => i).Where(i => i.Key < precision))
                 data[g.Key] = g.Count();
 
-            DrawGraph(timeDomain, data.Select(i => (double)i.Real), $"{title} (time domain)", 1000.0 / precision);
+            DrawGraph(timeDomain, timeTransform(data.Select(i => (double)i.Real)), $"{title} (time domain)", 1000.0 / precision);
 
             Fourier.Forward(data);
             double[] isolated = data.Take(data.Length / 2 + 1).Select(i => (double)i.Magnitude).ToArray();
@@ -618,7 +620,21 @@ namespace Keyboard_Inspector {
 
             RunGraphJob(GetDiffs(), chartDiffs, chartDiffsFreq, "Differences between consecutive events");
             RunGraphJob(GetCompound(), chartCompound, chartCompoundFreq, "Differences between all events");
-            RunGraphJob(GetCircular(), chartCircular, chartCircularFreq, "Events wrapped around a second");
+            RunGraphJob(GetCircular(), chartCircular, chartCircularFreq, "Events wrapped around a second", arr => {
+                double max = double.MinValue;
+                int rot = -1;
+
+                int i = 0;
+                foreach (double v in arr) {
+                    if (v > max) {
+                        max = v;
+                        rot = i;
+                    }
+                    i++;
+                }
+
+                return arr.Concat(arr).Skip(rot);
+            });
         }
 
         void open_Click(object sender, EventArgs e) {
