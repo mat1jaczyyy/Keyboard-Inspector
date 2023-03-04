@@ -417,8 +417,8 @@ namespace Keyboard_Inspector {
             }
         }
 
-        bool EstimatePeak(IEnumerable<float> data, out int result) {
-            float max = float.MaxValue;
+        bool EstimatePeak(IEnumerable<double> data, out int result) {
+            double max = double.MaxValue;
             bool search = false;
             result = -1;
             
@@ -520,25 +520,35 @@ namespace Keyboard_Inspector {
             RunFitter(fitter.ColumnCount - 1);
         }
 
-        void HighPass(float[] data) {
+        void HighPass(double[] data) {
             // https://www.desmos.com/calculator/yukhgjz5g9
             for (int i = 0; i < Math.Min(30, data.Length); i++)
-                data[i] = (float)(data[i] / (1 + Math.Pow(Math.E, -(i - 25) / 4.0)));
+                data[i] /= 1 + Math.Pow(Math.E, -(i - 25) / 4.0);
         }
 
-        void HarmonicProduct(float[] data) {
+        void HarmonicProduct(double[] data) {
             if (hpsIterations <= 0) return;
 
-            for (int _ = 0; _ < hpsIterations; _++) {
-                for (int i = data.Length - 1; i >= 0; i--) {
-                    data[i] *= data[i / 2];
+            double[] copy = new double[data.Length];
+            data.CopyTo(copy, 0);
+
+            for (int i = 0; i < data.Length; i++) {
+                for (var j = 0; j < hpsIterations; j++) {
+                    data[i] *= copy[(int)((double)i * (j + 1) / (hpsIterations + 1))];
                 }
             }
         }
 
-        void DrawGraph(Chart chart, IEnumerable<float> data, string title, double xFactor = 1) {
+        void Normalize(double[] data) {
+            double max = data.Max();
+
+            for (int i = 0; i < data.Length; i++)
+                data[i] /= max;
+        }
+
+        void DrawGraph(Chart chart, IEnumerable<double> data, string title, double xFactor = 1) {
             int i = 0;
-            foreach (float v in data)
+            foreach (double v in data)
                 chart.Series[0].Points.AddXY(i++ * xFactor, v);
 
             chart.Titles.Add(title);
@@ -550,15 +560,16 @@ namespace Keyboard_Inspector {
             foreach (var g in source.GroupBy(i => i).Where(i => i.Key < precision))
                 data[g.Key] = g.Count();
 
-            DrawGraph(timeDomain, data.Select(i => i.Real), $"{title} (time domain)", 1000.0 / precision);
+            DrawGraph(timeDomain, data.Select(i => (double)i.Real), $"{title} (time domain)", 1000.0 / precision);
 
             Fourier.Forward(data);
-            float[] isolated = data.Take(data.Length / 2 + 1).Select(i => i.Magnitude).ToArray();
+            double[] isolated = data.Take(data.Length / 2 + 1).Select(i => (double)i.Magnitude).ToArray();
 
             HighPass(isolated);
             HarmonicProduct(isolated);
+            Normalize(isolated);
 
-            double hpsFactor = Math.Pow(2, -hpsIterations);
+            double hpsFactor = 1.0 / (hpsIterations + 1);
             double max = (isolated.Length - 1) * hpsFactor;
 
             Axis a = freqDomain.ChartAreas.First().AxisX;

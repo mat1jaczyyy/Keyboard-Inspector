@@ -402,6 +402,8 @@ namespace Keyboard_Inspector {
             chartArea4.AxisX.MinorGrid.Interval = 10D;
             chartArea4.AxisX.MinorGrid.LineColor = System.Drawing.Color.Gainsboro;
             chartArea4.AxisY.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(232)))), ((int)(((byte)(232)))), ((int)(((byte)(232)))));
+            chartArea4.AxisY.Maximum = 1D;
+            chartArea4.AxisY.Minimum = 0D;
             chartArea4.Name = "area";
             this.chartCircularFreq.ChartAreas.Add(chartArea4);
             this.chartCircularFreq.Location = new System.Drawing.Point(865, 221);
@@ -431,6 +433,8 @@ namespace Keyboard_Inspector {
             chartArea5.AxisX.MinorGrid.Interval = 10D;
             chartArea5.AxisX.MinorGrid.LineColor = System.Drawing.Color.Gainsboro;
             chartArea5.AxisY.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(232)))), ((int)(((byte)(232)))), ((int)(((byte)(232)))));
+            chartArea5.AxisY.Maximum = 1D;
+            chartArea5.AxisY.Minimum = 0D;
             chartArea5.Name = "area";
             this.chartCompoundFreq.ChartAreas.Add(chartArea5);
             this.chartCompoundFreq.Location = new System.Drawing.Point(434, 221);
@@ -460,6 +464,8 @@ namespace Keyboard_Inspector {
             chartArea6.AxisX.MinorGrid.Interval = 10D;
             chartArea6.AxisX.MinorGrid.LineColor = System.Drawing.Color.Gainsboro;
             chartArea6.AxisY.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(232)))), ((int)(((byte)(232)))), ((int)(((byte)(232)))));
+            chartArea6.AxisY.Maximum = 1D;
+            chartArea6.AxisY.Minimum = 0D;
             chartArea6.Name = "area";
             this.chartDiffsFreq.ChartAreas.Add(chartArea6);
             this.chartDiffsFreq.Location = new System.Drawing.Point(3, 221);
@@ -780,7 +786,7 @@ namespace Keyboard_Inspector {
             this.hps.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.hps.Location = new System.Drawing.Point(162, 55);
             this.hps.Maximum = new decimal(new int[] {
-            4,
+            9,
             0,
             0,
             0});
