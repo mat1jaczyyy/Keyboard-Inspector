@@ -17,15 +17,15 @@ namespace Keyboard_Inspector {
 
     class WiitarInput: Input<WiitarKeys> {
         static readonly Dictionary<WiitarKeys, Color> colors = new Dictionary<WiitarKeys, Color>() {
-            {WiitarKeys.Green, Color.Green},
-            {WiitarKeys.Red, Color.Red},
+            {WiitarKeys.Green, Color.FromArgb(0, 142, 0)},
+            {WiitarKeys.Red, Color.FromArgb(176, 0, 0)},
             {WiitarKeys.Yellow, Color.Gold},
-            {WiitarKeys.Blue, Color.Blue},
+            {WiitarKeys.Blue, Color.FromArgb(25, 90, 196)},
             {WiitarKeys.Orange, Color.Orange},
-            {WiitarKeys.Downstrum, Color.Black},
-            {WiitarKeys.Start, Color.Gray},
-            {WiitarKeys.Select, Color.Gray},
-            {WiitarKeys.Upstrum, Color.Black}
+            {WiitarKeys.Downstrum, Color.FromArgb(15, 15, 15)},
+            {WiitarKeys.Start, Color.DarkGray},
+            {WiitarKeys.Select, Color.DarkGray},
+            {WiitarKeys.Upstrum, Color.FromArgb(15, 15, 15)}
         };
 
         public WiitarInput(WiitarKeys k): base(k) {}

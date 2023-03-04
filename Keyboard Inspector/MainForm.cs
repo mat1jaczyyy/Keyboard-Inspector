@@ -12,12 +12,15 @@ using System.Windows.Forms;
 using Control = System.Windows.Forms.Control;
 using System.Windows.Forms.DataVisualization.Charting;
 
+using DarkUI.Controls;
+using DarkUI.Forms;
+
 using MathNet.Numerics;
 using MathNet.Numerics.IntegralTransforms;
 using MathNet.Numerics.Statistics;
 
 namespace Keyboard_Inspector {
-    partial class MainForm: Form {
+    partial class MainForm: DarkForm {
         public static MainForm Instance { get; private set; }
 
         // WiitarListener needs to grab WM_INPUT from Form...
@@ -58,6 +61,9 @@ namespace Keyboard_Inspector {
         Dictionary<Input, Color> colors = new Dictionary<Input, Color>();
 
         void processResult() {
+            if (freeze.Checked && inputs?.Any() != true)
+                freeze.Checked = false;
+
             if (!freeze.Checked) {
                 inputs = result.Events.Select(i => i.Input).Distinct().ToList();
                 colors.Clear();
@@ -150,7 +156,7 @@ namespace Keyboard_Inspector {
             UpdateScroll();
         }
 
-        private void scroll_Scroll(object sender, ScrollEventArgs e) {
+        private void scroll_Scroll(object sender, ScrollValueEventArgs e) {
             viewport = (double)scroll.Value / scroll.Maximum;
 
             Redraw();
@@ -161,7 +167,7 @@ namespace Keyboard_Inspector {
 
             if (result == null) return;
 
-            scroll.LargeChange = (int)(scroll.Maximum / zoom);
+            //scroll.LargeChange = (int)(scroll.Maximum / zoom);
             scroll.Value = (int)(scroll.Maximum * viewport);
         }
 
@@ -190,9 +196,9 @@ namespace Keyboard_Inspector {
                 textRects.Clear();
 
                 Font font = status.Font;
-                Brush textBrush = new SolidBrush(status.ForeColor);
-                Pen pen = new Pen(Color.LightGray);
-                Pen pollPen = new Pen(Color.Blue);
+                Brush textBrush = new SolidBrush(Color.FromArgb(160, 160, 160));
+                Pen penMajor = new Pen(Color.FromArgb(20, 20, 20));
+                Pen penMinor = new Pen(Color.FromArgb(48, 48, 48));
 
                 bool multipleSources = inputs.Select(i => i.Source).Distinct().Count() > 1;
 
@@ -204,41 +210,6 @@ namespace Keyboard_Inspector {
                     float textHeight = textSize[0].Height;
                     areaX = 2 * Margin + textWidth;
                     areaWidth = screen.Width - Margin - areaX;
-
-                    int incIndex = 8; // 0.5s
-                    float increment, px;
-
-                    for (;;) {
-                        increment = (float)GetUnitIncrement(incIndex);
-
-                        px = (float)(increment / result.Time * areaWidth * zoom);
-
-                        if (px < 30) incIndex++;
-                        else if (px >= 90 && incIndex > 0) incIndex--;
-                        else break;
-                    }
-
-                    double pos = viewport * result.Time / increment;
-                    
-                    int posCeil = (int)Math.Ceiling(pos);
-
-                    for (float s = (float)((posCeil - pos) * px); s < areaWidth; s = (float)(++posCeil - pos) * px) {
-                        gfx.DrawLine(
-                            pen,
-                            2 * Margin + textWidth + s,
-                            Margin,
-                            2 * Margin + textWidth + s,
-                            screen.Height - 2 * Margin - textHeight
-                        );
-
-                        string t = (increment * posCeil).ToString("0.###");
-
-                        gfx.DrawString(
-                            t, font, textBrush,
-                            2 * Margin + textWidth + s - gfx.MeasureString(t, font).Width / 2,
-                            screen.Height - Margin - textHeight
-                        );
-                    }
 
                     float keyHeight = (float)(screen.Height - 3 * Margin - textHeight) / inputs.Count;
 
@@ -254,11 +225,46 @@ namespace Keyboard_Inspector {
                         );
 
                         gfx.DrawLine(
-                            pen,
+                            penMinor,
                             2 * Margin + textWidth,
                             Margin + keyHeight * (k + 0.5f),
                             screen.Width - Margin,
                             Margin + keyHeight * (k + 0.5f)
+                        );
+                    }
+
+                    int incIndex = 8; // 0.5s
+                    float increment, px;
+
+                    for (;;) {
+                        increment = (float)GetUnitIncrement(incIndex);
+
+                        px = (float)(increment / result.Time * areaWidth * zoom);
+
+                        if (px < 30) incIndex++;
+                        else if (px >= 90 && incIndex > 0) incIndex--;
+                        else break;
+                    }
+
+                    double pos = viewport * result.Time / increment;
+
+                    int posCeil = (int)Math.Ceiling(pos);
+
+                    for (float s = (float)((posCeil - pos) * px); s < areaWidth; s = (float)(++posCeil - pos) * px) {
+                        gfx.DrawLine(
+                            penMajor,
+                            2 * Margin + textWidth + s,
+                            Margin,
+                            2 * Margin + textWidth + s,
+                            screen.Height - 2 * Margin - textHeight
+                        );
+
+                        string t = (increment * posCeil).ToString("0.###");
+
+                        gfx.DrawString(
+                            t, font, textBrush,
+                            2 * Margin + textWidth + s - gfx.MeasureString(t, font).Width / 2,
+                            screen.Height - Margin - textHeight
                         );
                     }
 
@@ -511,8 +517,8 @@ namespace Keyboard_Inspector {
             stddevCtrl.Text = stddev.ToString("0.00E0");
             amountCtrl.Text = amount.ToString("0.00%");
 
-            stddevCtrl.ForeColor = stddev < ms / 4? Color.DarkGreen : SystemColors.ControlText;
-            amountCtrl.ForeColor = amount >= 0.8? Color.DarkGreen : SystemColors.ControlText;
+            stddevCtrl.ForeColor = stddev < ms / 4? Color.Chartreuse : Color.Crimson;
+            amountCtrl.ForeColor = amount >= 0.8? Color.Chartreuse : Color.Crimson;
         }
 
         void fitterCustomHz_TextChanged(object sender, EventArgs e) {
@@ -551,7 +557,7 @@ namespace Keyboard_Inspector {
             foreach (double v in data)
                 chart.Series[0].Points.AddXY(i++ * xFactor, v);
 
-            chart.Titles.Add(title);
+            chart.Titles.First().Text = title;
         }
 
         void RunGraphJob(IEnumerable<int> source, Chart timeDomain, Chart freqDomain, string title, Func<IEnumerable<double>, IEnumerable<double>> timeTransform = null) {
@@ -607,10 +613,8 @@ namespace Keyboard_Inspector {
             CalcDelta();
             tlp.Visible = hasResult;
 
-            foreach (var chart in tlp.Controls.OfType<Chart>()) {
+            foreach (var chart in tlp.Controls.OfType<Chart>())
                 chart.Series[0].Points.Clear();
-                chart.Titles.Clear();
-            }
 
             if (!hasResult || precision <= 0)
                 return;

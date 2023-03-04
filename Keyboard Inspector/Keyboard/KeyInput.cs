@@ -8,7 +8,7 @@ namespace Keyboard_Inspector {
 
         public override string Source => "Keyboard";
 
-        public override Color DefaultColor => Color.Gray;
+        public override Color DefaultColor => Color.DarkGray;
 
         protected override char BinaryID => 'k';
 
