@@ -54,6 +54,7 @@ namespace Keyboard_Inspector {
 
         int elapsed;
         Result result = null;
+        bool hasResult => result?.Events.Any() == true;
         double zoom, viewport;
         float areaWidth, areaX;
         List<Input> inputs;
@@ -72,7 +73,7 @@ namespace Keyboard_Inspector {
 
         void resultLoaded() {
             key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
-            save.Enabled = result?.Events.Any() == true;
+            save.Enabled = split.Visible = hasResult;
 
             Redraw();
             UpdateScroll();
@@ -461,7 +462,7 @@ namespace Keyboard_Inspector {
                 for (int j = i + 1; j < result.Events.Count; j++) {
                     int diff = (int)Math.Round((result.Events[j].Time - result.Events[i].Time) * precision);
 
-                    if (j > i + 1 && diff >= 1000)
+                    if (j > i + 1 && diff >= precision)
                         break;
 
                     yield return diff;
@@ -522,7 +523,7 @@ namespace Keyboard_Inspector {
         }
 
         void fitterCustomHz_TextChanged(object sender, EventArgs e) {
-            if (result == null || deltaCache == null) return;
+            if (!hasResult || deltaCache == null) return;
             RunFitter(fitter.ColumnCount - 1);
         }
 
@@ -535,8 +536,7 @@ namespace Keyboard_Inspector {
         void HarmonicProduct(double[] data) {
             if (hpsIterations <= 0) return;
 
-            double[] copy = new double[data.Length];
-            data.CopyTo(copy, 0);
+            double[] copy = data.ToArray();
 
             for (int i = 0; i < data.Length; i++) {
                 for (var j = 0; j < hpsIterations; j++) {
@@ -553,6 +553,8 @@ namespace Keyboard_Inspector {
         }
 
         void DrawGraph(Chart chart, IEnumerable<double> data, string title, double xFactor = 1) {
+            chart.Series[0].Points.Clear();
+
             int i = 0;
             foreach (double v in data)
                 chart.Series[0].Points.AddXY(i++ * xFactor, v);
@@ -560,7 +562,9 @@ namespace Keyboard_Inspector {
             chart.Titles.First().Text = title;
         }
 
-        void RunGraphJob(IEnumerable<int> source, Chart timeDomain, Chart freqDomain, string title, Func<IEnumerable<double>, IEnumerable<double>> timeTransform = null) {
+        Dictionary<Chart, double[]> beforeHPS = new Dictionary<Chart, double[]>();
+
+        void RunGraphJob(IEnumerable<int> source, Chart timeDomain, Chart freqDomain, Func<IEnumerable<double>, IEnumerable<double>> timeTransform = null) {
             timeTransform = timeTransform?? (i => i);
             
             Complex32[] data = new Complex32[precision];
@@ -568,17 +572,25 @@ namespace Keyboard_Inspector {
             foreach (var g in source.GroupBy(i => i).Where(i => i.Key < precision))
                 data[g.Key] = g.Count();
 
-            DrawGraph(timeDomain, timeTransform(data.Select(i => (double)i.Real)), $"{title} (time domain)", 1000.0 / precision);
+            DrawGraph(timeDomain, timeTransform(data.Select(i => (double)i.Real)), $"{timeDomain.Tag as string} (time domain)", 1000.0 / precision);
 
             Fourier.Forward(data);
             double[] isolated = data.Take(data.Length / 2 + 1).Select(i => (double)i.Magnitude).ToArray();
 
             HighPass(isolated);
-            HarmonicProduct(isolated);
-            Normalize(isolated);
+                
+            beforeHPS[freqDomain] = isolated.ToArray();
+            RunFromHPS(freqDomain);
+        }
+
+        void RunFromHPS(Chart freqDomain) {
+            double[] data = beforeHPS[freqDomain].ToArray();
+
+            HarmonicProduct(data);
+            Normalize(data);
 
             double hpsFactor = 1.0 / (hpsIterations + 1);
-            double max = (isolated.Length - 1) * hpsFactor;
+            double max = (data.Length - 1) * hpsFactor;
 
             Axis a = freqDomain.ChartAreas.First().AxisX;
             a.Maximum = max;
@@ -587,10 +599,10 @@ namespace Keyboard_Inspector {
 
             string estimate = "";
 
-            if (EstimatePeak(isolated, out int result))
+            if (EstimatePeak(data, out int result))
                 estimate = $" - peak at {(int)Math.Round(result * hpsFactor)} Hz";
 
-            DrawGraph(freqDomain, isolated, $"{title} (frequency domain{estimate})", hpsFactor);
+            DrawGraph(freqDomain, data, $"{freqDomain.Tag as string} (frequency domain{estimate})", hpsFactor);
         }
 
         void tbPrecision_TextChanged(object sender, EventArgs e) {
@@ -598,33 +610,34 @@ namespace Keyboard_Inspector {
             CreateCharts();
         }
 
-        private void hps_ValueChanged(object sender, EventArgs e)
-            => CreateCharts();
+        private void hps_ValueChanged(object sender, EventArgs e) {
+            RunFromHPS(chartDiffsFreq);
+            RunFromHPS(chartCompoundFreq);
+            RunFromHPS(chartCircularFreq);
+        }
 
         int precision = 4000;
         int hpsIterations => (int)hps.Value;
         List<double> deltaCache;
 
         void CreateCharts() {
-            bool hasResult = result != null && result.Events.Any();
+            foreach (var chart in tlpCharts.Controls.OfType<Chart>())
+                chart.Series[0].Points.Clear();
+
+            if (!hasResult) return;
 
             int.TryParse(tbPrecision.Text, out precision);
 
             CalcDelta();
-            tlp.Visible = hasResult;
-
-            foreach (var chart in tlp.Controls.OfType<Chart>())
-                chart.Series[0].Points.Clear();
-
-            if (!hasResult || precision <= 0)
-                return;
 
             for (int i = 1; i < fitter.ColumnCount; i++)
                 RunFitter(i);
 
-            RunGraphJob(GetDiffs(), chartDiffs, chartDiffsFreq, "Differences between consecutive events");
-            RunGraphJob(GetCompound(), chartCompound, chartCompoundFreq, "Differences between all events");
-            RunGraphJob(GetCircular(), chartCircular, chartCircularFreq, "Events wrapped around a second", arr => {
+            if (precision <= 0) return;
+
+            RunGraphJob(GetDiffs(), chartDiffs, chartDiffsFreq);
+            RunGraphJob(GetCompound(), chartCompound, chartCompoundFreq);
+            RunGraphJob(GetCircular(), chartCircular, chartCircularFreq, arr => {
                 double max = double.MinValue;
                 int rot = -1;
 
@@ -701,6 +714,22 @@ namespace Keyboard_Inspector {
 
             double change = Math.Pow(1.05, -e.Delta / 120.0);
             a.Maximum = Math.Min(a.Maximum * change, c.Series[0].Points.Last().XValue);
+        }
+
+        private void chart_MouseDoubleClick(object sender, MouseEventArgs e) {
+            if (e.Button != MouseButtons.Left) return;
+
+            var chart = sender as Chart;
+
+            if (chart.Parent == tlpCharts) {
+                tlpCharts.Controls.Remove(chart);
+                split.Panel1.Controls.Add(chart);
+                split.Panel1.Controls.SetChildIndex(chart, 0);
+
+            } else if (chart.Parent == split.Panel1) {
+                split.Panel1.Controls.Remove(chart);
+                tlpCharts.Controls.Add(chart);
+            }
         }
 
         private void screen_SizeChanged(object sender, EventArgs e)

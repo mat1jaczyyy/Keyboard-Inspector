@@ -53,13 +53,14 @@ namespace Keyboard_Inspector {
             this.hide = new System.Windows.Forms.ToolStripMenuItem();
             this.status = new DarkUI.Controls.DarkLabel();
             this.split = new System.Windows.Forms.SplitContainer();
-            this.tlp = new System.Windows.Forms.TableLayoutPanel();
+            this.tlpCharts = new System.Windows.Forms.TableLayoutPanel();
             this.chartDiffs = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chartCompound = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chartCircular = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chartCircularFreq = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chartCompoundFreq = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chartDiffsFreq = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.tlpMain = new System.Windows.Forms.TableLayoutPanel();
             this.fitter = new System.Windows.Forms.TableLayoutPanel();
             this.label3 = new DarkUI.Controls.DarkLabel();
             this.label2 = new DarkUI.Controls.DarkLabel();
@@ -106,13 +107,14 @@ namespace Keyboard_Inspector {
             this.split.Panel1.SuspendLayout();
             this.split.Panel2.SuspendLayout();
             this.split.SuspendLayout();
-            this.tlp.SuspendLayout();
+            this.tlpCharts.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartDiffs)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartCompound)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartCircular)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartCircularFreq)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartCompoundFreq)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartDiffsFreq)).BeginInit();
+            this.tlpMain.SuspendLayout();
             this.fitter.SuspendLayout();
             this.precisionPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.hps)).BeginInit();
@@ -205,7 +207,8 @@ namespace Keyboard_Inspector {
             // 
             // split.Panel1
             // 
-            this.split.Panel1.Controls.Add(this.tlp);
+            this.split.Panel1.Controls.Add(this.tlpCharts);
+            this.split.Panel1.Controls.Add(this.tlpMain);
             this.split.Panel1MinSize = 400;
             // 
             // split.Panel2
@@ -216,38 +219,33 @@ namespace Keyboard_Inspector {
             this.split.Size = new System.Drawing.Size(1294, 717);
             this.split.SplitterDistance = 491;
             this.split.TabIndex = 8;
+            this.split.Visible = false;
             // 
-            // tlp
+            // tlpCharts
             // 
-            this.tlp.ColumnCount = 3;
-            this.tlp.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlp.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlp.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlp.Controls.Add(this.chartDiffs, 0, 0);
-            this.tlp.Controls.Add(this.chartCompound, 1, 0);
-            this.tlp.Controls.Add(this.chartCircular, 2, 0);
-            this.tlp.Controls.Add(this.chartCircularFreq, 2, 1);
-            this.tlp.Controls.Add(this.chartCompoundFreq, 1, 1);
-            this.tlp.Controls.Add(this.chartDiffsFreq, 0, 1);
-            this.tlp.Controls.Add(this.fitter, 2, 2);
-            this.tlp.Controls.Add(this.precisionPanel, 0, 2);
-            this.tlp.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tlp.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
-            this.tlp.Location = new System.Drawing.Point(0, 0);
-            this.tlp.Name = "tlp";
-            this.tlp.RowCount = 3;
-            this.tlp.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tlp.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tlp.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 75F));
-            this.tlp.Size = new System.Drawing.Size(1294, 491);
-            this.tlp.TabIndex = 0;
-            this.tlp.Visible = false;
+            this.tlpCharts.ColumnCount = 3;
+            this.tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tlpCharts.Controls.Add(this.chartDiffs, 0, 0);
+            this.tlpCharts.Controls.Add(this.chartCompound, 1, 0);
+            this.tlpCharts.Controls.Add(this.chartCircular, 2, 0);
+            this.tlpCharts.Controls.Add(this.chartCircularFreq, 2, 1);
+            this.tlpCharts.Controls.Add(this.chartCompoundFreq, 1, 1);
+            this.tlpCharts.Controls.Add(this.chartDiffsFreq, 0, 1);
+            this.tlpCharts.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tlpCharts.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
+            this.tlpCharts.Location = new System.Drawing.Point(0, 0);
+            this.tlpCharts.Name = "tlpCharts";
+            this.tlpCharts.RowCount = 2;
+            this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 75F));
+            this.tlpCharts.Size = new System.Drawing.Size(1294, 416);
+            this.tlpCharts.TabIndex = 0;
             // 
             // chartDiffs
             // 
-            this.chartDiffs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.chartDiffs.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea1.AxisX.Interval = 8D;
             chartArea1.AxisX.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
@@ -270,6 +268,7 @@ namespace Keyboard_Inspector {
             chartArea1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea1.Name = "area";
             this.chartDiffs.ChartAreas.Add(chartArea1);
+            this.chartDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartDiffs.Location = new System.Drawing.Point(3, 3);
             this.chartDiffs.Name = "chartDiffs";
             series1.ChartArea = "area";
@@ -278,16 +277,15 @@ namespace Keyboard_Inspector {
             this.chartDiffs.Series.Add(series1);
             this.chartDiffs.Size = new System.Drawing.Size(425, 202);
             this.chartDiffs.TabIndex = 1;
+            this.chartDiffs.Tag = "Differences between consecutive events";
             title1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title1.Name = "Title1";
             this.chartDiffs.Titles.Add(title1);
+            this.chartDiffs.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
             this.chartDiffs.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
             // 
             // chartCompound
             // 
-            this.chartCompound.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.chartCompound.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea2.AxisX.Interval = 8D;
             chartArea2.AxisX.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
@@ -310,6 +308,7 @@ namespace Keyboard_Inspector {
             chartArea2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea2.Name = "area";
             this.chartCompound.ChartAreas.Add(chartArea2);
+            this.chartCompound.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartCompound.Location = new System.Drawing.Point(434, 3);
             this.chartCompound.Name = "chartCompound";
             series2.ChartArea = "area";
@@ -318,16 +317,15 @@ namespace Keyboard_Inspector {
             this.chartCompound.Series.Add(series2);
             this.chartCompound.Size = new System.Drawing.Size(425, 202);
             this.chartCompound.TabIndex = 1;
+            this.chartCompound.Tag = "Differences between all events";
             title2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title2.Name = "Title1";
             this.chartCompound.Titles.Add(title2);
+            this.chartCompound.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
             this.chartCompound.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
             // 
             // chartCircular
             // 
-            this.chartCircular.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.chartCircular.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea3.AxisX.Interval = 8D;
             chartArea3.AxisX.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
@@ -350,6 +348,7 @@ namespace Keyboard_Inspector {
             chartArea3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea3.Name = "area";
             this.chartCircular.ChartAreas.Add(chartArea3);
+            this.chartCircular.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartCircular.Location = new System.Drawing.Point(865, 3);
             this.chartCircular.Name = "chartCircular";
             series3.ChartArea = "area";
@@ -358,16 +357,15 @@ namespace Keyboard_Inspector {
             this.chartCircular.Series.Add(series3);
             this.chartCircular.Size = new System.Drawing.Size(426, 202);
             this.chartCircular.TabIndex = 1;
+            this.chartCircular.Tag = "Events wrapped around a second";
             title3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title3.Name = "Title1";
             this.chartCircular.Titles.Add(title3);
+            this.chartCircular.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
             this.chartCircular.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
             // 
             // chartCircularFreq
             // 
-            this.chartCircularFreq.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.chartCircularFreq.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea4.AxisX.Interval = 50D;
             chartArea4.AxisX.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
@@ -391,6 +389,7 @@ namespace Keyboard_Inspector {
             chartArea4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea4.Name = "area";
             this.chartCircularFreq.ChartAreas.Add(chartArea4);
+            this.chartCircularFreq.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartCircularFreq.Location = new System.Drawing.Point(865, 211);
             this.chartCircularFreq.Name = "chartCircularFreq";
             this.chartCircularFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
@@ -400,16 +399,15 @@ namespace Keyboard_Inspector {
             this.chartCircularFreq.Series.Add(series4);
             this.chartCircularFreq.Size = new System.Drawing.Size(426, 202);
             this.chartCircularFreq.TabIndex = 1;
+            this.chartCircularFreq.Tag = "Events wrapped around a second";
             title4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title4.Name = "Title1";
             this.chartCircularFreq.Titles.Add(title4);
+            this.chartCircularFreq.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
             this.chartCircularFreq.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
             // 
             // chartCompoundFreq
             // 
-            this.chartCompoundFreq.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.chartCompoundFreq.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea5.AxisX.Interval = 50D;
             chartArea5.AxisX.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
@@ -433,6 +431,7 @@ namespace Keyboard_Inspector {
             chartArea5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea5.Name = "area";
             this.chartCompoundFreq.ChartAreas.Add(chartArea5);
+            this.chartCompoundFreq.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartCompoundFreq.Location = new System.Drawing.Point(434, 211);
             this.chartCompoundFreq.Name = "chartCompoundFreq";
             this.chartCompoundFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
@@ -442,16 +441,15 @@ namespace Keyboard_Inspector {
             this.chartCompoundFreq.Series.Add(series5);
             this.chartCompoundFreq.Size = new System.Drawing.Size(425, 202);
             this.chartCompoundFreq.TabIndex = 1;
+            this.chartCompoundFreq.Tag = "Differences between all events";
             title5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title5.Name = "Title1";
             this.chartCompoundFreq.Titles.Add(title5);
+            this.chartCompoundFreq.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
             this.chartCompoundFreq.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
             // 
             // chartDiffsFreq
             // 
-            this.chartDiffsFreq.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.chartDiffsFreq.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea6.AxisX.Interval = 50D;
             chartArea6.AxisX.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
@@ -475,6 +473,7 @@ namespace Keyboard_Inspector {
             chartArea6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea6.Name = "area";
             this.chartDiffsFreq.ChartAreas.Add(chartArea6);
+            this.chartDiffsFreq.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartDiffsFreq.Location = new System.Drawing.Point(3, 211);
             this.chartDiffsFreq.Name = "chartDiffsFreq";
             this.chartDiffsFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
@@ -484,10 +483,29 @@ namespace Keyboard_Inspector {
             this.chartDiffsFreq.Series.Add(series6);
             this.chartDiffsFreq.Size = new System.Drawing.Size(425, 202);
             this.chartDiffsFreq.TabIndex = 1;
+            this.chartDiffsFreq.Tag = "Differences between consecutive events";
             title6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title6.Name = "Title1";
             this.chartDiffsFreq.Titles.Add(title6);
+            this.chartDiffsFreq.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
             this.chartDiffsFreq.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
+            // 
+            // tlpMain
+            // 
+            this.tlpMain.ColumnCount = 3;
+            this.tlpMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tlpMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tlpMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tlpMain.Controls.Add(this.fitter, 2, 0);
+            this.tlpMain.Controls.Add(this.precisionPanel, 0, 0);
+            this.tlpMain.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.tlpMain.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
+            this.tlpMain.Location = new System.Drawing.Point(0, 416);
+            this.tlpMain.Name = "tlpMain";
+            this.tlpMain.RowCount = 1;
+            this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tlpMain.Size = new System.Drawing.Size(1294, 75);
+            this.tlpMain.TabIndex = 1;
             // 
             // fitter
             // 
@@ -523,12 +541,13 @@ namespace Keyboard_Inspector {
             this.fitter.Controls.Add(this.label19, 2, 2);
             this.fitter.Controls.Add(this.label20, 1, 2);
             this.fitter.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fitter.Location = new System.Drawing.Point(865, 419);
+            this.fitter.Location = new System.Drawing.Point(865, 3);
             this.fitter.Name = "fitter";
             this.fitter.RowCount = 3;
             this.fitter.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.fitter.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.fitter.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.fitter.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.fitter.Size = new System.Drawing.Size(426, 69);
             this.fitter.TabIndex = 4;
             // 
@@ -787,7 +806,7 @@ namespace Keyboard_Inspector {
             this.precisionPanel.Controls.Add(this.label21);
             this.precisionPanel.Controls.Add(this.label22);
             this.precisionPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.precisionPanel.Location = new System.Drawing.Point(3, 419);
+            this.precisionPanel.Location = new System.Drawing.Point(3, 3);
             this.precisionPanel.Name = "precisionPanel";
             this.precisionPanel.Size = new System.Drawing.Size(425, 69);
             this.precisionPanel.TabIndex = 5;
@@ -799,9 +818,9 @@ namespace Keyboard_Inspector {
             this.label25.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.label25.Location = new System.Drawing.Point(234, 51);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(49, 13);
+            this.label25.Size = new System.Drawing.Size(40, 13);
             this.label25.TabIndex = 12;
-            this.label25.Text = "iterations";
+            this.label25.Text = "partials";
             this.label25.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // label24
@@ -930,7 +949,7 @@ namespace Keyboard_Inspector {
             this.open.Name = "open";
             this.open.ShortcutKeyDisplayString = "";
             this.open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.open.Size = new System.Drawing.Size(180, 22);
+            this.open.Size = new System.Drawing.Size(155, 22);
             this.open.Text = "&Open...";
             this.open.Click += new System.EventHandler(this.open_Click);
             // 
@@ -940,7 +959,7 @@ namespace Keyboard_Inspector {
             this.save.Enabled = false;
             this.save.Name = "save";
             this.save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.save.Size = new System.Drawing.Size(180, 22);
+            this.save.Size = new System.Drawing.Size(155, 22);
             this.save.Text = "&Save...";
             this.save.Click += new System.EventHandler(this.save_Click);
             // 
@@ -960,14 +979,14 @@ namespace Keyboard_Inspector {
             this.freeze.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.freeze.CheckOnClick = true;
             this.freeze.Name = "freeze";
-            this.freeze.Size = new System.Drawing.Size(180, 22);
+            this.freeze.Size = new System.Drawing.Size(134, 22);
             this.freeze.Text = "&Freeze Keys";
             // 
             // unhide
             // 
             this.unhide.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.unhide.Name = "unhide";
-            this.unhide.Size = new System.Drawing.Size(180, 22);
+            this.unhide.Size = new System.Drawing.Size(134, 22);
             this.unhide.Text = "&Unhide All";
             this.unhide.Click += new System.EventHandler(this.unhide_Click);
             // 
@@ -1007,13 +1026,14 @@ namespace Keyboard_Inspector {
             this.split.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.split)).EndInit();
             this.split.ResumeLayout(false);
-            this.tlp.ResumeLayout(false);
+            this.tlpCharts.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chartDiffs)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartCompound)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartCircular)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartCircularFreq)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartCompoundFreq)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chartDiffsFreq)).EndInit();
+            this.tlpMain.ResumeLayout(false);
             this.fitter.ResumeLayout(false);
             this.fitter.PerformLayout();
             this.precisionPanel.ResumeLayout(false);
@@ -1036,7 +1056,7 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.ToolStripMenuItem hide;
         private DarkUI.Controls.DarkLabel status;
         private System.Windows.Forms.SplitContainer split;
-        private System.Windows.Forms.TableLayoutPanel tlp;
+        private System.Windows.Forms.TableLayoutPanel tlpCharts;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartDiffs;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartCompound;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartCircular;
@@ -1083,5 +1103,6 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.ToolStripMenuItem freeze;
         private System.Windows.Forms.ToolStripMenuItem unhide;
         private DarkUI.Controls.DarkMenuStrip mainmenu;
+        private System.Windows.Forms.TableLayoutPanel tlpMain;
     }
 }
