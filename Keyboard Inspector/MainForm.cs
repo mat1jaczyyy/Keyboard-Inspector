@@ -168,7 +168,11 @@ namespace Keyboard_Inspector {
 
             if (result == null) return;
 
-            //scroll.LargeChange = (int)(scroll.Maximum / zoom);
+            scroll.ViewSize = (int)(scroll.Maximum / zoom);
+
+            if (scroll.ViewSize == scroll.Maximum)
+                scroll.ViewSize -= 1;
+
             scroll.Value = (int)(scroll.Maximum * viewport);
         }
 
@@ -654,28 +658,133 @@ namespace Keyboard_Inspector {
             });
         }
 
+        private void precisionDouble_Click(object sender, EventArgs e) {
+            if (precision <= 0) return;
+            precision *= 2;
+            tbPrecision.Text = precision.ToString();
+        }
+
+        private void precisionHalf_Click(object sender, EventArgs e) {
+            if (precision <= 0) return;
+            precision /= 2;
+            tbPrecision.Text = precision.ToString();
+        }
+
+        void chart_MouseWheel(object sender, MouseEventArgs e) {
+            if (result == null || precision <= 0) return;
+
+            Chart c = sender as Chart;
+            Axis a = c.ChartAreas.First().AxisX;
+            DarkScrollBar scroll = c.Parent.Controls.OfType<DarkScrollBar>().Single();
+
+            double x = (a.PixelPositionToValue(e.X) - a.Minimum) / (a.Maximum - a.Minimum);
+            Console.WriteLine(x);
+
+            if (x < 0 || 1 <= x) return;
+
+            double max = c.Series[0].Points.Last().XValue;
+            double zoom = max / (a.Maximum - a.Minimum);
+            double viewport = a.Minimum / max;
+
+            double s = 1 / zoom;
+            
+            double change = Math.Pow(1.05, e.Delta / 120.0);
+            zoom *= change;
+
+            if (zoom <= 1) {
+                zoom = 1;
+                viewport = 0;
+            
+            } else {
+                if (zoom > 200000) {
+                    zoom = 200000;
+                    change = zoom * s;
+                }
+            
+                double v = x * (1 - 1 / change);
+                viewport += v * s;
+            
+                if (viewport < 0) viewport = 0;
+                else {
+                    double t = 1 / zoom;
+                    if (viewport + t > 1) viewport = 1 - t;
+                }
+            }
+
+            a.Minimum = viewport * max;
+            a.Maximum = max / zoom + a.Minimum;
+            a.IntervalOffset = (-a.Minimum) % a.Interval;
+
+            scroll.ViewSize = (int)(scroll.Maximum / zoom);
+
+            if (scroll.ViewSize == scroll.Maximum)
+                scroll.ViewSize -= 1;
+
+            scroll.Value = (int)(scroll.Maximum * viewport);
+        }
+
+        private void chart_Scroll(object sender, ScrollValueEventArgs e) {
+            if (result == null || precision <= 0) return;
+
+            DarkScrollBar scroll = sender as DarkScrollBar;
+            Chart c = scroll.Parent.Controls.OfType<Chart>().Single();
+            Axis a = c.ChartAreas.First().AxisX;
+
+            double max = c.Series[0].Points.Last().XValue;
+            double zoom = (a.Maximum - a.Minimum) / max;
+
+            double viewport = (double)scroll.Value / scroll.Maximum;
+
+            a.Minimum = viewport * max;
+            a.Maximum = zoom * max + a.Minimum;
+            a.IntervalOffset = (-a.Minimum) % a.Interval;
+        }
+
+        private void chart_MouseDoubleClick(object sender, MouseEventArgs e) {
+            if (e.Button != MouseButtons.Left) return;
+
+            var panel = (sender as Chart).Parent as Panel;
+
+            if (panel.Parent == tlpCharts) {
+                tlpCharts.Controls.Remove(panel);
+                split.Panel1.Controls.Add(panel);
+                split.Panel1.Controls.SetChildIndex(panel, 0);
+
+            } else if (panel.Parent == split.Panel1) {
+                split.Panel1.Controls.Remove(panel);
+                tlpCharts.Controls.Add(panel);
+            }
+        }
+
+        private void screen_SizeChanged(object sender, EventArgs e)
+            => Redraw();
+
+        void LoadFile(string filename) {
+            try {
+                using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(filename))) {
+                    using (BinaryReader br = new BinaryReader(ms)) {
+                        result = Result.FromBinary(br);
+                    }
+                }
+
+                zoom = 1;
+                viewport = 0;
+
+                processResult();
+                resultLoaded();
+
+            } catch {
+                status.Text = "Couldn't load file, it might be invalid?";
+            }
+        }
+
         void open_Click(object sender, EventArgs e) {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "Keyboard Inspector Files (*.kbi)|*.kbi";
             ofd.Title = "Open Recording";
 
             if (ofd.ShowDialog() == DialogResult.OK) {
-                try {
-                    using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(ofd.FileName))) {
-                        using (BinaryReader br = new BinaryReader(ms)) {
-                            result = Result.FromBinary(br);
-                        }
-                    }
-
-                    zoom = 1;
-                    viewport = 0;
-
-                    processResult();
-                    resultLoaded();
-
-                } catch {
-                    status.Text = "Couldn't load file, it might be invalid?";
-                }
+                LoadFile(ofd.FileName);
             }
         }
 
@@ -694,46 +803,30 @@ namespace Keyboard_Inspector {
             }
         }
 
-        private void precisionDouble_Click(object sender, EventArgs e) {
-            if (precision <= 0) return;
-            precision *= 2;
-            tbPrecision.Text = precision.ToString();
+        bool ValidateFileDrag(DragEventArgs e, out string result) {
+            result = null;
+            if (!e.Data.GetDataPresent(DataFormats.FileDrop)) return false;
+
+            var arr = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (arr.Length != 1) return false;
+
+            result = arr[0];
+            return result.EndsWith(".kbi");
         }
 
-        private void precisionHalf_Click(object sender, EventArgs e) {
-            if (precision <= 0) return;
-            precision /= 2;
-            tbPrecision.Text = precision.ToString();
+        private void MainForm_DragOver(object sender, DragEventArgs e) {
+            e.Effect = DragDropEffects.None;
+
+            if (!ValidateFileDrag(e, out _)) return;
+
+            e.Effect = DragDropEffects.Move;
         }
 
-        void chart_MouseWheel(object sender, MouseEventArgs e) {
-            if (result == null || precision <= 0) return;
+        private void MainForm_DragDrop(object sender, DragEventArgs e) {
+            if (!ValidateFileDrag(e, out string filename)) return;
 
-            Chart c = sender as Chart;
-            Axis a = c.ChartAreas.First().AxisX;
-
-            double change = Math.Pow(1.05, -e.Delta / 120.0);
-            a.Maximum = Math.Min(a.Maximum * change, c.Series[0].Points.Last().XValue);
+            LoadFile(filename);
         }
-
-        private void chart_MouseDoubleClick(object sender, MouseEventArgs e) {
-            if (e.Button != MouseButtons.Left) return;
-
-            var chart = sender as Chart;
-
-            if (chart.Parent == tlpCharts) {
-                tlpCharts.Controls.Remove(chart);
-                split.Panel1.Controls.Add(chart);
-                split.Panel1.Controls.SetChildIndex(chart, 0);
-
-            } else if (chart.Parent == split.Panel1) {
-                split.Panel1.Controls.Remove(chart);
-                tlpCharts.Controls.Add(chart);
-            }
-        }
-
-        private void screen_SizeChanged(object sender, EventArgs e)
-            => Redraw();
 
         void MainForm_FormClosing(object sender, FormClosingEventArgs e) {
             if (Recorder.IsRecording) {
