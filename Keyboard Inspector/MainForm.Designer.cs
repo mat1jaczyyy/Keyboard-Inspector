@@ -64,13 +64,13 @@ namespace Keyboard_Inspector {
             this.chartCircular = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.darkScrollBar3 = new DarkUI.Controls.DarkScrollBar();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.chartCircularFreq = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.chartDiffsFreq = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.darkScrollBar4 = new DarkUI.Controls.DarkScrollBar();
             this.panel5 = new System.Windows.Forms.Panel();
             this.chartCompoundFreq = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.darkScrollBar5 = new DarkUI.Controls.DarkScrollBar();
             this.panel6 = new System.Windows.Forms.Panel();
-            this.chartDiffsFreq = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.chartCircularFreq = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.darkScrollBar6 = new DarkUI.Controls.DarkScrollBar();
             this.tlpMain = new System.Windows.Forms.TableLayoutPanel();
             this.fitter = new System.Windows.Forms.TableLayoutPanel();
@@ -109,6 +109,8 @@ namespace Keyboard_Inspector {
             this.recording = new System.Windows.Forms.ToolStripMenuItem();
             this.open = new System.Windows.Forms.ToolStripMenuItem();
             this.save = new System.Windows.Forms.ToolStripMenuItem();
+            this.sep1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tetrio = new System.Windows.Forms.ToolStripMenuItem();
             this.key = new System.Windows.Forms.ToolStripMenuItem();
             this.freeze = new System.Windows.Forms.ToolStripMenuItem();
             this.unhide = new System.Windows.Forms.ToolStripMenuItem();
@@ -127,11 +129,11 @@ namespace Keyboard_Inspector {
             this.panel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartCircular)).BeginInit();
             this.panel4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.chartCircularFreq)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartDiffsFreq)).BeginInit();
             this.panel5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartCompoundFreq)).BeginInit();
             this.panel6.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.chartDiffsFreq)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartCircularFreq)).BeginInit();
             this.tlpMain.SuspendLayout();
             this.fitter.SuspendLayout();
             this.precisionPanel.SuspendLayout();
@@ -466,7 +468,7 @@ namespace Keyboard_Inspector {
             // 
             // panel4
             // 
-            this.panel4.Controls.Add(this.chartCircularFreq);
+            this.panel4.Controls.Add(this.chartDiffsFreq);
             this.panel4.Controls.Add(this.darkScrollBar4);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel4.Location = new System.Drawing.Point(3, 211);
@@ -474,9 +476,9 @@ namespace Keyboard_Inspector {
             this.panel4.Size = new System.Drawing.Size(425, 202);
             this.panel4.TabIndex = 9;
             // 
-            // chartCircularFreq
+            // chartDiffsFreq
             // 
-            this.chartCircularFreq.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.chartDiffsFreq.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea4.AxisX.Interval = 50D;
             chartArea4.AxisX.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             chartArea4.AxisX.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
@@ -503,23 +505,23 @@ namespace Keyboard_Inspector {
             chartArea4.InnerPlotPosition.X = 9F;
             chartArea4.InnerPlotPosition.Y = 6F;
             chartArea4.Name = "area";
-            this.chartCircularFreq.ChartAreas.Add(chartArea4);
-            this.chartCircularFreq.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartCircularFreq.Location = new System.Drawing.Point(0, 0);
-            this.chartCircularFreq.Name = "chartCircularFreq";
-            this.chartCircularFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
+            this.chartDiffsFreq.ChartAreas.Add(chartArea4);
+            this.chartDiffsFreq.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartDiffsFreq.Location = new System.Drawing.Point(0, 0);
+            this.chartDiffsFreq.Name = "chartDiffsFreq";
+            this.chartDiffsFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
             series4.ChartArea = "area";
             series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series4.Name = "series";
-            this.chartCircularFreq.Series.Add(series4);
-            this.chartCircularFreq.Size = new System.Drawing.Size(425, 185);
-            this.chartCircularFreq.TabIndex = 1;
-            this.chartCircularFreq.Tag = "Events wrapped around a second";
+            this.chartDiffsFreq.Series.Add(series4);
+            this.chartDiffsFreq.Size = new System.Drawing.Size(425, 185);
+            this.chartDiffsFreq.TabIndex = 1;
+            this.chartDiffsFreq.Tag = "Differences between consecutive events";
             title4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title4.Name = "Title1";
-            this.chartCircularFreq.Titles.Add(title4);
-            this.chartCircularFreq.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
-            this.chartCircularFreq.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
+            this.chartDiffsFreq.Titles.Add(title4);
+            this.chartDiffsFreq.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
+            this.chartDiffsFreq.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
             // 
             // darkScrollBar4
             // 
@@ -604,7 +606,7 @@ namespace Keyboard_Inspector {
             // 
             // panel6
             // 
-            this.panel6.Controls.Add(this.chartDiffsFreq);
+            this.panel6.Controls.Add(this.chartCircularFreq);
             this.panel6.Controls.Add(this.darkScrollBar6);
             this.panel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel6.Location = new System.Drawing.Point(865, 211);
@@ -612,9 +614,9 @@ namespace Keyboard_Inspector {
             this.panel6.Size = new System.Drawing.Size(426, 202);
             this.panel6.TabIndex = 9;
             // 
-            // chartDiffsFreq
+            // chartCircularFreq
             // 
-            this.chartDiffsFreq.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.chartCircularFreq.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             chartArea6.AxisX.Interval = 50D;
             chartArea6.AxisX.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             chartArea6.AxisX.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
@@ -641,23 +643,23 @@ namespace Keyboard_Inspector {
             chartArea6.InnerPlotPosition.X = 9F;
             chartArea6.InnerPlotPosition.Y = 6F;
             chartArea6.Name = "area";
-            this.chartDiffsFreq.ChartAreas.Add(chartArea6);
-            this.chartDiffsFreq.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartDiffsFreq.Location = new System.Drawing.Point(0, 0);
-            this.chartDiffsFreq.Name = "chartDiffsFreq";
-            this.chartDiffsFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
+            this.chartCircularFreq.ChartAreas.Add(chartArea6);
+            this.chartCircularFreq.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartCircularFreq.Location = new System.Drawing.Point(0, 0);
+            this.chartCircularFreq.Name = "chartCircularFreq";
+            this.chartCircularFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
             series6.ChartArea = "area";
             series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
             series6.Name = "series";
-            this.chartDiffsFreq.Series.Add(series6);
-            this.chartDiffsFreq.Size = new System.Drawing.Size(426, 185);
-            this.chartDiffsFreq.TabIndex = 1;
-            this.chartDiffsFreq.Tag = "Differences between consecutive events";
+            this.chartCircularFreq.Series.Add(series6);
+            this.chartCircularFreq.Size = new System.Drawing.Size(426, 185);
+            this.chartCircularFreq.TabIndex = 1;
+            this.chartCircularFreq.Tag = "Events wrapped around a second";
             title6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title6.Name = "Title1";
-            this.chartDiffsFreq.Titles.Add(title6);
-            this.chartDiffsFreq.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
-            this.chartDiffsFreq.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
+            this.chartCircularFreq.Titles.Add(title6);
+            this.chartCircularFreq.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
+            this.chartCircularFreq.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
             // 
             // darkScrollBar6
             // 
@@ -1118,19 +1120,22 @@ namespace Keyboard_Inspector {
             this.recording.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.recording.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.open,
-            this.save});
+            this.save,
+            this.sep1,
+            this.tetrio});
             this.recording.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.recording.Name = "recording";
-            this.recording.Size = new System.Drawing.Size(73, 20);
-            this.recording.Text = "&Recording";
+            this.recording.Size = new System.Drawing.Size(37, 20);
+            this.recording.Text = "&File";
             // 
             // open
             // 
             this.open.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.open.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.open.Name = "open";
             this.open.ShortcutKeyDisplayString = "";
             this.open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.open.Size = new System.Drawing.Size(155, 22);
+            this.open.Size = new System.Drawing.Size(200, 22);
             this.open.Text = "&Open...";
             this.open.Click += new System.EventHandler(this.open_Click);
             // 
@@ -1138,11 +1143,29 @@ namespace Keyboard_Inspector {
             // 
             this.save.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.save.Enabled = false;
+            this.save.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(153)))), ((int)(((byte)(153)))));
             this.save.Name = "save";
             this.save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.save.Size = new System.Drawing.Size(155, 22);
-            this.save.Text = "&Save...";
+            this.save.Size = new System.Drawing.Size(200, 22);
+            this.save.Text = "&Save As...";
             this.save.Click += new System.EventHandler(this.save_Click);
+            // 
+            // sep1
+            // 
+            this.sep1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.sep1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.sep1.Margin = new System.Windows.Forms.Padding(0, 0, 0, 1);
+            this.sep1.Name = "sep1";
+            this.sep1.Size = new System.Drawing.Size(197, 6);
+            // 
+            // tetrio
+            // 
+            this.tetrio.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.tetrio.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.tetrio.Name = "tetrio";
+            this.tetrio.Size = new System.Drawing.Size(200, 22);
+            this.tetrio.Text = "Import &TETR.IO Replay...";
+            this.tetrio.Click += new System.EventHandler(this.tetrio_Click);
             // 
             // key
             // 
@@ -1152,22 +1175,24 @@ namespace Keyboard_Inspector {
             this.unhide});
             this.key.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.key.Name = "key";
-            this.key.Size = new System.Drawing.Size(95, 20);
-            this.key.Text = "&Key Collection";
+            this.key.Size = new System.Drawing.Size(43, 20);
+            this.key.Text = "&Keys";
             // 
             // freeze
             // 
             this.freeze.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.freeze.CheckOnClick = true;
+            this.freeze.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.freeze.Name = "freeze";
-            this.freeze.Size = new System.Drawing.Size(134, 22);
+            this.freeze.Size = new System.Drawing.Size(180, 22);
             this.freeze.Text = "&Freeze Keys";
             // 
             // unhide
             // 
             this.unhide.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.unhide.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.unhide.Name = "unhide";
-            this.unhide.Size = new System.Drawing.Size(134, 22);
+            this.unhide.Size = new System.Drawing.Size(180, 22);
             this.unhide.Text = "&Unhide All";
             this.unhide.Click += new System.EventHandler(this.unhide_Click);
             // 
@@ -1217,11 +1242,11 @@ namespace Keyboard_Inspector {
             this.panel3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chartCircular)).EndInit();
             this.panel4.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.chartCircularFreq)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartDiffsFreq)).EndInit();
             this.panel5.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chartCompoundFreq)).EndInit();
             this.panel6.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.chartDiffsFreq)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.chartCircularFreq)).EndInit();
             this.tlpMain.ResumeLayout(false);
             this.fitter.ResumeLayout(false);
             this.fitter.PerformLayout();
@@ -1299,11 +1324,13 @@ namespace Keyboard_Inspector {
         private DarkUI.Controls.DarkScrollBar darkScrollBar2;
         private System.Windows.Forms.Panel panel3;
         private DarkUI.Controls.DarkScrollBar darkScrollBar3;
-        private System.Windows.Forms.Panel panel4;
-        private DarkUI.Controls.DarkScrollBar darkScrollBar4;
-        private System.Windows.Forms.Panel panel5;
-        private DarkUI.Controls.DarkScrollBar darkScrollBar5;
         private System.Windows.Forms.Panel panel6;
         private DarkUI.Controls.DarkScrollBar darkScrollBar6;
+        private System.Windows.Forms.Panel panel5;
+        private DarkUI.Controls.DarkScrollBar darkScrollBar5;
+        private System.Windows.Forms.Panel panel4;
+        private DarkUI.Controls.DarkScrollBar darkScrollBar4;
+        private System.Windows.Forms.ToolStripSeparator sep1;
+        private System.Windows.Forms.ToolStripMenuItem tetrio;
     }
 }

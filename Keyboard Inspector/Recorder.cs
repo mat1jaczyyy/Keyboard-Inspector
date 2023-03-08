@@ -42,7 +42,7 @@ namespace Keyboard_Inspector {
 
             IsRecording = false;
 
-            return new Result(time.ElapsedPrecise(), events);
+            return new Result(null, DateTime.Now, time.ElapsedPrecise(), events);
         }
 
         public static void RecordInput(bool pressed, Input input)

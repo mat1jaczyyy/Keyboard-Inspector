@@ -72,6 +72,9 @@ namespace Keyboard_Inspector {
         }
 
         void resultLoaded() {
+            string title = result?.GetTitle();
+            Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
+
             key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
             save.Enabled = split.Visible = hasResult;
 
@@ -609,12 +612,16 @@ namespace Keyboard_Inspector {
             DrawGraph(freqDomain, data, $"{freqDomain.Tag as string} (frequency domain{estimate})", hpsFactor);
         }
 
+        bool silentAnalysis = false;
+
         void tbPrecision_TextChanged(object sender, EventArgs e) {
-            int.TryParse(tbPrecision.Text, out precision);
+            if (silentAnalysis) return;
             CreateCharts();
         }
 
         private void hps_ValueChanged(object sender, EventArgs e) {
+            if (silentAnalysis) return;
+
             RunFromHPS(chartDiffsFreq);
             RunFromHPS(chartCompoundFreq);
             RunFromHPS(chartCircularFreq);
@@ -714,6 +721,7 @@ namespace Keyboard_Inspector {
             a.Minimum = viewport * max;
             a.Maximum = max / zoom + a.Minimum;
             a.IntervalOffset = (-a.Minimum) % a.Interval;
+            a.MinorGrid.IntervalOffset = (-a.Minimum) % a.MinorGrid.Interval;
 
             scroll.ViewSize = (int)(scroll.Maximum / zoom);
 
@@ -738,6 +746,7 @@ namespace Keyboard_Inspector {
             a.Minimum = viewport * max;
             a.Maximum = zoom * max + a.Minimum;
             a.IntervalOffset = (-a.Minimum) % a.Interval;
+            a.MinorGrid.IntervalOffset = (-a.Minimum) % a.MinorGrid.Interval;
         }
 
         private void chart_MouseDoubleClick(object sender, MouseEventArgs e) {
@@ -761,21 +770,25 @@ namespace Keyboard_Inspector {
 
         void LoadFile(string filename) {
             try {
-                using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(filename))) {
+                using (MemoryStream ms = new MemoryStream(System.IO.File.ReadAllBytes(filename))) {
                     using (BinaryReader br = new BinaryReader(ms)) {
                         result = Result.FromBinary(br);
                     }
                 }
 
-                zoom = 1;
-                viewport = 0;
-
-                processResult();
-                resultLoaded();
+                AfterLoadFile();
 
             } catch {
                 status.Text = "Couldn't load file, it might be invalid?";
             }
+        }
+
+        void AfterLoadFile() {
+            zoom = 1;
+            viewport = 0;
+
+            processResult();
+            resultLoaded();
         }
 
         void open_Click(object sender, EventArgs e) {
@@ -826,6 +839,36 @@ namespace Keyboard_Inspector {
             if (!ValidateFileDrag(e, out string filename)) return;
 
             LoadFile(filename);
+        }
+
+        private void tetrio_Click(object sender, EventArgs e) {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "All TETR.IO Replay Files (*.ttr, *.ttrm)|*.ttr;*.ttrm|TETR.IO Solo Replay Files|*.ttr|TETR.IO Multi Replay Files|*.ttrm";
+            ofd.Title = "Import TETR.IO Replay";
+
+            if (ofd.ShowDialog() == DialogResult.OK) {
+                try {
+                    result = TetrioReplay.ConvertToResult(ofd.FileName);
+
+                    silentAnalysis = true;
+                    tbPrecision.Text = "600";
+                    silentAnalysis = false;
+
+                    AfterLoadFile();
+
+                    DarkMessageBox.ShowInformation(
+                        "You are analyzing a TETR.IO replay file.\n\nTETR.IO downsamples input data to 600 Hz to fit it onto the subframe grid which " +
+                        "you will notice as a peak at 600 Hz in the frequency domain. This adds another \"sampling rate\" (in addition to the usual " +
+                        "USB poll rate and matrix scan rate) to the process.\n\nThis is unlike a regular Keyboard Inspector recording which tries to " +
+                        "get the most accurate real-time timestamp it can without any additional downsampling.\n\nYou may still analyze the recording, " +
+                        "but be vary of the limitations of the TETR.IO replay format.",
+                        "Disclaimer"
+                    );
+
+                } catch {
+                    status.Text = "Couldn't load file, it might be invalid?";
+                }
+            }
         }
 
         void MainForm_FormClosing(object sender, FormClosingEventArgs e) {

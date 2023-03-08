@@ -40,6 +40,9 @@ namespace Keyboard_Inspector {
 
                 case 'w':
                     return WiitarInput.FromBinaryDerived(br);
+
+                case 't':
+                    return TetrioInput.FromBinaryDerived(br);
             }
 
             throw new InvalidDataException();
