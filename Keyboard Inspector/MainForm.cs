@@ -174,14 +174,28 @@ namespace Keyboard_Inspector {
                     float keyHeight = (float)(screen.Height - 3 * Margin - textHeight) / inputs.Count;
 
                     for (int k = 0; k < inputs.Count; k++) {
-                        textRects.Add(new RectangleF(new PointF(
-                            Margin + textWidth - textSize[k].Width,
-                            Margin + keyHeight * k + (keyHeight - textHeight) / 2
-                        ), textSize[k]));
+                        RectangleF stringRect = new RectangleF(
+                            new PointF(
+                                Margin + textWidth - textSize[k].Width,
+                                Margin + keyHeight * k + (keyHeight - textHeight) / 2
+                            ),
+                            textSize[k]
+                        );
+
+                        textRects.Add(new RectangleF(
+                            new PointF(
+                                Margin + textWidth - textSize[k].Width,
+                                Margin + keyHeight * k
+                            ),
+                            new SizeF(
+                                textSize[k].Width,
+                                keyHeight
+                            )
+                        ));
 
                         gfx.DrawString(
                             inputs[k].ToString(multipleSources), font, textBrush,
-                            textRects[k].X, textRects[k].Y
+                            stringRect.X, stringRect.Y
                         );
 
                         gfx.DrawLine(
