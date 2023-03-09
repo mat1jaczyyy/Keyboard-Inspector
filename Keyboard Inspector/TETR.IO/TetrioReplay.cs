@@ -19,7 +19,7 @@ namespace Keyboard_Inspector {
 
             string title = "";
 
-            if (gametypes.TryGetValue(ttr.gametype.Value?? "", out string gametype))
+            if (gametypes.TryGetValue(ttr.gametype?.Value?? "", out string gametype))
                 title = $"[{gametype}] ";
 
             bool isMulti = ttr.ismulti?.Value == true;

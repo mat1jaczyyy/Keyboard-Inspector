@@ -23,6 +23,7 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TTRMPickerForm));
             this.p1 = new DarkUI.Controls.DarkLabel();
             this.p2 = new DarkUI.Controls.DarkLabel();
             this.vs = new DarkUI.Controls.DarkLabel();
@@ -70,6 +71,10 @@
             this.Controls.Add(this.vs);
             this.Controls.Add(this.p2);
             this.Controls.Add(this.p1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "TTRMPickerForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Select TETR.IO Replay";
