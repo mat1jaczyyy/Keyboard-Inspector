@@ -42,7 +42,10 @@ namespace Keyboard_Inspector {
                 if (gametype == "40 LINES") title += $"{ttr.endcontext.finalTime.Value / 1000.0:0.000} ";
                 if (gametype == "BLITZ") title += $"{ttr.endcontext.score.Value:0,000} ";
 
-                title += $"played by {ttr.user.username.Value.ToUpper()} ";
+                var user = ttr.user.username.Value;
+                if (!string.IsNullOrWhiteSpace(user))
+                    title += $"played by {user.ToUpper()} ";
+
                 data = ttr.data;
             }
 

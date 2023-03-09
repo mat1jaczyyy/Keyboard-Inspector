@@ -44,8 +44,8 @@ namespace Keyboard_Inspector {
         int elapsed;
         Result result = null;
         bool hasResult => result?.Events.Any() == true;
-        double zoom, viewport;
-        float areaWidth, areaX;
+        Scope scope = new Scope();
+        double areaWidth, areaX;
         List<Input> inputs;
         List<RectangleF> textRects = new List<RectangleF>();
         Dictionary<Input, Color> colors = new Dictionary<Input, Color>();
@@ -70,7 +70,7 @@ namespace Keyboard_Inspector {
             save.Enabled = split.Visible = hasResult;
 
             Redraw();
-            UpdateScroll();
+            UpdateScroll(scroll, scope);
 
             labelN.Text = result?.Events.Count.ToString();
 
@@ -89,8 +89,7 @@ namespace Keyboard_Inspector {
 
                 Recorder.StartRecording();
 
-                zoom = 1;
-                viewport = 0;
+                scope.Reset();
 
                 elapsed = -1;
                 t_Tick(sender, e);
@@ -118,56 +117,18 @@ namespace Keyboard_Inspector {
 
         void screen_MouseWheel(object sender, MouseEventArgs e) {
             if (result == null) return;
-
-            int x = (int)(e.X - areaX);
-            if (x < 0 || areaWidth <= x) return;
-
-            double s = 1 / zoom;
-
-            double change = Math.Pow(1.05, e.Delta / 120.0);
-            zoom *= change;
-
-            if (zoom <= 1) {
-                zoom = 1;
-                viewport = 0;
-
-            } else {
-                if (zoom > 200000) {
-                    zoom = 200000;
-                    change = zoom * s;
-                }
-
-                double v = x / areaWidth * (1 - 1 / change);
-                viewport += v * s;
-
-                if (viewport < 0) viewport = 0;
-                else {
-                    double t = 1 / zoom;
-                    if (viewport + t > 1) viewport = 1 - t;
-                }
-            }
-
+            if (!scope.ApplyWheel(e.Delta, (int)(e.X - areaX) / areaWidth)) return;
+            
             Redraw();
-            UpdateScroll();
+            UpdateScroll(scroll, scope);
         }
 
         private void scroll_Scroll(object sender, ScrollValueEventArgs e) {
-            viewport = (double)scroll.Value / scroll.Maximum;
+            if (result == null || updatingScroll) return;
+
+            scope.ScrollBar(scroll);
 
             Redraw();
-        }
-
-        void UpdateScroll() {
-            scroll.Enabled = result != null;
-
-            if (result == null) return;
-
-            scroll.ViewSize = (int)(scroll.Maximum / zoom);
-
-            if (scroll.ViewSize == scroll.Maximum)
-                scroll.ViewSize -= 1;
-
-            scroll.Value = (int)(scroll.Maximum * viewport);
         }
 
         new const int Margin = 5;
@@ -191,7 +152,7 @@ namespace Keyboard_Inspector {
 
             Bitmap img = new Bitmap(screen.Width, screen.Height);
 
-            if (result != null && inputs.Any()) {
+            if (result != null && inputs?.Any() == true) {
                 textRects.Clear();
 
                 Font font = status.Font;
@@ -233,23 +194,24 @@ namespace Keyboard_Inspector {
                     }
 
                     int incIndex = 8; // 0.5s
-                    float increment, px;
+                    double increment;
+                    double px;
 
                     for (;;) {
-                        increment = (float)GetUnitIncrement(incIndex);
+                        increment = GetUnitIncrement(incIndex);
 
-                        px = (float)(increment / result.Time * areaWidth * zoom);
+                        px = increment / result.Time * areaWidth * scope.Zoom;
 
                         if (px < 30) incIndex++;
                         else if (px >= 90 && incIndex > 0) incIndex--;
                         else break;
                     }
 
-                    double pos = viewport * result.Time / increment;
+                    double pos = scope.Viewport * result.Time / increment;
 
                     int posCeil = (int)Math.Ceiling(pos);
 
-                    for (float s = (float)((posCeil - pos) * px); s < areaWidth; s = (float)(++posCeil - pos) * px) {
+                    for (float s = (float)((posCeil - pos) * px); s < areaWidth; s = (float)((++posCeil - pos) * px)) {
                         gfx.DrawLine(
                             penMajor,
                             2 * Margin + textWidth + s,
@@ -273,8 +235,8 @@ namespace Keyboard_Inspector {
 
                         if (events.Any()) {
                             void drawBar(double start, double end) {
-                                start = (start - viewport * result.Time) * zoom / result.Time;
-                                end = (end - viewport * result.Time) * zoom / result.Time;
+                                start = (start - scope.Viewport * result.Time) * scope.Zoom / result.Time;
+                                end = (end - scope.Viewport * result.Time) * scope.Zoom / result.Time;
 
                                 if (start <= 0) start = 0;
                                 if (start >= 1) return;
@@ -574,6 +536,7 @@ namespace Keyboard_Inspector {
                 data[g.Key] = g.Count();
 
             DrawGraph(timeDomain, timeTransform(data.Select(i => (double)i.Real)), $"{timeDomain.Tag as string} (time domain)", 1000.0 / precision);
+            ChartApplyScope(timeDomain, new Scope(), 100);
 
             Fourier.Forward(data);
             double[] isolated = data.Take(data.Length / 2 + 1).Select(i => (double)i.Magnitude).ToArray();
@@ -594,7 +557,6 @@ namespace Keyboard_Inspector {
             double max = (data.Length - 1) * hpsFactor;
 
             Axis a = freqDomain.ChartAreas.First().AxisX;
-            a.Maximum = max;
             a.Interval = a.MajorGrid.Interval = a.MajorTickMark.Interval = max / 10;
             a.MinorGrid.Interval = max / 50;
 
@@ -604,6 +566,7 @@ namespace Keyboard_Inspector {
                 estimate = $" - peak at {(int)Math.Round(result * hpsFactor)} Hz";
 
             DrawGraph(freqDomain, data, $"{freqDomain.Tag as string} (frequency domain{estimate})", hpsFactor);
+            ChartApplyScope(freqDomain, new Scope());
         }
 
         bool silentAnalysis = false;
@@ -626,8 +589,14 @@ namespace Keyboard_Inspector {
         List<double> deltaCache;
 
         void CreateCharts() {
-            foreach (var chart in tlpCharts.Controls.OfType<Chart>())
+            var panels = tlpCharts.Controls.OfType<Panel>();
+
+            foreach (var chart in panels.SelectMany(i => i.Controls.OfType<Chart>()))
                 chart.Series[0].Points.Clear();
+
+            var defaultScope = new Scope();
+            foreach (var scroll in panels.SelectMany(i => i.Controls.OfType<DarkScrollBar>()))
+                UpdateScroll(scroll, defaultScope);
 
             if (!hasResult) return;
 
@@ -671,62 +640,57 @@ namespace Keyboard_Inspector {
             tbPrecision.Text = precision.ToString();
         }
 
+        void ChartApplyScope(Chart c, Scope scope, double? maxOverride = null) {
+            Axis a = c.ChartAreas.First().AxisX;
+            double max = maxOverride?? c.Series[0].Points.Last().XValue;
+
+            a.Minimum = scope.Viewport * max;
+            a.Maximum = max / scope.Zoom + a.Minimum;
+            a.IntervalOffset = (-a.Minimum) % a.Interval;
+            a.MinorGrid.IntervalOffset = (-a.Minimum) % a.MinorGrid.Interval;
+        }
+
+        bool updatingScroll = false;
+
+        void UpdateScroll(DarkScrollBar scroll, Scope scope) {
+            try {
+                updatingScroll = true;
+
+                scroll.Enabled = hasResult;
+                if (!hasResult) return;
+
+                scroll.ViewSize = (int)(scroll.Maximum / scope.Zoom);
+
+                if (scroll.ViewSize == scroll.Maximum)
+                    scroll.ViewSize -= 1;
+
+                scroll.Value = (int)(scroll.Maximum * scope.Viewport);
+
+            } finally {
+                updatingScroll = false;
+            }
+        }
+
         void chart_MouseWheel(object sender, MouseEventArgs e) {
             if (result == null || precision <= 0) return;
 
             Chart c = sender as Chart;
             Axis a = c.ChartAreas.First().AxisX;
-            DarkScrollBar scroll = c.Parent.Controls.OfType<DarkScrollBar>().Single();
 
-            double x = (a.PixelPositionToValue(e.X) - a.Minimum) / (a.Maximum - a.Minimum);
-            Console.WriteLine(x);
-
-            if (x < 0 || 1 <= x) return;
+            double width = a.Maximum - a.Minimum;
+            double x = (a.PixelPositionToValue(e.X) - a.Minimum) / width;
 
             double max = c.Series[0].Points.Last().XValue;
-            double zoom = max / (a.Maximum - a.Minimum);
-            double viewport = a.Minimum / max;
 
-            double s = 1 / zoom;
-            
-            double change = Math.Pow(1.05, e.Delta / 120.0);
-            zoom *= change;
+            Scope scope = new Scope(max / width, a.Minimum / max);
+            if (!scope.ApplyWheel(e.Delta, x)) return;
 
-            if (zoom <= 1) {
-                zoom = 1;
-                viewport = 0;
-            
-            } else {
-                if (zoom > 200000) {
-                    zoom = 200000;
-                    change = zoom * s;
-                }
-            
-                double v = x * (1 - 1 / change);
-                viewport += v * s;
-            
-                if (viewport < 0) viewport = 0;
-                else {
-                    double t = 1 / zoom;
-                    if (viewport + t > 1) viewport = 1 - t;
-                }
-            }
-
-            a.Minimum = viewport * max;
-            a.Maximum = max / zoom + a.Minimum;
-            a.IntervalOffset = (-a.Minimum) % a.Interval;
-            a.MinorGrid.IntervalOffset = (-a.Minimum) % a.MinorGrid.Interval;
-
-            scroll.ViewSize = (int)(scroll.Maximum / zoom);
-
-            if (scroll.ViewSize == scroll.Maximum)
-                scroll.ViewSize -= 1;
-
-            scroll.Value = (int)(scroll.Maximum * viewport);
+            ChartApplyScope(c, scope);
+            UpdateScroll(c.Parent.Controls.OfType<DarkScrollBar>().Single(), scope);
         }
 
         private void chart_Scroll(object sender, ScrollValueEventArgs e) {
-            if (result == null || precision <= 0) return;
+            if (result == null || precision <= 0 || updatingScroll) return;
 
             DarkScrollBar scroll = sender as DarkScrollBar;
             Chart c = scroll.Parent.Controls.OfType<Chart>().Single();
@@ -818,8 +782,7 @@ namespace Keyboard_Inspector {
             try {
                 result = fileFormats.First(i => i.Match(filename)).Read(filename);
 
-                zoom = 1;
-                viewport = 0;
+                scope.Reset();
 
                 processResult();
                 resultLoaded();
