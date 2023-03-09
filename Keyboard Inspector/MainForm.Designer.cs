@@ -109,8 +109,6 @@ namespace Keyboard_Inspector {
             this.recording = new System.Windows.Forms.ToolStripMenuItem();
             this.open = new System.Windows.Forms.ToolStripMenuItem();
             this.save = new System.Windows.Forms.ToolStripMenuItem();
-            this.sep1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tetrio = new System.Windows.Forms.ToolStripMenuItem();
             this.key = new System.Windows.Forms.ToolStripMenuItem();
             this.freeze = new System.Windows.Forms.ToolStripMenuItem();
             this.unhide = new System.Windows.Forms.ToolStripMenuItem();
@@ -1120,9 +1118,7 @@ namespace Keyboard_Inspector {
             this.recording.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.recording.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.open,
-            this.save,
-            this.sep1,
-            this.tetrio});
+            this.save});
             this.recording.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.recording.Name = "recording";
             this.recording.Size = new System.Drawing.Size(37, 20);
@@ -1135,7 +1131,7 @@ namespace Keyboard_Inspector {
             this.open.Name = "open";
             this.open.ShortcutKeyDisplayString = "";
             this.open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.open.Size = new System.Drawing.Size(200, 22);
+            this.open.Size = new System.Drawing.Size(163, 22);
             this.open.Text = "&Open...";
             this.open.Click += new System.EventHandler(this.open_Click);
             // 
@@ -1146,26 +1142,9 @@ namespace Keyboard_Inspector {
             this.save.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(153)))), ((int)(((byte)(153)))));
             this.save.Name = "save";
             this.save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.save.Size = new System.Drawing.Size(200, 22);
+            this.save.Size = new System.Drawing.Size(163, 22);
             this.save.Text = "&Save As...";
             this.save.Click += new System.EventHandler(this.save_Click);
-            // 
-            // sep1
-            // 
-            this.sep1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.sep1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.sep1.Margin = new System.Windows.Forms.Padding(0, 0, 0, 1);
-            this.sep1.Name = "sep1";
-            this.sep1.Size = new System.Drawing.Size(197, 6);
-            // 
-            // tetrio
-            // 
-            this.tetrio.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.tetrio.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.tetrio.Name = "tetrio";
-            this.tetrio.Size = new System.Drawing.Size(200, 22);
-            this.tetrio.Text = "Import &TETR.IO Replay...";
-            this.tetrio.Click += new System.EventHandler(this.tetrio_Click);
             // 
             // key
             // 
@@ -1184,7 +1163,7 @@ namespace Keyboard_Inspector {
             this.freeze.CheckOnClick = true;
             this.freeze.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.freeze.Name = "freeze";
-            this.freeze.Size = new System.Drawing.Size(180, 22);
+            this.freeze.Size = new System.Drawing.Size(134, 22);
             this.freeze.Text = "&Freeze Keys";
             // 
             // unhide
@@ -1192,7 +1171,7 @@ namespace Keyboard_Inspector {
             this.unhide.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.unhide.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.unhide.Name = "unhide";
-            this.unhide.Size = new System.Drawing.Size(180, 22);
+            this.unhide.Size = new System.Drawing.Size(134, 22);
             this.unhide.Text = "&Unhide All";
             this.unhide.Click += new System.EventHandler(this.unhide_Click);
             // 
@@ -1330,7 +1309,5 @@ namespace Keyboard_Inspector {
         private DarkUI.Controls.DarkScrollBar darkScrollBar5;
         private System.Windows.Forms.Panel panel4;
         private DarkUI.Controls.DarkScrollBar darkScrollBar4;
-        private System.Windows.Forms.ToolStripSeparator sep1;
-        private System.Windows.Forms.ToolStripMenuItem tetrio;
     }
 }

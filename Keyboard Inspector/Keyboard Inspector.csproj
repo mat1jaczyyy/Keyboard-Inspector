@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Event.cs" />
+    <Compile Include="FileFormat.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="IBinary.cs" />
     <Compile Include="Keyboard\KeyInput.cs" />
@@ -83,6 +84,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Recorder.cs" />
     <Compile Include="Result.cs" />
+    <Compile Include="TETR.IO\TTRMPickerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TETR.IO\TTRMPickerForm.Designer.cs">
+      <DependentUpon>TTRMPickerForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="TETR.IO\TetrioInput.cs" />
     <Compile Include="TETR.IO\TetrioReplay.cs" />
     <Compile Include="Wiitar\WiitarInput.cs" />
@@ -99,6 +106,9 @@
   <ItemGroup>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TETR.IO\TTRMPickerForm.resx">
+      <DependentUpon>TTRMPickerForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />

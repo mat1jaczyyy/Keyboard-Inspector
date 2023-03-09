@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Control = System.Windows.Forms.Control;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -31,16 +28,6 @@ namespace Keyboard_Inspector {
             base.WndProc(ref m);
         }
 
-        public static void InvokeIfRequired(Control control, MethodInvoker action) {
-            if (control.InvokeRequired) control.Invoke(action);
-            else action();
-        }
-
-        void CancelDropDownClose(object sender, ToolStripDropDownClosingEventArgs e) {
-            if (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked)
-                e.Cancel = true;
-        }
-
         public MainForm() {
             if (Instance != null) throw new Exception("Can't have more than one MainForm");
             Instance = this;
@@ -49,7 +36,9 @@ namespace Keyboard_Inspector {
 
             screen.AllowDrop = true;
 
-            key.DropDown.Closing += CancelDropDownClose;
+            key.DropDown.Closing += (s, e) => e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked;
+
+            InitFileFormats();
         }
 
         int elapsed;
@@ -62,6 +51,8 @@ namespace Keyboard_Inspector {
         Dictionary<Input, Color> colors = new Dictionary<Input, Color>();
 
         void processResult() {
+            if (!hasResult) return;
+
             if (freeze.Checked && inputs?.Any() != true)
                 freeze.Checked = false;
 
@@ -431,6 +422,9 @@ namespace Keyboard_Inspector {
             }
         }
 
+        private void screen_SizeChanged(object sender, EventArgs e)
+            => Redraw();
+
         bool EstimatePeak(IEnumerable<double> data, out int result) {
             double max = double.MaxValue;
             bool search = false;
@@ -765,55 +759,101 @@ namespace Keyboard_Inspector {
             }
         }
 
-        private void screen_SizeChanged(object sender, EventArgs e)
-            => Redraw();
+        FileFormat[] fileFormats;
+        OpenFileDialog ofd;
+        SaveFileDialog sfd;
+
+        void InitFileFormats() {
+            fileFormats = new FileFormat[] {
+                new FileFormat("Keyboard Inspector Files", new string[] { "kbi" },
+                    path => {
+                        using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(path))) {
+                            using (BinaryReader br = new BinaryReader(ms)) {
+                                return Result.FromBinary(br);
+                            }
+                        }
+                    },
+                    (result, path) => {
+                        using (MemoryStream ms = new MemoryStream()) {
+                            using (BinaryWriter bw = new BinaryWriter(ms)) {
+                                result.ToBinary(bw);
+                                File.WriteAllBytes(path, ms.ToArray());
+                            }
+                        }
+                    }
+                ),
+                new FileFormat("TETR.IO Replay Files", new string[] { "ttr", "ttrm" },
+                    path => {
+                        result = TetrioReplay.ConvertToResult(path);
+
+                        if (result != null) {
+                            silentAnalysis = true;
+                            tbPrecision.Text = "600";
+                            silentAnalysis = false;
+                        }
+
+                        return result;
+                    },
+                    disclaimer:
+                    "You are analyzing a TETR.IO replay file.\n\nTETR.IO downsamples input data to 600 Hz to fit it onto the subframe grid which " +
+                    "you will notice as a peak at 600 Hz in the frequency domain. This adds another \"sampling rate\" (in addition to the usual " +
+                    "USB poll rate and matrix scan rate) to the process.\n\nThis is unlike a regular Keyboard Inspector recording which tries to " +
+                    "get the most accurate real-time timestamp it can without any additional downsampling.\n\nYou may still analyze the recording, " +
+                    "but be vary of the limitations of the TETR.IO replay format."
+                ),
+            };
+
+            ofd = new OpenFileDialog() {
+                Filter = FileFormat.GetOpenFilter(fileFormats),
+                Title = "Open Recording"
+            };
+
+            sfd = new SaveFileDialog() {
+                Filter = FileFormat.GetSaveFilter(fileFormats),
+                Title = "Save Recording"
+            };
+        }
 
         void LoadFile(string filename) {
             try {
-                using (MemoryStream ms = new MemoryStream(System.IO.File.ReadAllBytes(filename))) {
-                    using (BinaryReader br = new BinaryReader(ms)) {
-                        result = Result.FromBinary(br);
-                    }
-                }
+                result = fileFormats.First(i => i.Match(filename)).Read(filename);
 
-                AfterLoadFile();
+                zoom = 1;
+                viewport = 0;
+
+                processResult();
+                resultLoaded();
 
             } catch {
-                status.Text = "Couldn't load file, it might be invalid?";
+                status.Text = "Couldn't parse file, it is likely corrupt or in an unsupported format.";
+                
+                #if DEBUG
+                    throw;
+                #endif
             }
         }
 
-        void AfterLoadFile() {
-            zoom = 1;
-            viewport = 0;
+        void SaveFile(string filename) {
+            try {
+                fileFormats.First(i => i.Match(filename)).Write(result, filename);
 
-            processResult();
-            resultLoaded();
+            } catch {
+                status.Text = "Couldn't save file, try saving it to a different location or with a different file name.";
+
+                #if DEBUG
+                    throw;
+                #endif
+            }
         }
 
         void open_Click(object sender, EventArgs e) {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Keyboard Inspector Files (*.kbi)|*.kbi";
-            ofd.Title = "Open Recording";
-
-            if (ofd.ShowDialog() == DialogResult.OK) {
+            if (ofd.ShowDialog() == DialogResult.OK)
                 LoadFile(ofd.FileName);
-            }
         }
 
         void save_Click(object sender, EventArgs e) {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.Filter = "Keyboard Inspector Files (*.kbi)|*.kbi";
-            sfd.Title = "Save Recording";
-
-            if (sfd.ShowDialog() == DialogResult.OK) {
-                using (MemoryStream ms = new MemoryStream()) {
-                    using (BinaryWriter bw = new BinaryWriter(ms)) {
-                        result.ToBinary(bw);
-                        File.WriteAllBytes(sfd.FileName, ms.ToArray());
-                    }
-                }
-            }
+            if (hasResult && sfd.ShowDialog() == DialogResult.OK)
+                SaveFile(sfd.FileName);
         }
 
         bool ValidateFileDrag(DragEventArgs e, out string result) {
@@ -824,7 +864,7 @@ namespace Keyboard_Inspector {
             if (arr.Length != 1) return false;
 
             result = arr[0];
-            return result.EndsWith(".kbi");
+            return fileFormats.Any(i => i.Match(arr[0]));
         }
 
         private void MainForm_DragOver(object sender, DragEventArgs e) {
@@ -839,36 +879,6 @@ namespace Keyboard_Inspector {
             if (!ValidateFileDrag(e, out string filename)) return;
 
             LoadFile(filename);
-        }
-
-        private void tetrio_Click(object sender, EventArgs e) {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "All TETR.IO Replay Files (*.ttr, *.ttrm)|*.ttr;*.ttrm|TETR.IO Solo Replay Files|*.ttr|TETR.IO Multi Replay Files|*.ttrm";
-            ofd.Title = "Import TETR.IO Replay";
-
-            if (ofd.ShowDialog() == DialogResult.OK) {
-                try {
-                    result = TetrioReplay.ConvertToResult(ofd.FileName);
-
-                    silentAnalysis = true;
-                    tbPrecision.Text = "600";
-                    silentAnalysis = false;
-
-                    AfterLoadFile();
-
-                    DarkMessageBox.ShowInformation(
-                        "You are analyzing a TETR.IO replay file.\n\nTETR.IO downsamples input data to 600 Hz to fit it onto the subframe grid which " +
-                        "you will notice as a peak at 600 Hz in the frequency domain. This adds another \"sampling rate\" (in addition to the usual " +
-                        "USB poll rate and matrix scan rate) to the process.\n\nThis is unlike a regular Keyboard Inspector recording which tries to " +
-                        "get the most accurate real-time timestamp it can without any additional downsampling.\n\nYou may still analyze the recording, " +
-                        "but be vary of the limitations of the TETR.IO replay format.",
-                        "Disclaimer"
-                    );
-
-                } catch {
-                    status.Text = "Couldn't load file, it might be invalid?";
-                }
-            }
         }
 
         void MainForm_FormClosing(object sender, FormClosingEventArgs e) {

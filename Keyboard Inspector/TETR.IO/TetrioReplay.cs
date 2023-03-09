@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Forms;
 
 using Newtonsoft.Json.Linq;
 
@@ -22,16 +23,27 @@ namespace Keyboard_Inspector {
                 title = $"[{gametype}] ";
 
             bool isMulti = ttr.ismulti?.Value == true;
+            dynamic data;
 
             if (isMulti) {
-                title += $"{ttr.endcontext[0].user.username.Value.ToUpper()} ({ttr.endcontext[0].wins.Value}) versus ";
-                title += $"({ttr.endcontext[1].wins.Value}) {ttr.endcontext[1].user.username.Value.ToUpper()} played ";
+                var form = new TTRMPickerForm(ttr);
+
+                if (form.ShowDialog() == DialogResult.OK) {
+                    data = form.SelectedReplay;
+                } else {
+                    return null;
+                }
+
+                title += $"{ttr.endcontext[form.SelectedPlayer].user.username.Value.ToUpper()} ({ttr.endcontext[form.SelectedPlayer].wins.Value}) versus ";
+                title += $"({ttr.endcontext[1 - form.SelectedPlayer].wins.Value}) {ttr.endcontext[1 - form.SelectedPlayer].user.username.Value.ToUpper()}, ";
+                title += $"round {form.SelectedIndex + 1}/{(ttr.data as JArray).Count}, played ";
 
             } else {
                 if (gametype == "40 LINES") title += $"{ttr.endcontext.finalTime.Value / 1000.0:0.000} ";
                 if (gametype == "BLITZ") title += $"{ttr.endcontext.score.Value:0,000} ";
 
                 title += $"played by {ttr.user.username.Value.ToUpper()} ";
+                data = ttr.data;
             }
 
             DateTime ts = ttr.ts.Value.ToLocalTime();
@@ -40,14 +52,14 @@ namespace Keyboard_Inspector {
             return new Result(
                 title,
                 ts,
-                ttr.data.frames.Value / 60.0,
-                (ttr.data.events as JArray)
-                    .Select(i => (i as dynamic))
+                data.frames.Value / 60.0,
+                (data.events as JArray)
+                    .Select(i => i as dynamic)
                     .Where(i => i.type.Value.StartsWith("key") && i.data.hoisted?.Value != true)
                     .Select(i => new Event(
-                        (i.frame.Value + i.data.subframe.Value) / 60.0,
+                        Math.Round((double)(i.frame.Value + i.data.subframe.Value), 1) / 60.0,
                         i.type.Value == "keydown",
-                        new TetrioInput(Enum.TryParse<TetrioKeys>(i.data.key.Value, out TetrioKeys key) ? key : throw new Exception("Unknown TETR.IO key"))
+                        new TetrioInput(Enum.TryParse<TetrioKeys>(i.data.key.Value, out TetrioKeys key)? key : throw new Exception("Unknown TETR.IO key"))
                     ))
                     .ToList()
             );
