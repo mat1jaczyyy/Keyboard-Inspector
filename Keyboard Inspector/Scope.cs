@@ -6,15 +6,17 @@ namespace Keyboard_Inspector {
     class Scope {
         public double Zoom { get; private set; }
         public double Viewport { get; private set; }
+        readonly Func<int, double> IntervalGenerator;
+        public string BaseTitle = null;
 
         public void Reset() {
             Zoom = 1;
             Viewport = 0;
         }
 
-        public Scope(double zoom = 1, double viewport = 0) {
-            Zoom = zoom;
-            Viewport = viewport;
+        public Scope(Func<int, double> intervalGenerator) {
+            Reset();
+            IntervalGenerator = intervalGenerator?? (i => Math.Pow(2, i - 10));
         }
 
         public void ScrollBar(DarkScrollBar scroll)
@@ -49,6 +51,28 @@ namespace Keyboard_Inspector {
             }
 
             return true;
+        }
+
+        public double GetInterval(double xMax, double areaWidth, out double px) {
+            int incIndex = 4;
+            double interval;
+
+            for (;;) {
+                interval = IntervalGenerator(incIndex);
+
+                px = interval / xMax * areaWidth * Zoom;
+
+                if (px < 30) incIndex++;
+                else if (px >= 90 && incIndex > 0) incIndex--;
+                else break;
+            }
+
+            return interval;
+        }
+
+        public void SetBetween(double lo, double hi, double max) {
+            Zoom = max / (hi - lo);
+            Viewport = lo / max;
         }
     }
 }

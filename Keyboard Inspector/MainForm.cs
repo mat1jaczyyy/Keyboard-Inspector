@@ -15,6 +15,10 @@ using DarkUI.Forms;
 using MathNet.Numerics;
 using MathNet.Numerics.IntegralTransforms;
 using MathNet.Numerics.Statistics;
+using System.Reflection;
+using System.ComponentModel;
+using MathNet.Numerics.LinearAlgebra.Factorization;
+using System.Threading.Tasks;
 
 namespace Keyboard_Inspector {
     partial class MainForm: DarkForm {
@@ -39,12 +43,27 @@ namespace Keyboard_Inspector {
             key.DropDown.Closing += (s, e) => e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked;
 
             InitFileFormats();
+            InitChartTags();
         }
 
         int elapsed;
         Result result = null;
         bool hasResult => result?.Events.Any() == true;
-        Scope scope = new Scope();
+
+        static double ScreenInterval(int i) {
+            if (i <= 3) return Math.Pow(2, i) / 1000;
+            if (i <= 12) {
+                double ret = Math.Pow(10, (i / 3) - 3);
+                if (i % 3 == 1) ret *= 2;
+                if (i % 3 == 2) ret *= 5;
+                return ret;
+            }
+            if (i <= 15) return Math.Pow(2, i - 14) * 60;
+            if (i <= 17) return Math.Pow(2, i - 16) * 300;
+            return Math.Pow(2, i - 18) * 1800;
+        }
+        Scope scope = new Scope(ScreenInterval);
+
         double areaWidth, areaX;
         List<Input> inputs;
         List<RectangleF> textRects = new List<RectangleF>();
@@ -134,19 +153,6 @@ namespace Keyboard_Inspector {
         new const int Margin = 5;
         const int BarMargin = 1;
 
-        double GetUnitIncrement(int index) {
-            if (index <= 3) return Math.Pow(2, index) / 1000;
-            if (index <= 12) {
-                double ret = Math.Pow(10, (index / 3) - 3);
-                if (index % 3 == 1) ret *= 2;
-                if (index % 3 == 2) ret *= 5;
-                return ret;
-            }
-            if (index <= 15) return Math.Pow(2, index - 14) * 60;
-            if (index <= 17) return Math.Pow(2, index - 16) * 300;
-            return Math.Pow(2, index - 18) * 1800;
-        }
-
         void Redraw() {
             if (screen.Width <= 0 || screen.Height <= 0) return;
 
@@ -207,21 +213,9 @@ namespace Keyboard_Inspector {
                         );
                     }
 
-                    int incIndex = 8; // 0.5s
-                    double increment;
-                    double px;
+                    double interval = scope.GetInterval(result.Time, areaWidth, out double px);
 
-                    for (;;) {
-                        increment = GetUnitIncrement(incIndex);
-
-                        px = increment / result.Time * areaWidth * scope.Zoom;
-
-                        if (px < 30) incIndex++;
-                        else if (px >= 90 && incIndex > 0) incIndex--;
-                        else break;
-                    }
-
-                    double pos = scope.Viewport * result.Time / increment;
+                    double pos = scope.Viewport * result.Time / interval;
 
                     int posCeil = (int)Math.Ceiling(pos);
 
@@ -234,7 +228,7 @@ namespace Keyboard_Inspector {
                             screen.Height - 2 * Margin - textHeight
                         );
 
-                        string t = (increment * posCeil).ToString("0.###");
+                        string t = (interval * posCeil).ToString("0.###");
 
                         gfx.DrawString(
                             t, font, textBrush,
@@ -536,7 +530,9 @@ namespace Keyboard_Inspector {
             foreach (double v in data)
                 chart.Series[0].Points.AddXY(i++ * xFactor, v);
 
-            chart.Titles.First().Text = title;
+            chart.Titles[0].Text = title;
+
+            ResizeChart(chart);
         }
 
         Dictionary<Chart, double[]> beforeHPS = new Dictionary<Chart, double[]>();
@@ -549,8 +545,10 @@ namespace Keyboard_Inspector {
             foreach (var g in source.GroupBy(i => i).Where(i => i.Key < precision))
                 data[g.Key] = g.Count();
 
-            DrawGraph(timeDomain, timeTransform(data.Select(i => (double)i.Real)), $"{timeDomain.Tag as string} (time domain)", 1000.0 / precision);
-            ChartApplyScope(timeDomain, new Scope(), 100);
+            DrawGraph(timeDomain, timeTransform(data.Select(i => (double)i.Real)), $"{(timeDomain.Tag as Scope).BaseTitle} (time domain)", 1000.0 / precision);
+            (timeDomain.Tag as Scope).SetBetween(0, 100, timeDomain.Series[0].Points.Last().XValue);
+            ChartApplyScope(timeDomain);
+            UpdateScroll(timeDomain);
 
             Fourier.Forward(data);
             double[] isolated = data.Take(data.Length / 2 + 1).Select(i => (double)i.Magnitude).ToArray();
@@ -568,19 +566,15 @@ namespace Keyboard_Inspector {
             Normalize(data);
 
             double hpsFactor = 1.0 / (hpsIterations + 1);
-            double max = (data.Length - 1) * hpsFactor;
-
-            Axis a = freqDomain.ChartAreas.First().AxisX;
-            a.Interval = a.MajorGrid.Interval = a.MajorTickMark.Interval = max / 10;
-            a.MinorGrid.Interval = max / 50;
 
             string estimate = "";
-
             if (EstimatePeak(data, out int result))
                 estimate = $" - peak at {(int)Math.Round(result * hpsFactor)} Hz";
 
-            DrawGraph(freqDomain, data, $"{freqDomain.Tag as string} (frequency domain{estimate})", hpsFactor);
-            ChartApplyScope(freqDomain, new Scope());
+            DrawGraph(freqDomain, data, $"{(freqDomain.Tag as Scope).BaseTitle} (frequency domain{estimate})", hpsFactor);
+            (freqDomain.Tag as Scope).Reset();
+            ChartApplyScope(freqDomain);
+            UpdateScroll(freqDomain);
         }
 
         bool silentAnalysis = false;
@@ -603,14 +597,11 @@ namespace Keyboard_Inspector {
         List<double> deltaCache;
 
         void CreateCharts() {
-            var panels = tlpCharts.Controls.OfType<Panel>();
-
-            foreach (var chart in panels.SelectMany(i => i.Controls.OfType<Chart>()))
+            foreach (var chart in tlpCharts.Controls.OfType<Panel>().SelectMany(i => i.Controls.OfType<Chart>())) {
                 chart.Series[0].Points.Clear();
-
-            var defaultScope = new Scope();
-            foreach (var scroll in panels.SelectMany(i => i.Controls.OfType<DarkScrollBar>()))
-                UpdateScroll(scroll, defaultScope);
+                (chart.Tag as Scope).Reset();
+                UpdateScroll(chart);
+            }
 
             if (!hasResult) return;
 
@@ -638,7 +629,7 @@ namespace Keyboard_Inspector {
                     i++;
                 }
 
-                return arr.Concat(arr).Skip(rot);
+                return arr.Concat(arr).Skip(rot).Take(i);
             });
         }
 
@@ -654,24 +645,52 @@ namespace Keyboard_Inspector {
             tbPrecision.Text = precision.ToString();
         }
 
-        void ChartApplyScope(Chart c, Scope scope, double? maxOverride = null) {
-            Axis a = c.ChartAreas.First().AxisX;
-            double max = maxOverride?? c.Series[0].Points.Last().XValue;
+        void InitChartTags() {
+            var TimeInterval = (Func<int, double>)(i => ScreenInterval(i) * 1000);
+            var FreqInterval = (Func<int, double>)(i => {
+                if (i < 2) return (i + 1) * 5;
+                if (i < 4) return (i - 1) * 25;
+                return Math.Pow(2, i - 4) * 125;
+            });
+
+            foreach (Chart c in tlpCharts.Controls.OfType<Panel>().SelectMany(i => i.Controls.OfType<Chart>())) {
+                c.Tag = new Scope(c.Palette == ChartColorPalette.EarthTones? FreqInterval : TimeInterval) {
+                    BaseTitle = c.Tag as string
+                };
+            }
+        }
+
+        void ChartApplyScope(Chart c) {
+            Axis a = c.ChartAreas[0].AxisX;
+            double max = c.Series[0].Points.Last().XValue;
+
+            Scope scope = c.Tag as Scope;
 
             a.Minimum = scope.Viewport * max;
             a.Maximum = max / scope.Zoom + a.Minimum;
-            a.IntervalOffset = (-a.Minimum) % a.Interval;
-            a.MinorGrid.IntervalOffset = (-a.Minimum) % a.MinorGrid.Interval;
+
+            a.Interval =
+            a.MajorGrid.Interval =
+            a.MajorTickMark.Interval = scope.GetInterval(max, a.ValueToPixelPosition(a.Maximum) - a.ValueToPixelPosition(a.Minimum), out _);
+
+            a.IntervalOffset =
+            a.MajorGrid.IntervalOffset =
+            a.MajorTickMark.IntervalOffset = (-a.Minimum) % a.Interval;
         }
 
         bool updatingScroll = false;
 
-        void UpdateScroll(DarkScrollBar scroll, Scope scope) {
+        void UpdateScroll(Chart c)
+            => UpdateScroll(c.Parent.Controls.OfType<DarkScrollBar>().First(), c.Tag as Scope);
+
+        void UpdateScroll(DarkScrollBar scroll, Scope scope = null) {
             try {
                 updatingScroll = true;
 
                 scroll.Enabled = hasResult;
                 if (!hasResult) return;
+
+                scope = scope?? scroll.Parent.Controls.OfType<Chart>().First().Tag as Scope;
 
                 scroll.ViewSize = (int)(scroll.Maximum / scope.Zoom);
 
@@ -689,18 +708,14 @@ namespace Keyboard_Inspector {
             if (result == null || precision <= 0) return;
 
             Chart c = sender as Chart;
-            Axis a = c.ChartAreas.First().AxisX;
+            Axis a = c.ChartAreas[0].AxisX;
 
-            double width = a.Maximum - a.Minimum;
-            double x = (a.PixelPositionToValue(e.X) - a.Minimum) / width;
+            if (!(c.Tag as Scope).ApplyWheel(e.Delta, (a.PixelPositionToValue(e.X) - a.Minimum) / (a.Maximum - a.Minimum))) return;
 
-            double max = c.Series[0].Points.Last().XValue;
+            ChartApplyScope(c);
+            UpdateScroll(c);
 
-            Scope scope = new Scope(max / width, a.Minimum / max);
-            if (!scope.ApplyWheel(e.Delta, x)) return;
-
-            ChartApplyScope(c, scope);
-            UpdateScroll(c.Parent.Controls.OfType<DarkScrollBar>().Single(), scope);
+            chart_MouseMove(sender, e, true);
         }
 
         private void chart_Scroll(object sender, ScrollValueEventArgs e) {
@@ -708,17 +723,10 @@ namespace Keyboard_Inspector {
 
             DarkScrollBar scroll = sender as DarkScrollBar;
             Chart c = scroll.Parent.Controls.OfType<Chart>().Single();
-            Axis a = c.ChartAreas.First().AxisX;
 
-            double max = c.Series[0].Points.Last().XValue;
-            double zoom = (a.Maximum - a.Minimum) / max;
+            (c.Tag as Scope).ScrollBar(scroll);
 
-            double viewport = (double)scroll.Value / scroll.Maximum;
-
-            a.Minimum = viewport * max;
-            a.Maximum = zoom * max + a.Minimum;
-            a.IntervalOffset = (-a.Minimum) % a.Interval;
-            a.MinorGrid.IntervalOffset = (-a.Minimum) % a.MinorGrid.Interval;
+            ChartApplyScope(c);
         }
 
         private void chart_MouseDoubleClick(object sender, MouseEventArgs e) {
@@ -727,15 +735,127 @@ namespace Keyboard_Inspector {
             var panel = (sender as Chart).Parent as Panel;
 
             if (panel.Parent == tlpCharts) {
+                panel.SuspendLayout();
+
                 tlpCharts.Controls.Remove(panel);
                 split.Panel1.Controls.Add(panel);
                 split.Panel1.Controls.SetChildIndex(panel, 0);
 
+                panel.ResumeLayout();
+
             } else if (panel.Parent == split.Panel1) {
+                panel.SuspendLayout();
+
                 split.Panel1.Controls.Remove(panel);
                 tlpCharts.Controls.Add(panel);
+
+                panel.ResumeLayout();
             }
         }
+
+        void chart_MouseMove(object sender, MouseEventArgs e)
+            => chart_MouseMove(sender, e, false);
+
+        void chart_MouseMove(object sender, MouseEventArgs e, bool remake) {
+            Chart c = sender as Chart;
+            Axis ax = c.ChartAreas[0].AxisX;
+            Axis ay = c.ChartAreas[0].AxisY;
+
+            double x = ax.PixelPositionToValue(e.X);
+            double y = ay.PixelPositionToValue(e.Y);
+
+            var series = c.Series[0].Points;
+
+            double w = (ax.ValueToPixelPosition(ax.Maximum) - ax.ValueToPixelPosition(ax.Minimum)) / (ax.Maximum - ax.Minimum);
+            double h = (ay.ValueToPixelPosition(ay.Maximum) - ay.ValueToPixelPosition(ay.Minimum)) / (ay.Maximum - ay.Minimum);
+
+            double min = double.MaxValue;
+            DataPoint win = null;
+
+            // TODO optimize with Voronoi generated at graph render time?
+            foreach (var p in series) {
+                var x2 = p.XValue - x;
+                x2 *= x2;
+                var y2 = p.YValues[0] - y;
+                y2 *= h/w;
+                y2 *= y2;
+                var d = x2 + y2;
+
+                if (d < min) {
+                    min = d;
+                    win = p;
+                }
+            }
+
+            if (win == null) {
+                chart_MouseLeave(sender, e);
+                return;
+            }
+
+            double sx = ax.ValueToPixelPosition(win.XValue);
+            double sy = ay.ValueToPixelPosition(win.YValues[0]);
+
+            double dx = sx - e.X;
+            double dy = sy - e.Y;
+
+            // TODO optimize by somehow reducing previous foreach space to this condition?
+            if (dx * dx + dy * dy > 800) {
+                chart_MouseLeave(sender, e);
+                return;
+            }
+
+            var l = Controls.OfType<HTTransparentDarkLabel>().SingleOrDefault();
+            if (!remake && l != null && l.Tag is DataPoint prev && prev == win) return;
+
+            chart_MouseLeave(sender, e);
+
+            l = new HTTransparentDarkLabel();
+            l.AutoSize = true;
+            l.Text = $"({win.XValue:0.###}, {win.YValues[0]:0.###})";
+            l.Tag = win;
+            l.Location = PointToClient(c.PointToScreen(new Point((int)Math.Round(sx), (int)Math.Round(sy)))) + new Size(7, 10 - l.Height);
+
+            Controls.Add(l);
+            Controls.SetChildIndex(l, 0);
+
+            win.MarkerStyle = MarkerStyle.Circle;
+            win.MarkerSize = 5;
+        }
+
+        private void chart_MouseLeave(object sender, EventArgs e) {
+            var l = Controls.OfType<HTTransparentDarkLabel>().SingleOrDefault();
+            if (l == null) return;
+
+            (l.Tag as DataPoint).MarkerStyle = MarkerStyle.None;
+            Controls.Remove(l);
+            split.Panel1.Invalidate();
+        }
+
+        static double[] rampW = new double[] { 425, 1294, 1920 };
+        static double[] rampH = new double[] { 185, 399, 675 };
+
+        static Polynomial titleY = Polynomial.Fit(rampH, new double[] { 3, 2.1, 1.5 }, 2);
+        static Polynomial innerX = Polynomial.Fit(rampW, new double[] { 9, 3.8, 2.9 }, 2);
+        static Polynomial innerW = Polynomial.Fit(rampW, new double[] { 86, 94, 95.6 }, 2);
+        static Polynomial innerH = Polynomial.Fit(rampH, new double[] { 86, 93, 96 }, 2);
+        static Polynomial posY = Polynomial.Fit(rampH, new double[] { 11, 5.9, 3.5 }, 2);
+
+        void ResizeChart(Chart c) {
+            double w = Math.Min(c.Width, rampW.Last());
+            double h = Math.Min(c.Height, rampH.Last());
+
+            c.Titles[0].Position.Y = (float)titleY.Evaluate(h);
+            c.ChartAreas[0].InnerPlotPosition.X = (float)innerX.Evaluate(w);
+            c.ChartAreas[0].InnerPlotPosition.Width = (float)innerW.Evaluate(w);
+            c.ChartAreas[0].InnerPlotPosition.Height = (float)innerH.Evaluate(h);
+            c.ChartAreas[0].Position.Y = (float)posY.Evaluate(h);
+            c.ChartAreas[0].Position.Height = 100 - c.ChartAreas[0].Position.Y;
+
+            c.Invalidate();
+        }
+
+        private void chart_SizeChanged(object sender, EventArgs e)
+            => ResizeChart(sender as Chart);
 
         FileFormat[] fileFormats;
         OpenFileDialog ofd;

@@ -67,6 +67,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HTTransparentDarkLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Event.cs" />
     <Compile Include="FileFormat.cs" />
     <Compile Include="Input.cs" />
