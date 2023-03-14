@@ -16,7 +16,7 @@ namespace Keyboard_Inspector {
         public ReadOnlyCollection<Event> Events;
 
         public Result(string title, DateTime recorded, double time, List<Event> events) {
-            Title = title;
+            Title = title?? "";
             Recorded = recorded;
             Time = time;
             
