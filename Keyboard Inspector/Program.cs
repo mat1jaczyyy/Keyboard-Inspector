@@ -8,8 +8,12 @@ using System.Windows.Forms;
 
 namespace Keyboard_Inspector {
     static class Program {
+        public static string[] Args = null;
+
         [STAThread]
-        static void Main() {
+        static void Main(string[] args) {
+            Args = args;
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());

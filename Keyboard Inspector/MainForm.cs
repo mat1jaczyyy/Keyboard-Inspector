@@ -658,6 +658,9 @@ namespace Keyboard_Inspector {
 
         void ChartApplyScope(Chart c) {
             Axis a = c.ChartAreas[0].AxisX;
+
+            if (c.Series[0].Points.Count == 0) return;
+
             double max = c.Series[0].Points.Last().XValue;
 
             Scope scope = c.Tag as Scope;
@@ -750,6 +753,7 @@ namespace Keyboard_Inspector {
         }
 
         int BinarySearchX(double val, DataPointCollection arr) {
+            if (arr.Count == 0) return -1;
             if (arr[0].XValue >= val) return 0;
             if (arr[arr.Count - 1].XValue <= val) return arr.Count - 1;
 
@@ -785,16 +789,20 @@ namespace Keyboard_Inspector {
         void chart_MouseMove(object sender, MouseEventArgs e, bool remake) {
             Chart c = sender as Chart;
 
-            if (e.Y >= c.Height) {
+            Axis ax = c.ChartAreas[0].AxisX;
+            Axis ay = c.ChartAreas[0].AxisY;
+
+            double x, y;
+
+            try {
+                x = ax.PixelPositionToValue(e.X);
+                y = ay.PixelPositionToValue(e.Y);
+
+            } catch { // ArgumentException if cursor is out of bounds for some reason
                 chart_MouseLeave(sender, e);
                 return;
             }
 
-            Axis ax = c.ChartAreas[0].AxisX;
-            Axis ay = c.ChartAreas[0].AxisY;
-
-            var x = ax.PixelPositionToValue(e.X);
-            var y = ay.PixelPositionToValue(e.Y);
             var series = c.Series[0].Points;
             
             // Hacky way to get XValue size of radius
@@ -1016,6 +1024,11 @@ namespace Keyboard_Inspector {
             if (!ValidateFileDrag(e, out string filename)) return;
 
             LoadFile(filename);
+        }
+
+        private void MainForm_Shown(object sender, EventArgs e) {
+            if (Program.Args.Length > 0)
+                LoadFile(Program.Args[0]);
         }
 
         void MainForm_FormClosing(object sender, FormClosingEventArgs e) {
