@@ -33,16 +33,16 @@ namespace Keyboard_Inspector {
 
         public abstract void ToBinary(BinaryWriter bw);
 
-        public static Input FromBinary(BinaryReader br) {
+        public static Input FromBinary(BinaryReader br, uint fileVersion) {
             switch (br.ReadChar()) {
                 case 'k':
-                    return KeyInput.FromBinaryDerived(br);
+                    return KeyInput.FromBinaryDerived(br, fileVersion);
 
                 case 'w':
-                    return WiitarInput.FromBinaryDerived(br);
+                    return WiitarInput.FromBinaryDerived(br, fileVersion);
 
                 case 't':
-                    return TetrioInput.FromBinaryDerived(br);
+                    return TetrioInput.FromBinaryDerived(br, fileVersion);
             }
 
             throw new InvalidDataException();

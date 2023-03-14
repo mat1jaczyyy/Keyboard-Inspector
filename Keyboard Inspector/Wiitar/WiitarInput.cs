@@ -36,7 +36,7 @@ namespace Keyboard_Inspector {
 
         protected override char BinaryID => 'w';
 
-        public static WiitarInput FromBinaryDerived(BinaryReader br) {
+        public static WiitarInput FromBinaryDerived(BinaryReader br, uint fileVersion) {
             return new WiitarInput((WiitarKeys)br.ReadInt32());
         }
     }

@@ -12,7 +12,7 @@ namespace Keyboard_Inspector {
 
         protected override char BinaryID => 'k';
 
-        public static KeyInput FromBinaryDerived(BinaryReader br) {
+        public static KeyInput FromBinaryDerived(BinaryReader br, uint fileVersion) {
             return new KeyInput((Keys)br.ReadInt32());
         }
     }

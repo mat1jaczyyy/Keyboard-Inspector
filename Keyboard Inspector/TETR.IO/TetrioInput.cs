@@ -23,7 +23,7 @@ namespace Keyboard_Inspector {
 
         protected override char BinaryID => 't';
 
-        public static TetrioInput FromBinaryDerived(BinaryReader br) {
+        public static TetrioInput FromBinaryDerived(BinaryReader br, uint fileVersion) {
             return new TetrioInput((TetrioKeys)br.ReadInt32());
         }
     }

@@ -784,6 +784,12 @@ namespace Keyboard_Inspector {
 
         void chart_MouseMove(object sender, MouseEventArgs e, bool remake) {
             Chart c = sender as Chart;
+
+            if (e.Y >= c.Height) {
+                chart_MouseLeave(sender, e);
+                return;
+            }
+
             Axis ax = c.ChartAreas[0].AxisX;
             Axis ay = c.ChartAreas[0].AxisY;
 

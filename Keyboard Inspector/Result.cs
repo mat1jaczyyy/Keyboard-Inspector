@@ -6,6 +6,9 @@ using System.Linq;
 
 namespace Keyboard_Inspector {
     class Result: IBinary {
+        static readonly char[] Header = new char[] { 'K', 'B', 'I', '\0' };
+        static readonly uint FileVersion = 0;
+        
         public string GetTitle()
             => string.IsNullOrWhiteSpace(Title)? $"Untitled {Recorded:MM/dd/yyyy, h:mm:ss tt}" : Title;
 
@@ -27,6 +30,9 @@ namespace Keyboard_Inspector {
         }
 
         public void ToBinary(BinaryWriter bw) {
+            bw.Write(Header);
+            bw.Write(FileVersion);
+
             bw.Write(Title);
             bw.Write(Recorded.ToBinary());
 
@@ -35,11 +41,16 @@ namespace Keyboard_Inspector {
         }
 
         public static Result FromBinary(BinaryReader br) {
+            if (!br.ReadChars(Header.Length).SequenceEqual(Header))
+                throw new Exception("Invalid header");
+
+            uint fileVersion = br.ReadUInt32();
+
             return new Result(
                 br.ReadString(),
                 DateTime.FromBinary(br.ReadInt64()),
                 br.ReadDouble(),
-                Event.ListFromBinary(br)
+                Event.ListFromBinary(br, fileVersion)
             );
         }
     }

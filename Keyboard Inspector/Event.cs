@@ -22,7 +22,7 @@ namespace Keyboard_Inspector {
             Input.ToBinary(bw);
         }
 
-        public static List<Event> ListFromBinary(BinaryReader br) {
+        public static List<Event> ListFromBinary(BinaryReader br, uint fileVersion) {
             int n = br.ReadInt32();
             var ret = new List<Event>();
 
@@ -30,7 +30,7 @@ namespace Keyboard_Inspector {
                 ret.Add(new Event(
                     br.ReadDouble(),
                     br.ReadBoolean(),
-                    Input.FromBinary(br)
+                    Input.FromBinary(br, fileVersion)
                 ));
             }
 
