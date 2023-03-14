@@ -15,10 +15,6 @@ using DarkUI.Forms;
 using MathNet.Numerics;
 using MathNet.Numerics.IntegralTransforms;
 using MathNet.Numerics.Statistics;
-using System.Reflection;
-using System.ComponentModel;
-using MathNet.Numerics.LinearAlgebra.Factorization;
-using System.Threading.Tasks;
 
 namespace Keyboard_Inspector {
     partial class MainForm: DarkForm {
@@ -753,6 +749,36 @@ namespace Keyboard_Inspector {
             }
         }
 
+        int BinarySearchX(double val, DataPointCollection arr) {
+            if (arr[0].XValue >= val) return 0;
+            if (arr[arr.Count - 1].XValue <= val) return arr.Count - 1;
+
+            int start = 0;
+            int end = arr.Count - 1;
+
+            while (start <= end) {
+                int mid = (start + end) / 2;
+
+                // value is in interval from previous to current element
+                if (mid == 0) {
+                    return mid;
+
+                } else if (val >= arr[mid - 1].XValue && val <= arr[mid].XValue) {
+                    return mid - 1;
+
+                } else if (arr[mid].XValue < val) {
+                    start = mid + 1;
+
+                } else {
+                    end = mid - 1;
+                }
+            }
+
+            return -1;
+        }
+
+        const double hoverRadius = 29;
+
         void chart_MouseMove(object sender, MouseEventArgs e)
             => chart_MouseMove(sender, e, false);
 
@@ -761,23 +787,40 @@ namespace Keyboard_Inspector {
             Axis ax = c.ChartAreas[0].AxisX;
             Axis ay = c.ChartAreas[0].AxisY;
 
-            double x = ax.PixelPositionToValue(e.X);
-            double y = ay.PixelPositionToValue(e.Y);
-
+            var x = ax.PixelPositionToValue(e.X);
+            var y = ay.PixelPositionToValue(e.Y);
             var series = c.Series[0].Points;
+            
+            // Hacky way to get XValue size of radius
+            var r = ax.PixelPositionToValue(hoverRadius) - ax.PixelPositionToValue(0);
 
             double w = (ax.ValueToPixelPosition(ax.Maximum) - ax.ValueToPixelPosition(ax.Minimum)) / (ax.Maximum - ax.Minimum);
             double h = (ay.ValueToPixelPosition(ay.Maximum) - ay.ValueToPixelPosition(ay.Minimum)) / (ay.Maximum - ay.Minimum);
+            double aspect = h / w;
 
-            double min = double.MaxValue;
+            // Discard values that are too far away to match
+            double lowest = Math.Max(ax.Minimum, x - r);
+            double highest = Math.Min(ax.Maximum, x + r);
+            int start = BinarySearchX(lowest, series);
+
+            if (start == -1) {
+                chart_MouseLeave(sender, e);
+                return;
+            }
+
+            double min = r * r;
             DataPoint win = null;
 
-            // TODO optimize with Voronoi generated at graph render time?
-            foreach (var p in series) {
+            // foreach (var p in series.Skip(start)) is really slow here for some reason, keep the regular loop
+            for (int i = start; i < series.Count; i++) {
+                var p = series[i];
+
+                if (p.XValue < lowest) continue;
+                if (p.XValue > highest) break;
+
                 var x2 = p.XValue - x;
                 x2 *= x2;
-                var y2 = p.YValues[0] - y;
-                y2 *= h/w;
+                var y2 = (p.YValues[0] - y) * aspect;
                 y2 *= y2;
                 var d = x2 + y2;
 
@@ -792,18 +835,6 @@ namespace Keyboard_Inspector {
                 return;
             }
 
-            double sx = ax.ValueToPixelPosition(win.XValue);
-            double sy = ay.ValueToPixelPosition(win.YValues[0]);
-
-            double dx = sx - e.X;
-            double dy = sy - e.Y;
-
-            // TODO optimize by somehow reducing previous foreach space to this condition?
-            if (dx * dx + dy * dy > 800) {
-                chart_MouseLeave(sender, e);
-                return;
-            }
-
             var l = Controls.OfType<HTTransparentDarkLabel>().SingleOrDefault();
             if (!remake && l != null && l.Tag is DataPoint prev && prev == win) return;
 
@@ -813,7 +844,10 @@ namespace Keyboard_Inspector {
             l.AutoSize = true;
             l.Text = $"({win.XValue:0.###}, {win.YValues[0]:0.###})";
             l.Tag = win;
-            l.Location = PointToClient(c.PointToScreen(new Point((int)Math.Round(sx), (int)Math.Round(sy)))) + new Size(7, 10 - l.Height);
+            l.Location = PointToClient(c.PointToScreen(new Point(
+                (int)Math.Round(ax.ValueToPixelPosition(win.XValue)),
+                (int)Math.Round(ay.ValueToPixelPosition(win.YValues[0]))
+            ))) + new Size(7, 10 - l.Height);
 
             Controls.Add(l);
             Controls.SetChildIndex(l, 0);
