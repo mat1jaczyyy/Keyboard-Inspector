@@ -554,7 +554,7 @@ namespace Keyboard_Inspector {
             chart.Titles.SuspendUpdates();
 
             chart.Series.Clear();
-            chart.Series.Add(new Series() { ChartType = SeriesChartType.Line });
+            chart.Series.Add(new Series() { ChartType = SeriesChartType.FastLine });
 
             int i = 0;
             foreach (double v in data)
@@ -574,7 +574,6 @@ namespace Keyboard_Inspector {
             timeTransform = timeTransform?? DefaultTimeTransform;
             
             AlignedArrayDouble data = new AlignedArrayDouble(64, precision);
-
             foreach (var i in source) {
                 if (0 <= i && i < precision)
                     data[i] += 1;
@@ -932,17 +931,24 @@ namespace Keyboard_Inspector {
             Controls.Add(l);
             Controls.SetChildIndex(l, 0);
 
-            win.MarkerStyle = MarkerStyle.Circle;
-            win.MarkerSize = 6;
+            c.Series.Add(new Series() {
+                ChartType = SeriesChartType.Point,
+                Palette = c.Palette,
+                MarkerSize = 6,
+                MarkerStyle = MarkerStyle.Circle,
+                Points = { win }
+            });
         }
 
         private void chart_MouseLeave(object sender, EventArgs e) {
             var l = Controls.OfType<HTTransparentDarkLabel>().SingleOrDefault();
-            if (l == null) return;
+            if (l != null)
+                Controls.Remove(l);
 
-            (l.Tag as DataPoint).MarkerStyle = MarkerStyle.None;
-            Controls.Remove(l);
-            split.Panel1.Invalidate();
+            Chart c = sender as Chart;
+
+            if (c.Series.Count > 1)
+                c.Series.RemoveAt(1);
         }
 
         static double[] rampW = new double[] { 425, 1294, 1920 };
