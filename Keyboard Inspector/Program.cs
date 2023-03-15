@@ -5,14 +5,23 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using FFTW.NET;
 
 namespace Keyboard_Inspector {
     static class Program {
+        public static readonly string DataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Keyboard Inspector");
+        public static readonly string WisdomFile = Path.Combine(DataDir, "wisdom");
+
         public static string[] Args = null;
 
         [STAThread]
         static void Main(string[] args) {
             Args = args;
+
+            if (!Directory.Exists(DataDir))
+                Directory.CreateDirectory(DataDir);
+
+            DFT.Wisdom.Import(WisdomFile);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

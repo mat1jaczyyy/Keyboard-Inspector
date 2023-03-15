@@ -1118,7 +1118,7 @@ namespace Keyboard_Inspector {
             this.tbPrecision.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.tbPrecision.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.tbPrecision.Location = new System.Drawing.Point(162, 26);
-            this.tbPrecision.MaxLength = 5;
+            this.tbPrecision.MaxLength = 6;
             this.tbPrecision.Name = "tbPrecision";
             this.tbPrecision.Size = new System.Drawing.Size(56, 20);
             this.tbPrecision.TabIndex = 7;
