@@ -67,6 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Benchmark.cs" />
     <Compile Include="HTTransparentDarkLabel.cs">
       <SubType>Component</SubType>
     </Compile>

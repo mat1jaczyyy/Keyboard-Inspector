@@ -6,8 +6,10 @@ using System.IO;
 using System.Linq;
 using System.Security.Permissions;
 using System.Windows.Forms;
-using Control = System.Windows.Forms.Control;
 using System.Windows.Forms.DataVisualization.Charting;
+
+using Control = System.Windows.Forms.Control;
+using Series = System.Windows.Forms.DataVisualization.Charting.Series;
 
 using DarkUI.Controls;
 using DarkUI.Forms;
@@ -89,7 +91,7 @@ namespace Keyboard_Inspector {
 
             labelN.Text = result?.Events.Count.ToString();
 
-            CreateCharts();
+            ProcessData();
         }
 
         void rec_Click(object sender, EventArgs e) {
@@ -419,8 +421,10 @@ namespace Keyboard_Inspector {
                 ?.Select((x, i) => x.Time - result.Events[i].Time)
                 ?.ToList();
 
-        IEnumerable<int> GetDiffs()
-            => deltaCache.Select(i => (int)Math.Round(i * precision));
+        IEnumerable<int> GetDiffs() {
+            for (int i = 0; i < deltaCache.Count; i++)
+                yield return (int)Math.Round(deltaCache[i] * precision);
+        }
 
         IEnumerable<int> GetCompound() {
             if (result == null) yield break;
@@ -437,8 +441,10 @@ namespace Keyboard_Inspector {
             }
         }
 
-        IEnumerable<int> GetCircular()
-            => result?.Events.Select(x => ((int)Math.Round(x.Time * precision)) % precision);
+        IEnumerable<int> GetCircular() {
+            for (int i = 0; i < result.Events.Count; i++)
+                yield return ((int)Math.Round(result.Events[i].Time * precision)) % precision;
+        }
             
         void RunFitter(int col) {
             Control stddevCtrl = fitter.GetControlFromPosition(col, 1);
@@ -520,7 +526,9 @@ namespace Keyboard_Inspector {
         }
 
         void DrawGraph(Chart chart, IEnumerable<double> data, string title, double xFactor = 1) {
-            chart.Series[0].Points.Clear();
+            chart.Series.Clear();
+            chart.Series.Add(new Series() { ChartType = SeriesChartType.Line });
+            chart.Series.SuspendUpdates();
 
             int i = 0;
             foreach (double v in data)
@@ -528,7 +536,15 @@ namespace Keyboard_Inspector {
 
             chart.Titles[0].Text = title;
 
+            chartBench.Tick("Points added");
+
+            chart.Series.ResumeUpdates();
+
+            chartBench.Tick("Updates resumed");
+
             ResizeChart(chart);
+
+            chartBench.Tick("Resized (invalidated)");
         }
 
         Dictionary<Chart, double[]> beforeHPS = new Dictionary<Chart, double[]>();
@@ -538,28 +554,57 @@ namespace Keyboard_Inspector {
             
             Complex32[] data = new Complex32[precision];
 
-            foreach (var g in source.GroupBy(i => i).Where(i => i.Key < precision))
-                data[g.Key] = g.Count();
+            chartBench.Tick("Prepared");
+            foreach (var i in source) {
+                if (0 <= i && i < precision)
+                    data[i] += 1;
+            }
+
+            chartBench.Tick("Data counted");
 
             DrawGraph(timeDomain, timeTransform(data.Select(i => (double)i.Real)), $"{(timeDomain.Tag as Scope).BaseTitle} (time domain)", 1000.0 / precision);
+
+            chartBench.Tick("DrawGraph TimeDomain done");
+
             (timeDomain.Tag as Scope).SetBetween(0, 100, timeDomain.Series[0].Points.Last().XValue);
             ChartApplyScope(timeDomain);
             UpdateScroll(timeDomain);
 
+            chartBench.Tick("Scope/Scroll adjusted");
+
             Fourier.Forward(data);
-            double[] isolated = data.Take(data.Length / 2 + 1).Select(i => (double)i.Magnitude).ToArray();
+
+            chartBench.Tick("FFT done");
+
+            double[] isolated = new double[data.Length / 2 + 1];
+            for (int i = 0; i < isolated.Length; i++)
+                isolated[i] = data[i].Magnitude;
+
+            chartBench.Tick("Magnitude isolated");
 
             HighPass(isolated);
-                
+
+            chartBench.Tick("HighPass applied");
+
             beforeHPS[freqDomain] = isolated.ToArray();
+
+            chartBench.Tick("beforeHPS copy cached");
+
             RunFromHPS(freqDomain);
         }
 
         void RunFromHPS(Chart freqDomain) {
             double[] data = beforeHPS[freqDomain].ToArray();
 
+            chartBench.Tick("beforeHPS copy retrieved");
+
             HarmonicProduct(data);
+
+            chartBench.Tick("HPS applied");
+
             Normalize(data);
+
+            chartBench.Tick("Y-axis normalized");
 
             double hpsFactor = 1.0 / (hpsIterations + 1);
 
@@ -567,10 +612,17 @@ namespace Keyboard_Inspector {
             if (EstimatePeak(data, out int result))
                 estimate = $" - peak at {(int)Math.Round(result * hpsFactor)} Hz";
 
+            chartBench.Tick("Peak estimated");
+
             DrawGraph(freqDomain, data, $"{(freqDomain.Tag as Scope).BaseTitle} (frequency domain{estimate})", hpsFactor);
+
+            chartBench.Tick("DrawGraph FreqDomain done");
+
             (freqDomain.Tag as Scope).Reset();
             ChartApplyScope(freqDomain);
             UpdateScroll(freqDomain);
+
+            chartBench.Tick("Scope/Scroll adjusted");
         }
 
         bool silentAnalysis = false;
@@ -592,41 +644,56 @@ namespace Keyboard_Inspector {
         int hpsIterations => (int)hps.Value;
         List<double> deltaCache;
 
-        void CreateCharts() {
-            foreach (var chart in tlpCharts.Controls.OfType<Panel>().SelectMany(i => i.Controls.OfType<Chart>())) {
-                chart.Series[0].Points.Clear();
-                (chart.Tag as Scope).Reset();
-                UpdateScroll(chart);
+        Benchmark chartBench;
+
+        void ProcessData() {
+            if (hasResult) {
+                CalcDelta();
+
+                for (int i = 1; i < fitter.ColumnCount; i++)
+                    RunFitter(i);
             }
 
-            if (!hasResult) return;
+            CreateCharts();
+        }
 
-            int.TryParse(tbPrecision.Text, out precision);
-
-            CalcDelta();
-
-            for (int i = 1; i < fitter.ColumnCount; i++)
-                RunFitter(i);
-
-            if (precision <= 0) return;
-
-            RunGraphJob(GetDiffs(), chartDiffs, chartDiffsFreq);
-            RunGraphJob(GetCompound(), chartCompound, chartCompoundFreq);
-            RunGraphJob(GetCircular(), chartCircular, chartCircularFreq, arr => {
-                double max = double.MinValue;
-                int rot = -1;
-
-                int i = 0;
-                foreach (double v in arr) {
-                    if (v > max) {
-                        max = v;
-                        rot = i;
-                    }
-                    i++;
+        void CreateCharts() {
+            using (chartBench = new Benchmark()) {
+                foreach (var chart in tlpCharts.Controls.OfType<Panel>().SelectMany(i => i.Controls.OfType<Chart>())) {
+                    chart.Series.Clear();
+                    (chart.Tag as Scope).Reset();
+                    UpdateScroll(chart);
                 }
 
-                return arr.Concat(arr).Skip(rot).Take(i);
-            });
+                if (!hasResult) return;
+
+                int.TryParse(tbPrecision.Text, out precision);
+                
+                chartBench.Tick("Prep Done");
+
+                if (precision <= 0) return;
+
+                RunGraphJob(GetDiffs(), chartDiffs, chartDiffsFreq);
+                chartBench.Tick("DiffsJob Done");
+                RunGraphJob(GetCompound(), chartCompound, chartCompoundFreq);
+                chartBench.Tick("CompoundJob Done");
+                RunGraphJob(GetCircular(), chartCircular, chartCircularFreq, arr => {
+                    double max = double.MinValue;
+                    int rot = -1;
+
+                    int i = 0;
+                    foreach (double v in arr) {
+                        if (v > max) {
+                            max = v;
+                            rot = i;
+                        }
+                        i++;
+                    }
+
+                    return arr.Concat(arr).Skip(rot).Take(i);
+                });
+                chartBench.Tick("CircularJob Done");
+            }
         }
 
         private void precisionDouble_Click(object sender, EventArgs e) {
@@ -659,6 +726,7 @@ namespace Keyboard_Inspector {
         void ChartApplyScope(Chart c) {
             Axis a = c.ChartAreas[0].AxisX;
 
+            if (c.Series.Count == 0) return;
             if (c.Series[0].Points.Count == 0) return;
 
             double max = c.Series[0].Points.Last().XValue;
@@ -788,6 +856,9 @@ namespace Keyboard_Inspector {
 
         void chart_MouseMove(object sender, MouseEventArgs e, bool remake) {
             Chart c = sender as Chart;
+
+            if (c.Series.Count == 0) return;
+            if (c.Series[0].Points.Count == 0) return;
 
             Axis ax = c.ChartAreas[0].AxisX;
             Axis ay = c.ChartAreas[0].AxisY;

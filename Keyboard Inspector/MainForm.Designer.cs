@@ -26,22 +26,16 @@ namespace Keyboard_Inspector {
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Title title1 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Title title3 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Title title4 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea5 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Title title5 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.Title title6 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.rec = new DarkUI.Controls.DarkButton();
@@ -309,10 +303,6 @@ namespace Keyboard_Inspector {
             this.chartDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartDiffs.Location = new System.Drawing.Point(0, 0);
             this.chartDiffs.Name = "chartDiffs";
-            series1.ChartArea = "area";
-            series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series1.Name = "series";
-            this.chartDiffs.Series.Add(series1);
             this.chartDiffs.Size = new System.Drawing.Size(425, 185);
             this.chartDiffs.TabIndex = 1;
             this.chartDiffs.Tag = "Differences between consecutive events";
@@ -387,10 +377,6 @@ namespace Keyboard_Inspector {
             this.chartCompound.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartCompound.Location = new System.Drawing.Point(0, 0);
             this.chartCompound.Name = "chartCompound";
-            series2.ChartArea = "area";
-            series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series2.Name = "series";
-            this.chartCompound.Series.Add(series2);
             this.chartCompound.Size = new System.Drawing.Size(425, 185);
             this.chartCompound.TabIndex = 1;
             this.chartCompound.Tag = "Differences between all events";
@@ -465,10 +451,6 @@ namespace Keyboard_Inspector {
             this.chartCircular.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartCircular.Location = new System.Drawing.Point(0, 0);
             this.chartCircular.Name = "chartCircular";
-            series3.ChartArea = "area";
-            series3.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series3.Name = "series";
-            this.chartCircular.Series.Add(series3);
             this.chartCircular.Size = new System.Drawing.Size(426, 185);
             this.chartCircular.TabIndex = 1;
             this.chartCircular.Tag = "Events wrapped around a second";
@@ -545,10 +527,6 @@ namespace Keyboard_Inspector {
             this.chartDiffsFreq.Location = new System.Drawing.Point(0, 0);
             this.chartDiffsFreq.Name = "chartDiffsFreq";
             this.chartDiffsFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
-            series4.ChartArea = "area";
-            series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series4.Name = "series";
-            this.chartDiffsFreq.Series.Add(series4);
             this.chartDiffsFreq.Size = new System.Drawing.Size(425, 185);
             this.chartDiffsFreq.TabIndex = 1;
             this.chartDiffsFreq.Tag = "Differences between consecutive events";
@@ -625,10 +603,6 @@ namespace Keyboard_Inspector {
             this.chartCompoundFreq.Location = new System.Drawing.Point(0, 0);
             this.chartCompoundFreq.Name = "chartCompoundFreq";
             this.chartCompoundFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
-            series5.ChartArea = "area";
-            series5.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series5.Name = "series";
-            this.chartCompoundFreq.Series.Add(series5);
             this.chartCompoundFreq.Size = new System.Drawing.Size(425, 185);
             this.chartCompoundFreq.TabIndex = 1;
             this.chartCompoundFreq.Tag = "Differences between all events";
@@ -705,10 +679,6 @@ namespace Keyboard_Inspector {
             this.chartCircularFreq.Location = new System.Drawing.Point(0, 0);
             this.chartCircularFreq.Name = "chartCircularFreq";
             this.chartCircularFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
-            series6.ChartArea = "area";
-            series6.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Line;
-            series6.Name = "series";
-            this.chartCircularFreq.Series.Add(series6);
             this.chartCircularFreq.Size = new System.Drawing.Size(426, 185);
             this.chartCircularFreq.TabIndex = 1;
             this.chartCircularFreq.Tag = "Events wrapped around a second";
