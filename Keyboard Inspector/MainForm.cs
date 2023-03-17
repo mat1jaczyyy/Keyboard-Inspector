@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -31,6 +32,20 @@ namespace Keyboard_Inspector {
             base.WndProc(ref m);
         }
 
+        [DllImport("user32.dll")]
+        public static extern int SendMessage(IntPtr hWnd, Int32 wMsg, bool wParam, Int32 lParam);
+
+        private const int WM_SETREDRAW = 11;
+
+        // Necessary during long drawings to avoid WM_PAINT clogging main thread
+        public void SuspendDrawing() {
+            SendMessage(Handle, WM_SETREDRAW, false, 0);
+        }
+
+        public void ResumeDrawing() {
+            SendMessage(Handle, WM_SETREDRAW, true, 0);
+        }
+
         public MainForm() {
             if (Instance != null) throw new Exception("Can't have more than one MainForm");
             Instance = this;
@@ -42,6 +57,9 @@ namespace Keyboard_Inspector {
             key.DropDown.Closing += (s, e) => e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked;
 
             InitFileFormats();
+
+            allCharts = tlpCharts.Controls.OfType<Panel>().SelectMany(i => i.Controls.OfType<Chart>()).ToList();
+
             InitChartTags();
         }
 
@@ -81,6 +99,8 @@ namespace Keyboard_Inspector {
         }
 
         void resultLoaded() {
+            SuspendDrawing();
+
             string title = result?.GetTitle();
             Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
 
@@ -92,7 +112,17 @@ namespace Keyboard_Inspector {
 
             labelN.Text = result?.Events.Count.ToString();
 
-            ProcessData();
+            if (hasResult) {
+                CalcDelta();
+
+                for (int i = 1; i < fitter.ColumnCount; i++)
+                    RunFitter(i);
+            }
+
+            CreateCharts();
+
+            ResumeDrawing();
+            Refresh();
         }
 
         void rec_Click(object sender, EventArgs e) {
@@ -550,22 +580,29 @@ namespace Keyboard_Inspector {
         }
 
         void DrawGraph(Chart chart, IEnumerable<double> data, string title, double xFactor = 1) {
-            chart.Series.SuspendUpdates();
-            chart.Titles.SuspendUpdates();
-
-            chart.Series.Clear();
-            chart.Series.Add(new Series() { ChartType = SeriesChartType.FastLine });
+            var points = chart.Series[0].Points;
 
             int i = 0;
-            foreach (double v in data)
-                chart.Series[0].Points.AddXY(i++ * xFactor, v);
+            double max = 0;
+            foreach (double v in data) {
+                points[i].SetValueXY(i * xFactor, v);
+                if (v > max) max = v;
+                i++;
+            }
+
+            chart.Series[0].Tag = i - 1;
+
+            double last = points[i - 1].XValue;
+            double dummy = points[i - 1].XValue + 1000;
+
+            for (; i < points.Count; i++) {
+                if (points[i].XValue > last) break;
+                points[i].SetValueXY(dummy, 0);
+            }
 
             chart.Titles[0].Text = title;
 
-            chart.Series.ResumeUpdates();
-            chart.Titles.ResumeUpdates();
-
-            ResizeChart(chart);
+            chart.ChartAreas[0].RecalculateAxesScale();
         }
 
         Dictionary<Chart, double[]> beforeHPS = new Dictionary<Chart, double[]>();
@@ -580,11 +617,7 @@ namespace Keyboard_Inspector {
             }
 
             DrawGraph(timeDomain, timeTransform(data), $"{(timeDomain.Tag as Scope).BaseTitle} (time domain)", 1000.0 / precision);
-            (timeDomain.Tag as Scope).SetBetween(0, 100, timeDomain.Series[0].Points.Last().XValue);
-            ChartApplyScope(timeDomain);
-            UpdateScroll(timeDomain);
-
-            (timeDomain.Tag as Scope).SetBetween(0, 100, timeDomain.Series[0].Points.Last().XValue);
+            (timeDomain.Tag as Scope).SetBetween(0, 100, timeDomain.GetLast().XValue);
 
             AlignedArrayComplex freq = new AlignedArrayComplex(64, precision / 2 + 1);
             DFT.FFT(data, freq, PlannerFlags.Estimate, Environment.ProcessorCount);
@@ -615,20 +648,19 @@ namespace Keyboard_Inspector {
 
             DrawGraph(freqDomain, data, $"{(freqDomain.Tag as Scope).BaseTitle} (frequency domain{estimate})", hpsFactor);
             (freqDomain.Tag as Scope).Reset();
-            ChartApplyScope(freqDomain);
-            UpdateScroll(freqDomain);
         }
 
         bool silentAnalysis = false;
 
+        const int precisionLimit = 128000;
         void tbPrecision_TextChanged(object sender, EventArgs e) {
             if (silentAnalysis) return;
 
             int.TryParse(tbPrecision.Text, out precision);
 
-            if (precision > 128000) {
+            if (precision > precisionLimit) {
                 silentAnalysis = true;
-                tbPrecision.Text = (precision = 128000).ToString();
+                tbPrecision.Text = (precision = precisionLimit).ToString();
                 silentAnalysis = false;
             }
 
@@ -638,56 +670,56 @@ namespace Keyboard_Inspector {
         private void hps_ValueChanged(object sender, EventArgs e) {
             if (silentAnalysis) return;
 
-            RunFromHPS(chartDiffsFreq);
-            RunFromHPS(chartCompoundFreq);
-            RunFromHPS(chartCircularFreq);
+            RunChartsSuspendedAction(() => {
+                RunFromHPS(chartDiffsFreq);
+                RunFromHPS(chartCompoundFreq);
+                RunFromHPS(chartCircularFreq);
+            });
         }
 
         int precision = 4000;
         int hpsIterations => (int)hps.Value;
         List<double> deltaCache;
 
-        Benchmark chartBench;
+        List<Chart> allCharts;
 
-        void ProcessData() {
-            if (hasResult) {
-                CalcDelta();
+        void RunChartsSuspendedAction(Action action) {
+            SuspendDrawing();
 
-                for (int i = 1; i < fitter.ColumnCount; i++)
-                    RunFitter(i);
+            foreach (var chart in allCharts) {
+                chart.Series.SuspendUpdates();
+                chart.Titles.SuspendUpdates();
             }
 
-            CreateCharts();
+            action();
+
+            foreach (var chart in allCharts) {
+                ResizeChart(chart);
+                ChartApplyScope(chart);
+                UpdateScroll(chart);
+
+                chart.Series.ResumeUpdates();
+                chart.Titles.ResumeUpdates();
+            }
+
+            ResumeDrawing();
+            Refresh();
         }
 
-        IEnumerable<Chart> allCharts => tlpCharts.Controls.OfType<Panel>().SelectMany(i => i.Controls.OfType<Chart>());
-
         void CreateCharts() {
-            using (chartBench = new Benchmark()) {
-                foreach (var chart in allCharts) {
-                    chart.Series.Clear();
-                    (chart.Tag as Scope).Reset();
-                    UpdateScroll(chart);
-                }
+            if (!hasResult) return;
 
-                if (!hasResult) return;
+            int.TryParse(tbPrecision.Text, out precision);
 
-                int.TryParse(tbPrecision.Text, out precision);
-                
-                chartBench.Tick("Prep Done");
+            if (precision <= 0) return;
 
-                if (precision <= 0) return;
-
+            RunChartsSuspendedAction(() => {
                 RunGraphJob(GetDiffs(), chartDiffs, chartDiffsFreq);
-                chartBench.Tick("DiffsJob Done");
                 RunGraphJob(GetCompound(), chartCompound, chartCompoundFreq);
-                chartBench.Tick("CompoundJob Done");
                 RunGraphJob(GetCircular(), chartCircular, chartCircularFreq, CircularRotationFix);
-                chartBench.Tick("CircularJob Done");
+            });
 
-                DFT.Wisdom.Export(Program.WisdomFile);
-                chartBench.Tick("Wisdom exported");
-            }
+            DFT.Wisdom.Export(Program.WisdomFile);
         }
 
         private void precisionDouble_Click(object sender, EventArgs e) {
@@ -710,10 +742,21 @@ namespace Keyboard_Inspector {
                 return Math.Pow(2, i - 4) * 125;
             });
 
-            foreach (Chart c in tlpCharts.Controls.OfType<Panel>().SelectMany(i => i.Controls.OfType<Chart>())) {
+            foreach (Chart c in allCharts) {
                 c.Tag = new Scope(c.Palette == ChartColorPalette.EarthTones? FreqInterval : TimeInterval) {
                     BaseTitle = c.Tag as string
                 };
+
+                c.Series.SuspendUpdates();
+                c.Series.Add(new Series() { ChartType = SeriesChartType.FastLine });
+
+                var points = c.Series[0].Points;
+                int cnt = tlpCharts.GetRow(c) == 1? (precisionLimit / 2 + 1) : precisionLimit;
+
+                for (int i = 0; i < cnt; i++)
+                    points.AddXY(precisionLimit + 1000, 0);
+
+                c.Series.ResumeUpdates();
             }
         }
 
@@ -723,7 +766,7 @@ namespace Keyboard_Inspector {
             if (c.Series.Count == 0) return;
             if (c.Series[0].Points.Count == 0) return;
 
-            double max = c.Series[0].Points.Last().XValue;
+            double max = c.GetLast().XValue;
 
             Scope scope = c.Tag as Scope;
 
@@ -814,13 +857,13 @@ namespace Keyboard_Inspector {
             }
         }
 
-        int BinarySearchX(double val, DataPointCollection arr) {
+        int BinarySearchX(double val, DataPointCollection arr, int end) {
             if (arr.Count == 0) return -1;
-            if (arr[0].XValue >= val) return 0;
-            if (arr[arr.Count - 1].XValue <= val) return arr.Count - 1;
 
             int start = 0;
-            int end = arr.Count - 1;
+
+            if (arr[start].XValue >= val) return 0;
+            if (arr[end].XValue <= val) return end;
 
             while (start <= end) {
                 int mid = (start + end) / 2;
@@ -868,8 +911,9 @@ namespace Keyboard_Inspector {
                 return;
             }
 
-            var series = c.Series[0].Points;
-            
+            var points = c.Series[0].Points;
+            int last = c.GetLastIndex();
+
             // Hacky way to get XValue size of radius
             var r = ax.PixelPositionToValue(hoverRadius) - ax.PixelPositionToValue(0);
 
@@ -880,7 +924,7 @@ namespace Keyboard_Inspector {
             // Discard values that are too far away to match
             double lowest = Math.Max(ax.Minimum, x - r);
             double highest = Math.Min(ax.Maximum, x + r);
-            int start = BinarySearchX(lowest, series);
+            int start = BinarySearchX(lowest, points, last);
 
             if (start == -1) {
                 chart_MouseLeave(sender, e);
@@ -891,8 +935,8 @@ namespace Keyboard_Inspector {
             DataPoint win = null;
 
             // foreach (var p in series.Skip(start)) is really slow here for some reason, keep the regular loop
-            for (int i = start; i < series.Count; i++) {
-                var p = series[i];
+            for (int i = start; i <= last; i++) {
+                var p = points[i];
 
                 if (p.XValue < lowest) continue;
                 if (p.XValue > highest) break;
@@ -1105,6 +1149,10 @@ namespace Keyboard_Inspector {
         }
 
         private void MainForm_Shown(object sender, EventArgs e) {
+            // Stupid hack to calculate PlotAreaPosition so Interval can be calculated before first chart draw...
+            foreach (var c in allCharts)
+                c.DrawToBitmap(new Bitmap(c.Width, c.Height), new Rectangle(0, 0, c.Width, c.Height));
+
             if (Program.Args.Length > 0)
                 LoadFile(Program.Args[0]);
         }

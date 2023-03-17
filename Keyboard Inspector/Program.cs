@@ -5,6 +5,8 @@ using System.Linq;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
+
 using FFTW.NET;
 
 namespace Keyboard_Inspector {
@@ -34,5 +36,11 @@ namespace Keyboard_Inspector {
             foreach (var i in c)
                 i.ToBinary(bw);
         }
+
+        public static int GetLastIndex(this Chart c)
+            => (int)c.Series[0].Tag;
+
+        public static DataPoint GetLast(this Chart c)
+            => c.Series[0].Points[c.GetLastIndex()];
     }
 }
