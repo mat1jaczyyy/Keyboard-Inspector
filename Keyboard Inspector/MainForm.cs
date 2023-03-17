@@ -44,6 +44,7 @@ namespace Keyboard_Inspector {
 
         public void ResumeDrawing() {
             SendMessage(Handle, WM_SETREDRAW, true, 0);
+            Refresh();
         }
 
         public MainForm() {
@@ -53,14 +54,22 @@ namespace Keyboard_Inspector {
             InitializeComponent();
 
             screen.AllowDrop = true;
-
             key.DropDown.Closing += (s, e) => e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked;
 
             InitFileFormats();
 
             allCharts = tlpCharts.Controls.OfType<Panel>().SelectMany(i => i.Controls.OfType<Chart>()).ToList();
-
             InitChartTags();
+        }
+
+        protected override void OnResizeBegin(EventArgs e) {
+            SuspendDrawing();
+            base.OnResizeBegin(e);
+        }
+
+        protected override void OnResizeEnd(EventArgs e) {
+            base.OnResizeEnd(e);
+            ResumeDrawing();
         }
 
         int elapsed;
@@ -122,7 +131,6 @@ namespace Keyboard_Inspector {
             CreateCharts();
 
             ResumeDrawing();
-            Refresh();
         }
 
         void rec_Click(object sender, EventArgs e) {
@@ -703,7 +711,6 @@ namespace Keyboard_Inspector {
             }
 
             ResumeDrawing();
-            Refresh();
         }
 
         void CreateCharts() {
@@ -836,7 +843,8 @@ namespace Keyboard_Inspector {
         private void chart_MouseDoubleClick(object sender, MouseEventArgs e) {
             if (e.Button != MouseButtons.Left) return;
 
-            var panel = (sender as Chart).Parent as Panel;
+            var chart = sender as Chart;
+            var panel = chart.Parent as Panel;
 
             if (panel.Parent == tlpCharts) {
                 panel.SuspendLayout();
@@ -1020,12 +1028,14 @@ namespace Keyboard_Inspector {
 
             c.Titles.ResumeUpdates();
             c.ChartAreas.ResumeUpdates();
-
-            c.Invalidate();
         }
 
-        private void chart_SizeChanged(object sender, EventArgs e)
-            => ResizeChart(sender as Chart);
+        private void chart_SizeChanged(object sender, EventArgs e) {
+            Chart chart = sender as Chart;
+
+            ResizeChart(chart);
+            ChartApplyScope(chart);
+        }
 
         FileFormat[] fileFormats;
         OpenFileDialog ofd;
