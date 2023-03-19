@@ -90,6 +90,7 @@ namespace Keyboard_Inspector {
             this.label19 = new DarkUI.Controls.DarkLabel();
             this.label20 = new DarkUI.Controls.DarkLabel();
             this.precisionPanel = new System.Windows.Forms.Panel();
+            this.lowCut = new DarkUI.Controls.DarkCheckBox();
             this.label25 = new DarkUI.Controls.DarkLabel();
             this.label24 = new DarkUI.Controls.DarkLabel();
             this.hps = new DarkUI.Controls.DarkNumericUpDown();
@@ -107,6 +108,7 @@ namespace Keyboard_Inspector {
             this.freeze = new System.Windows.Forms.ToolStripMenuItem();
             this.unhide = new System.Windows.Forms.ToolStripMenuItem();
             this.mainmenu = new DarkUI.Controls.DarkMenuStrip();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.screen)).BeginInit();
             this.keymenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
@@ -1018,6 +1020,8 @@ namespace Keyboard_Inspector {
             // 
             // precisionPanel
             // 
+            this.tlpMain.SetColumnSpan(this.precisionPanel, 2);
+            this.precisionPanel.Controls.Add(this.lowCut);
             this.precisionPanel.Controls.Add(this.label25);
             this.precisionPanel.Controls.Add(this.label24);
             this.precisionPanel.Controls.Add(this.hps);
@@ -1031,8 +1035,22 @@ namespace Keyboard_Inspector {
             this.precisionPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.precisionPanel.Location = new System.Drawing.Point(3, 3);
             this.precisionPanel.Name = "precisionPanel";
-            this.precisionPanel.Size = new System.Drawing.Size(425, 69);
+            this.precisionPanel.Size = new System.Drawing.Size(856, 69);
             this.precisionPanel.TabIndex = 5;
+            // 
+            // lowCut
+            // 
+            this.lowCut.AutoSize = true;
+            this.lowCut.Checked = true;
+            this.lowCut.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.lowCut.Location = new System.Drawing.Point(323, 26);
+            this.lowCut.Name = "lowCut";
+            this.lowCut.Size = new System.Drawing.Size(90, 17);
+            this.lowCut.TabIndex = 13;
+            this.lowCut.Text = "Low Cut Filter";
+            this.toolTip1.SetToolTip(this.lowCut, resources.GetString("lowCut.ToolTip"));
+            this.lowCut.UseMnemonic = false;
+            this.lowCut.CheckedChanged += new System.EventHandler(this.lowCut_CheckedChanged);
             // 
             // label25
             // 
@@ -1352,5 +1370,7 @@ namespace Keyboard_Inspector {
         private DarkUI.Controls.DarkScrollBar darkScrollBar5;
         private System.Windows.Forms.Panel panel4;
         private DarkUI.Controls.DarkScrollBar darkScrollBar4;
+        private DarkUI.Controls.DarkCheckBox lowCut;
+        private System.Windows.Forms.ToolTip toolTip1;
     }
 }

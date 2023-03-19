@@ -562,9 +562,11 @@ namespace Keyboard_Inspector {
             RunFitter(fitter.ColumnCount - 1);
         }
 
-        void HighPass(double[] data) {
+        void LowCut(double[] data) {
+            if (!lowCut.Checked) return;
+
             // https://www.desmos.com/calculator/yukhgjz5g9
-            for (int i = 0; i < Math.Min(30, data.Length); i++)
+            for (int i = 0; i < Math.Min(70, data.Length); i++)
                 data[i] /= 1 + Math.Pow(Math.E, -(i - 25) / 4.0);
         }
 
@@ -613,6 +615,7 @@ namespace Keyboard_Inspector {
             chart.ChartAreas[0].RecalculateAxesScale();
         }
 
+        Dictionary<Chart, double[]> beforeLowCut = new Dictionary<Chart, double[]>();
         Dictionary<Chart, double[]> beforeHPS = new Dictionary<Chart, double[]>();
 
         void RunGraphJob(IEnumerable<int> source, Chart timeDomain, Chart freqDomain, Func<AlignedArrayDouble, IEnumerable<double>> timeTransform = null) {
@@ -634,9 +637,17 @@ namespace Keyboard_Inspector {
             for (int i = 0; i < isolated.Length; i++)
                 isolated[i] = Math.Sqrt(freq[i].MagnitudeSquared());
 
-            HighPass(isolated);
+            beforeLowCut[freqDomain] = isolated.ToArray();
 
-            beforeHPS[freqDomain] = isolated.ToArray();
+            RunFromLowCut(freqDomain);
+        }
+
+        void RunFromLowCut(Chart freqDomain) {
+            double[] data = beforeLowCut[freqDomain].ToArray();
+
+            LowCut(data);
+
+            beforeHPS[freqDomain] = data.ToArray();
 
             RunFromHPS(freqDomain);
         }
@@ -682,6 +693,16 @@ namespace Keyboard_Inspector {
                 RunFromHPS(chartDiffsFreq);
                 RunFromHPS(chartCompoundFreq);
                 RunFromHPS(chartCircularFreq);
+            });
+        }
+
+        private void lowCut_CheckedChanged(object sender, EventArgs e) {
+            if (silentAnalysis) return;
+
+            RunChartsSuspendedAction(() => {
+                RunFromLowCut(chartDiffsFreq);
+                RunFromLowCut(chartCompoundFreq);
+                RunFromLowCut(chartCircularFreq);
             });
         }
 
