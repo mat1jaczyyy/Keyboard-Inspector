@@ -107,30 +107,27 @@ namespace Keyboard_Inspector {
             }
         }
 
-        void resultLoaded() {
-            SuspendDrawing();
+        void resultLoaded()
+            => RunSuspendedAction(() => {
+                string title = result?.GetTitle();
+                Text = (string.IsNullOrWhiteSpace(title) ? "" : $"{title} - ") + "Keyboard Inspector";
 
-            string title = result?.GetTitle();
-            Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
+                key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
+                save.Enabled = split.Visible = hasResult;
 
-            key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
-            save.Enabled = split.Visible = hasResult;
+                Redraw();
+                UpdateScroll(scroll, scope);
 
-            Redraw();
-            UpdateScroll(scroll, scope);
+                labelN.Text = result?.Events.Count.ToString();
 
-            labelN.Text = result?.Events.Count.ToString();
+                if (hasResult) {
+                    CalcDiffs();
+                    CalcCompound();
+                    CalcCircular();
+                }
 
-            if (hasResult) {
-                CalcDiffs();
-                CalcCompound();
-                CalcCircular();
-            }
-
-            CreateCharts();
-
-            ResumeDrawing();
-        }
+                CreateCharts();
+            });
 
         void rec_Click(object sender, EventArgs e) {
             status.TextAlign = ContentAlignment.TopRight;
@@ -431,23 +428,23 @@ namespace Keyboard_Inspector {
         private void screen_SizeChanged(object sender, EventArgs e)
             => Redraw();
 
-        bool EstimatePeak(IEnumerable<double> data, out int result) {
+        bool EstimatePeak(double[] data, out int result) {
             double max = double.MaxValue;
-            bool search = false;
             result = -1;
-            
+
             int i = 0;
-            foreach (var v in data) {
-                if (search) {
-                    if (v > max) {
-                        max = v;
-                        result = i;
-                    }
-                } else {
-                    if (v > max) search = true;
+            for (; i < data.Length; i++) {
+                double v = data[i];
+                bool brk = v > max;
+                max = v;
+                if (brk) break;
+            }
+            for (; i < data.Length; i++) {
+                double v = data[i];
+                if (v >= max) {
                     max = v;
+                    result = i;
                 }
-                i++;
             }
             
             return result != -1;
@@ -476,8 +473,7 @@ namespace Keyboard_Inspector {
                 }
             }
         }
-
-        // TODO this requires rotation fix, but it's fucked :/
+        
         List<double> cacheCircular;
         void CalcCircular() {
             cacheCircular = new List<double>(result.Events.Count);
@@ -508,41 +504,6 @@ namespace Keyboard_Inspector {
                 yield return arr[i];
         }
 
-        double FitterY(List<double> source, int hz) {
-            if (hz == 0 || source.Count < 2)
-                return double.NaN;
-
-            double ms = 1.0 / hz;
-            double half = ms / 2;
-            
-            // THIS IS BASICALLY DOING A DFT AND THEN DISCARDING IT FOR SOME BULLSHIT
-            // MAG => CONFIDENCE, ANG => PHASE
-            double ang = 0;
-            //if (source == cacheCircular) {// && ((hz > 990 && hz < 1010) || (hz > 490 && hz < 520))) {
-                double x = 0, y = 0;
-                for (int i = 0; i < source.Count; i++) {
-                    x += Math.Cos(source[i] % ms * hz * Math.PI * 2);
-                    y += Math.Sin(source[i] % ms * hz * Math.PI * 2);
-                }
-                x /= source.Count;
-                y /= source.Count;
-                double mag = Math.Sqrt(x * x + y * y);
-                ang = Math.Atan2(y, x) / Math.PI / 2;
-                ang = (ang + 1) % 1;
-                ang /= hz;
-                //Console.WriteLine($"{hz} => {mag:0.000000} {ang:0.000000}");
-            //}
-            return mag;
-            double stddev = 0;
-            // TODO: how do i know i can say i'm good with 1000?
-            int count = Math.Min(1000, source.Count);
-            for (int i = 0; i < count; i++) {
-                double v = (source[i] - ang + ms + half) % ms - half;
-                stddev += v * v;
-            }
-            return 1 / (Math.Sqrt(stddev) * hz);
-        }
-
         void LowCut(double[] data) {
             if (!lowCut.Checked) return;
 
@@ -570,7 +531,7 @@ namespace Keyboard_Inspector {
                 data[i] /= max;
         }
 
-        void DrawGraph(Chart chart, IEnumerable<double> data, string title, double xFactor = 1) {
+        void DrawGraph(Chart chart, IEnumerable<double> data, double xFactor = 1, string estimate = "") {
             var points = chart.Series[0].Points;
 
             int i = 0;
@@ -591,15 +552,19 @@ namespace Keyboard_Inspector {
                 points[i].SetValueXY(dummy, 0);
             }
 
-            chart.Titles[0].Text = title;
+            Scope scope = chart.Tag as Scope;
+            string title = $"{scope.BaseTitle} ({scope.SecondaryTitle}{estimate})";
 
+            chart.Titles[0].Text = title;
             chart.ChartAreas[0].RecalculateAxesScale();
+
+            scope.SetToDefault();
         }
 
         Dictionary<Chart, double[]> beforeLowCut = new Dictionary<Chart, double[]>();
         Dictionary<Chart, double[]> beforeHPS = new Dictionary<Chart, double[]>();
 
-        void RunGraphJob(List<double> source, Chart timeChart, Chart freqChart, Chart fitterChart, Func<AlignedArrayDouble, IEnumerable<double>> timeTransform = null) {
+        void RunGraphJob(List<double> source, Chart timeChart, Chart freqChart, Func<AlignedArrayDouble, IEnumerable<double>> timeTransform = null) {
             timeTransform = timeTransform?? DefaultTimeTransform;
             
             AlignedArrayDouble data = new AlignedArrayDouble(64, precision);
@@ -609,10 +574,7 @@ namespace Keyboard_Inspector {
                     data[(int)Math.Round(v * precision)] += 1;
             }
 
-            // TODO after circular rotation bug is fixed, timetransform not needed, generalize drawgraph call
-            Scope scope = timeChart.Tag as Scope;
-            DrawGraph(timeChart, timeTransform(data), $"{scope.BaseTitle} ({scope.SecondaryTitle})", 1000.0 / precision);
-            scope.SetToDefault();
+            DrawGraph(timeChart, timeTransform(data), 1000.0 / precision);
 
             AlignedArrayComplex input = new AlignedArrayComplex(64, precision / 2 + 1);
             DFT.FFT(data, input, PlannerFlags.Estimate, Environment.ProcessorCount);
@@ -622,18 +584,7 @@ namespace Keyboard_Inspector {
                 freq[i] = Math.Sqrt(input[i].MagnitudeSquared());
 
             beforeLowCut[freqChart] = freq;
-
-            // TODO 10001
-            // TODO only recalculate fitter when precision has changed here
-            var fitter = Enumerable.Range(0, 10001).Select(i => FitterY(source, i)).ToArray();
-
-            beforeLowCut[fitterChart] = fitter;
-
-            // TODO fitter before lowcut should be processed somehow as it's floating above 0
-            // fix this after fixing circular rotation bug
-
             RunFromLowCut(freqChart);
-            RunFromLowCut(fitterChart);
         }
 
         void RunFromLowCut(Chart chart) {
@@ -659,10 +610,7 @@ namespace Keyboard_Inspector {
             if (EstimatePeak(data, out int result))
                 estimate = $" - peak at {(int)Math.Round(result * hpsFactor)} Hz";
 
-            Scope scope = chart.Tag as Scope;
-
-            DrawGraph(chart, data, $"{scope.BaseTitle} ({scope.SecondaryTitle}{estimate})", hpsFactor);
-            scope.SetToDefault();
+            DrawGraph(chart, data, hpsFactor, estimate);
         }
 
         bool silentAnalysis = false;
@@ -687,11 +635,8 @@ namespace Keyboard_Inspector {
 
             RunChartsSuspendedAction(() => {
                 RunFromLowCut(chartDiffsFreq);
-                RunFromLowCut(chartDiffsFitter);
                 RunFromLowCut(chartCompoundFreq);
-                RunFromLowCut(chartCompoundFitter);
                 RunFromLowCut(chartCircularFreq);
-                RunFromLowCut(chartCircularFitter);
             });
         }
 
@@ -700,11 +645,8 @@ namespace Keyboard_Inspector {
 
             RunChartsSuspendedAction(() => {
                 RunFromHPS(chartDiffsFreq);
-                RunFromHPS(chartDiffsFitter);
                 RunFromHPS(chartCompoundFreq);
-                RunFromHPS(chartCompoundFitter);
                 RunFromHPS(chartCircularFreq);
-                RunFromHPS(chartCircularFitter);
             });
         }
 
@@ -713,27 +655,37 @@ namespace Keyboard_Inspector {
 
         List<Chart> allCharts;
 
-        void RunChartsSuspendedAction(Action action) {
-            SuspendDrawing();
+        void RunSuspendedAction(Action action) {
+            try {
+                SuspendDrawing();
+                action();
 
-            foreach (var chart in allCharts) {
-                chart.Series.SuspendUpdates();
-                chart.Titles.SuspendUpdates();
+            } finally {
+                ResumeDrawing();
             }
-
-            action();
-
-            foreach (var chart in allCharts) {
-                ResizeChart(chart);
-                ChartApplyScope(chart);
-                UpdateScroll(chart);
-
-                chart.Series.ResumeUpdates();
-                chart.Titles.ResumeUpdates();
-            }
-
-            ResumeDrawing();
         }
+
+        void RunChartsSuspendedAction(Action action)
+            => RunSuspendedAction(() => {
+                try {
+                    foreach (var chart in allCharts) {
+                        chart.Series.SuspendUpdates();
+                        chart.Titles.SuspendUpdates();
+                    }
+                    action();
+
+                } finally {
+
+                    foreach (var chart in allCharts) {
+                        ResizeChart(chart);
+                        ChartApplyScope(chart);
+                        UpdateScroll(chart);
+
+                        chart.Series.ResumeUpdates();
+                        chart.Titles.ResumeUpdates();
+                    }
+                }
+            });
 
         void CreateCharts() {
             if (!hasResult) return;
@@ -743,9 +695,9 @@ namespace Keyboard_Inspector {
             if (precision <= 0) return;
 
             RunChartsSuspendedAction(() => {
-                RunGraphJob(cacheDiffs, chartDiffs, chartDiffsFreq, chartDiffsFitter);
-                RunGraphJob(cacheCompound, chartCompound, chartCompoundFreq, chartCompoundFitter);
-                RunGraphJob(cacheCircular, chartCircular, chartCircularFreq, chartCircularFitter, CircularRotationFix);
+                RunGraphJob(cacheDiffs, chartDiffs, chartDiffsFreq);
+                RunGraphJob(cacheCompound, chartCompound, chartCompoundFreq);
+                RunGraphJob(cacheCircular, chartCircular, chartCircularFreq, CircularRotationFix);
             });
 
             DFT.Wisdom.Export(Program.WisdomFile);
@@ -771,14 +723,12 @@ namespace Keyboard_Inspector {
 
         string[] SecondaryTitles = new string[] {
             "time domain",
-            "frequency domain",
-            "variance-based"
+            "frequency domain"
         };
 
         Action<Scope>[] ScopeDefaults = new Action<Scope>[] {
             i => i.SetBetween(0, 100, i.Chart.GetLast().XValue),
-            i => i.Reset(),
-            i => i.SetBetween(0, 1000, i.Chart.GetLast().XValue)
+            i => i.Reset()
         };
 
         void InitChartTags() {
@@ -804,13 +754,10 @@ namespace Keyboard_Inspector {
                 c.Series.Add(new Series() { ChartType = SeriesChartType.FastLine });
 
                 var points = c.Series[0].Points;
-                int cnt = precisionLimit;
-                if (row == 1) cnt = precisionLimit / 2 + 1;
-                // TODO 10001
-                if (row == 2) cnt = 10001;
+                int cnt = row == 1? (precisionLimit / 2 + 1) : precisionLimit;
 
                 for (int i = 0; i < cnt; i++)
-                    points.AddXY(precisionLimit + 1000, 0);
+                    points.AddXY(cnt + 1000, 0);
 
                 c.Series.ResumeUpdates();
             }
