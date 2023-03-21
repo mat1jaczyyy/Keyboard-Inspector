@@ -37,6 +37,12 @@ namespace Keyboard_Inspector {
             System.Windows.Forms.DataVisualization.Charting.Title title5 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea6 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Title title6 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea7 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Title title7 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea8 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Title title8 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea9 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Title title9 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.rec = new DarkUI.Controls.DarkButton();
             this.t = new System.Windows.Forms.Timer(this.components);
@@ -66,29 +72,16 @@ namespace Keyboard_Inspector {
             this.panel6 = new System.Windows.Forms.Panel();
             this.chartCircularFreq = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.darkScrollBar6 = new DarkUI.Controls.DarkScrollBar();
+            this.panel7 = new System.Windows.Forms.Panel();
+            this.chartDiffsFitter = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.darkScrollBar7 = new DarkUI.Controls.DarkScrollBar();
+            this.panel8 = new System.Windows.Forms.Panel();
+            this.chartCompoundFitter = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.darkScrollBar8 = new DarkUI.Controls.DarkScrollBar();
+            this.panel9 = new System.Windows.Forms.Panel();
+            this.chartCircularFitter = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.darkScrollBar9 = new DarkUI.Controls.DarkScrollBar();
             this.tlpMain = new System.Windows.Forms.TableLayoutPanel();
-            this.fitter = new System.Windows.Forms.TableLayoutPanel();
-            this.label3 = new DarkUI.Controls.DarkLabel();
-            this.label2 = new DarkUI.Controls.DarkLabel();
-            this.label1 = new DarkUI.Controls.DarkLabel();
-            this.label5 = new DarkUI.Controls.DarkLabel();
-            this.label6 = new DarkUI.Controls.DarkLabel();
-            this.label7 = new DarkUI.Controls.DarkLabel();
-            this.label8 = new DarkUI.Controls.DarkLabel();
-            this.fitterCustomHz = new DarkUI.Controls.DarkTextBox();
-            this.label4 = new DarkUI.Controls.DarkLabel();
-            this.label9 = new DarkUI.Controls.DarkLabel();
-            this.label10 = new DarkUI.Controls.DarkLabel();
-            this.label11 = new DarkUI.Controls.DarkLabel();
-            this.label12 = new DarkUI.Controls.DarkLabel();
-            this.label13 = new DarkUI.Controls.DarkLabel();
-            this.label14 = new DarkUI.Controls.DarkLabel();
-            this.label15 = new DarkUI.Controls.DarkLabel();
-            this.label16 = new DarkUI.Controls.DarkLabel();
-            this.label17 = new DarkUI.Controls.DarkLabel();
-            this.label18 = new DarkUI.Controls.DarkLabel();
-            this.label19 = new DarkUI.Controls.DarkLabel();
-            this.label20 = new DarkUI.Controls.DarkLabel();
             this.precisionPanel = new System.Windows.Forms.Panel();
             this.lowCut = new DarkUI.Controls.DarkCheckBox();
             this.label25 = new DarkUI.Controls.DarkLabel();
@@ -128,8 +121,13 @@ namespace Keyboard_Inspector {
             ((System.ComponentModel.ISupportInitialize)(this.chartCompoundFreq)).BeginInit();
             this.panel6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chartCircularFreq)).BeginInit();
+            this.panel7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chartDiffsFitter)).BeginInit();
+            this.panel8.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chartCompoundFitter)).BeginInit();
+            this.panel9.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chartCircularFitter)).BeginInit();
             this.tlpMain.SuspendLayout();
-            this.fitter.SuspendLayout();
             this.precisionPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.hps)).BeginInit();
             this.mainmenu.SuspendLayout();
@@ -231,8 +229,8 @@ namespace Keyboard_Inspector {
             this.split.Panel2.Controls.Add(this.screen);
             this.split.Panel2.Controls.Add(this.scroll);
             this.split.Panel2MinSize = 125;
-            this.split.Size = new System.Drawing.Size(1294, 717);
-            this.split.SplitterDistance = 491;
+            this.split.Size = new System.Drawing.Size(1294, 787);
+            this.split.SplitterDistance = 561;
             this.split.TabIndex = 8;
             this.split.Visible = false;
             // 
@@ -248,15 +246,18 @@ namespace Keyboard_Inspector {
             this.tlpCharts.Controls.Add(this.panel4, 0, 1);
             this.tlpCharts.Controls.Add(this.panel5, 1, 1);
             this.tlpCharts.Controls.Add(this.panel6, 2, 1);
+            this.tlpCharts.Controls.Add(this.panel7, 0, 2);
+            this.tlpCharts.Controls.Add(this.panel8, 1, 2);
+            this.tlpCharts.Controls.Add(this.panel9, 2, 2);
             this.tlpCharts.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpCharts.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
             this.tlpCharts.Location = new System.Drawing.Point(0, 0);
             this.tlpCharts.Name = "tlpCharts";
-            this.tlpCharts.RowCount = 2;
-            this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 75F));
-            this.tlpCharts.Size = new System.Drawing.Size(1294, 416);
+            this.tlpCharts.RowCount = 3;
+            this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tlpCharts.Size = new System.Drawing.Size(1294, 486);
             this.tlpCharts.TabIndex = 0;
             // 
             // panel1
@@ -266,7 +267,7 @@ namespace Keyboard_Inspector {
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(3, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(425, 202);
+            this.panel1.Size = new System.Drawing.Size(425, 156);
             this.panel1.TabIndex = 9;
             // 
             // chartDiffs
@@ -306,9 +307,8 @@ namespace Keyboard_Inspector {
             this.chartDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartDiffs.Location = new System.Drawing.Point(0, 0);
             this.chartDiffs.Name = "chartDiffs";
-            this.chartDiffs.Size = new System.Drawing.Size(425, 185);
+            this.chartDiffs.Size = new System.Drawing.Size(425, 139);
             this.chartDiffs.TabIndex = 1;
-            this.chartDiffs.Tag = "Differences between consecutive events";
             title1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title1.Name = "Title1";
             title1.Position.Auto = false;
@@ -325,7 +325,7 @@ namespace Keyboard_Inspector {
             // darkScrollBar1
             // 
             this.darkScrollBar1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.darkScrollBar1.Location = new System.Drawing.Point(0, 185);
+            this.darkScrollBar1.Location = new System.Drawing.Point(0, 139);
             this.darkScrollBar1.Maximum = 1000000000;
             this.darkScrollBar1.Name = "darkScrollBar1";
             this.darkScrollBar1.ScrollOrientation = DarkUI.Controls.DarkScrollOrientation.Horizontal;
@@ -341,7 +341,7 @@ namespace Keyboard_Inspector {
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(434, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(425, 202);
+            this.panel2.Size = new System.Drawing.Size(425, 156);
             this.panel2.TabIndex = 9;
             // 
             // chartCompound
@@ -381,9 +381,8 @@ namespace Keyboard_Inspector {
             this.chartCompound.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartCompound.Location = new System.Drawing.Point(0, 0);
             this.chartCompound.Name = "chartCompound";
-            this.chartCompound.Size = new System.Drawing.Size(425, 185);
+            this.chartCompound.Size = new System.Drawing.Size(425, 139);
             this.chartCompound.TabIndex = 1;
-            this.chartCompound.Tag = "Differences between all events";
             title2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title2.Name = "Title1";
             title2.Position.Auto = false;
@@ -400,7 +399,7 @@ namespace Keyboard_Inspector {
             // darkScrollBar2
             // 
             this.darkScrollBar2.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.darkScrollBar2.Location = new System.Drawing.Point(0, 185);
+            this.darkScrollBar2.Location = new System.Drawing.Point(0, 139);
             this.darkScrollBar2.Maximum = 1000000000;
             this.darkScrollBar2.Name = "darkScrollBar2";
             this.darkScrollBar2.ScrollOrientation = DarkUI.Controls.DarkScrollOrientation.Horizontal;
@@ -416,7 +415,7 @@ namespace Keyboard_Inspector {
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel3.Location = new System.Drawing.Point(865, 3);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(426, 202);
+            this.panel3.Size = new System.Drawing.Size(426, 156);
             this.panel3.TabIndex = 9;
             // 
             // chartCircular
@@ -456,9 +455,8 @@ namespace Keyboard_Inspector {
             this.chartCircular.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartCircular.Location = new System.Drawing.Point(0, 0);
             this.chartCircular.Name = "chartCircular";
-            this.chartCircular.Size = new System.Drawing.Size(426, 185);
+            this.chartCircular.Size = new System.Drawing.Size(426, 139);
             this.chartCircular.TabIndex = 1;
-            this.chartCircular.Tag = "Events wrapped around a second";
             title3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title3.Name = "Title1";
             title3.Position.Auto = false;
@@ -475,7 +473,7 @@ namespace Keyboard_Inspector {
             // darkScrollBar3
             // 
             this.darkScrollBar3.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.darkScrollBar3.Location = new System.Drawing.Point(0, 185);
+            this.darkScrollBar3.Location = new System.Drawing.Point(0, 139);
             this.darkScrollBar3.Maximum = 1000000000;
             this.darkScrollBar3.Name = "darkScrollBar3";
             this.darkScrollBar3.ScrollOrientation = DarkUI.Controls.DarkScrollOrientation.Horizontal;
@@ -489,9 +487,9 @@ namespace Keyboard_Inspector {
             this.panel4.Controls.Add(this.chartDiffsFreq);
             this.panel4.Controls.Add(this.darkScrollBar4);
             this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel4.Location = new System.Drawing.Point(3, 211);
+            this.panel4.Location = new System.Drawing.Point(3, 165);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(425, 202);
+            this.panel4.Size = new System.Drawing.Size(425, 156);
             this.panel4.TabIndex = 9;
             // 
             // chartDiffsFreq
@@ -533,9 +531,8 @@ namespace Keyboard_Inspector {
             this.chartDiffsFreq.Location = new System.Drawing.Point(0, 0);
             this.chartDiffsFreq.Name = "chartDiffsFreq";
             this.chartDiffsFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
-            this.chartDiffsFreq.Size = new System.Drawing.Size(425, 185);
+            this.chartDiffsFreq.Size = new System.Drawing.Size(425, 139);
             this.chartDiffsFreq.TabIndex = 1;
-            this.chartDiffsFreq.Tag = "Differences between consecutive events";
             title4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title4.Name = "Title1";
             title4.Position.Auto = false;
@@ -552,7 +549,7 @@ namespace Keyboard_Inspector {
             // darkScrollBar4
             // 
             this.darkScrollBar4.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.darkScrollBar4.Location = new System.Drawing.Point(0, 185);
+            this.darkScrollBar4.Location = new System.Drawing.Point(0, 139);
             this.darkScrollBar4.Maximum = 1000000000;
             this.darkScrollBar4.Name = "darkScrollBar4";
             this.darkScrollBar4.ScrollOrientation = DarkUI.Controls.DarkScrollOrientation.Horizontal;
@@ -566,9 +563,9 @@ namespace Keyboard_Inspector {
             this.panel5.Controls.Add(this.chartCompoundFreq);
             this.panel5.Controls.Add(this.darkScrollBar5);
             this.panel5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel5.Location = new System.Drawing.Point(434, 211);
+            this.panel5.Location = new System.Drawing.Point(434, 165);
             this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(425, 202);
+            this.panel5.Size = new System.Drawing.Size(425, 156);
             this.panel5.TabIndex = 9;
             // 
             // chartCompoundFreq
@@ -610,9 +607,8 @@ namespace Keyboard_Inspector {
             this.chartCompoundFreq.Location = new System.Drawing.Point(0, 0);
             this.chartCompoundFreq.Name = "chartCompoundFreq";
             this.chartCompoundFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
-            this.chartCompoundFreq.Size = new System.Drawing.Size(425, 185);
+            this.chartCompoundFreq.Size = new System.Drawing.Size(425, 139);
             this.chartCompoundFreq.TabIndex = 1;
-            this.chartCompoundFreq.Tag = "Differences between all events";
             title5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title5.Name = "Title1";
             title5.Position.Auto = false;
@@ -629,7 +625,7 @@ namespace Keyboard_Inspector {
             // darkScrollBar5
             // 
             this.darkScrollBar5.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.darkScrollBar5.Location = new System.Drawing.Point(0, 185);
+            this.darkScrollBar5.Location = new System.Drawing.Point(0, 139);
             this.darkScrollBar5.Maximum = 1000000000;
             this.darkScrollBar5.Name = "darkScrollBar5";
             this.darkScrollBar5.ScrollOrientation = DarkUI.Controls.DarkScrollOrientation.Horizontal;
@@ -643,9 +639,9 @@ namespace Keyboard_Inspector {
             this.panel6.Controls.Add(this.chartCircularFreq);
             this.panel6.Controls.Add(this.darkScrollBar6);
             this.panel6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel6.Location = new System.Drawing.Point(865, 211);
+            this.panel6.Location = new System.Drawing.Point(865, 165);
             this.panel6.Name = "panel6";
-            this.panel6.Size = new System.Drawing.Size(426, 202);
+            this.panel6.Size = new System.Drawing.Size(426, 156);
             this.panel6.TabIndex = 9;
             // 
             // chartCircularFreq
@@ -687,9 +683,8 @@ namespace Keyboard_Inspector {
             this.chartCircularFreq.Location = new System.Drawing.Point(0, 0);
             this.chartCircularFreq.Name = "chartCircularFreq";
             this.chartCircularFreq.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.EarthTones;
-            this.chartCircularFreq.Size = new System.Drawing.Size(426, 185);
+            this.chartCircularFreq.Size = new System.Drawing.Size(426, 139);
             this.chartCircularFreq.TabIndex = 1;
-            this.chartCircularFreq.Tag = "Events wrapped around a second";
             title6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
             title6.Name = "Title1";
             title6.Position.Auto = false;
@@ -706,7 +701,7 @@ namespace Keyboard_Inspector {
             // darkScrollBar6
             // 
             this.darkScrollBar6.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.darkScrollBar6.Location = new System.Drawing.Point(0, 185);
+            this.darkScrollBar6.Location = new System.Drawing.Point(0, 139);
             this.darkScrollBar6.Maximum = 1000000000;
             this.darkScrollBar6.Name = "darkScrollBar6";
             this.darkScrollBar6.ScrollOrientation = DarkUI.Controls.DarkScrollOrientation.Horizontal;
@@ -715,312 +710,250 @@ namespace Keyboard_Inspector {
             this.darkScrollBar6.ViewSize = 999999999;
             this.darkScrollBar6.ValueChanged += new System.EventHandler<DarkUI.Controls.ScrollValueEventArgs>(this.chart_Scroll);
             // 
+            // panel7
+            // 
+            this.panel7.Controls.Add(this.chartDiffsFitter);
+            this.panel7.Controls.Add(this.darkScrollBar7);
+            this.panel7.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel7.Location = new System.Drawing.Point(3, 327);
+            this.panel7.Name = "panel7";
+            this.panel7.Size = new System.Drawing.Size(425, 156);
+            this.panel7.TabIndex = 10;
+            // 
+            // chartDiffsFitter
+            // 
+            this.chartDiffsFitter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            chartArea7.AxisX.Interval = 50D;
+            chartArea7.AxisX.LabelAutoFitStyle = ((System.Windows.Forms.DataVisualization.Charting.LabelAutoFitStyles)((System.Windows.Forms.DataVisualization.Charting.LabelAutoFitStyles.IncreaseFont | System.Windows.Forms.DataVisualization.Charting.LabelAutoFitStyles.DecreaseFont)));
+            chartArea7.AxisX.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            chartArea7.AxisX.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            chartArea7.AxisX.LineWidth = 0;
+            chartArea7.AxisX.MajorGrid.Interval = 50D;
+            chartArea7.AxisX.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            chartArea7.AxisX.MajorTickMark.Interval = 50D;
+            chartArea7.AxisX.MajorTickMark.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            chartArea7.AxisX.Maximum = 500D;
+            chartArea7.AxisX.Minimum = 0D;
+            chartArea7.AxisX.MinorGrid.Interval = 10D;
+            chartArea7.AxisX.MinorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+            chartArea7.AxisY.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            chartArea7.AxisY.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+            chartArea7.AxisY.LineWidth = 0;
+            chartArea7.AxisY.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+            chartArea7.AxisY.MajorTickMark.LineColor = System.Drawing.Color.Transparent;
+            chartArea7.AxisY.Minimum = 0D;
+            chartArea7.AxisY.MinorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+            chartArea7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            chartArea7.InnerPlotPosition.Auto = false;
+            chartArea7.InnerPlotPosition.Height = 86F;
+            chartArea7.InnerPlotPosition.Width = 89F;
+            chartArea7.InnerPlotPosition.X = 9F;
+            chartArea7.Name = "area";
+            chartArea7.Position.Auto = false;
+            chartArea7.Position.Height = 89F;
+            chartArea7.Position.Width = 100F;
+            chartArea7.Position.Y = 11F;
+            this.chartDiffsFitter.ChartAreas.Add(chartArea7);
+            this.chartDiffsFitter.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartDiffsFitter.Location = new System.Drawing.Point(0, 0);
+            this.chartDiffsFitter.Name = "chartDiffsFitter";
+            this.chartDiffsFitter.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.Bright;
+            this.chartDiffsFitter.Size = new System.Drawing.Size(425, 139);
+            this.chartDiffsFitter.TabIndex = 1;
+            title7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            title7.Name = "Title1";
+            title7.Position.Auto = false;
+            title7.Position.Width = 94F;
+            title7.Position.X = 3F;
+            title7.Position.Y = 3F;
+            this.chartDiffsFitter.Titles.Add(title7);
+            this.chartDiffsFitter.SizeChanged += new System.EventHandler(this.chart_SizeChanged);
+            this.chartDiffsFitter.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
+            this.chartDiffsFitter.MouseLeave += new System.EventHandler(this.chart_MouseLeave);
+            this.chartDiffsFitter.MouseMove += new System.Windows.Forms.MouseEventHandler(this.chart_MouseMove);
+            this.chartDiffsFitter.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
+            // 
+            // darkScrollBar7
+            // 
+            this.darkScrollBar7.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.darkScrollBar7.Location = new System.Drawing.Point(0, 139);
+            this.darkScrollBar7.Maximum = 1000000000;
+            this.darkScrollBar7.Name = "darkScrollBar7";
+            this.darkScrollBar7.ScrollOrientation = DarkUI.Controls.DarkScrollOrientation.Horizontal;
+            this.darkScrollBar7.Size = new System.Drawing.Size(425, 17);
+            this.darkScrollBar7.TabIndex = 5;
+            this.darkScrollBar7.ViewSize = 999999999;
+            this.darkScrollBar7.ValueChanged += new System.EventHandler<DarkUI.Controls.ScrollValueEventArgs>(this.chart_Scroll);
+            // 
+            // panel8
+            // 
+            this.panel8.Controls.Add(this.chartCompoundFitter);
+            this.panel8.Controls.Add(this.darkScrollBar8);
+            this.panel8.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel8.Location = new System.Drawing.Point(434, 327);
+            this.panel8.Name = "panel8";
+            this.panel8.Size = new System.Drawing.Size(425, 156);
+            this.panel8.TabIndex = 11;
+            // 
+            // chartCompoundFitter
+            // 
+            this.chartCompoundFitter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            chartArea8.AxisX.Interval = 50D;
+            chartArea8.AxisX.LabelAutoFitStyle = ((System.Windows.Forms.DataVisualization.Charting.LabelAutoFitStyles)((System.Windows.Forms.DataVisualization.Charting.LabelAutoFitStyles.IncreaseFont | System.Windows.Forms.DataVisualization.Charting.LabelAutoFitStyles.DecreaseFont)));
+            chartArea8.AxisX.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            chartArea8.AxisX.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            chartArea8.AxisX.LineWidth = 0;
+            chartArea8.AxisX.MajorGrid.Interval = 50D;
+            chartArea8.AxisX.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            chartArea8.AxisX.MajorTickMark.Interval = 50D;
+            chartArea8.AxisX.MajorTickMark.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            chartArea8.AxisX.Maximum = 500D;
+            chartArea8.AxisX.Minimum = 0D;
+            chartArea8.AxisX.MinorGrid.Interval = 10D;
+            chartArea8.AxisX.MinorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+            chartArea8.AxisY.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            chartArea8.AxisY.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+            chartArea8.AxisY.LineWidth = 0;
+            chartArea8.AxisY.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+            chartArea8.AxisY.MajorTickMark.LineColor = System.Drawing.Color.Transparent;
+            chartArea8.AxisY.Minimum = 0D;
+            chartArea8.AxisY.MinorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+            chartArea8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            chartArea8.InnerPlotPosition.Auto = false;
+            chartArea8.InnerPlotPosition.Height = 86F;
+            chartArea8.InnerPlotPosition.Width = 89F;
+            chartArea8.InnerPlotPosition.X = 9F;
+            chartArea8.Name = "area";
+            chartArea8.Position.Auto = false;
+            chartArea8.Position.Height = 89F;
+            chartArea8.Position.Width = 100F;
+            chartArea8.Position.Y = 11F;
+            this.chartCompoundFitter.ChartAreas.Add(chartArea8);
+            this.chartCompoundFitter.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartCompoundFitter.Location = new System.Drawing.Point(0, 0);
+            this.chartCompoundFitter.Name = "chartCompoundFitter";
+            this.chartCompoundFitter.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.Bright;
+            this.chartCompoundFitter.Size = new System.Drawing.Size(425, 139);
+            this.chartCompoundFitter.TabIndex = 1;
+            title8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            title8.Name = "Title1";
+            title8.Position.Auto = false;
+            title8.Position.Width = 94F;
+            title8.Position.X = 3F;
+            title8.Position.Y = 3F;
+            this.chartCompoundFitter.Titles.Add(title8);
+            this.chartCompoundFitter.SizeChanged += new System.EventHandler(this.chart_SizeChanged);
+            this.chartCompoundFitter.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
+            this.chartCompoundFitter.MouseLeave += new System.EventHandler(this.chart_MouseLeave);
+            this.chartCompoundFitter.MouseMove += new System.Windows.Forms.MouseEventHandler(this.chart_MouseMove);
+            this.chartCompoundFitter.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
+            // 
+            // darkScrollBar8
+            // 
+            this.darkScrollBar8.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.darkScrollBar8.Location = new System.Drawing.Point(0, 139);
+            this.darkScrollBar8.Maximum = 1000000000;
+            this.darkScrollBar8.Name = "darkScrollBar8";
+            this.darkScrollBar8.ScrollOrientation = DarkUI.Controls.DarkScrollOrientation.Horizontal;
+            this.darkScrollBar8.Size = new System.Drawing.Size(425, 17);
+            this.darkScrollBar8.TabIndex = 5;
+            this.darkScrollBar8.ViewSize = 999999999;
+            this.darkScrollBar8.ValueChanged += new System.EventHandler<DarkUI.Controls.ScrollValueEventArgs>(this.chart_Scroll);
+            // 
+            // panel9
+            // 
+            this.panel9.Controls.Add(this.chartCircularFitter);
+            this.panel9.Controls.Add(this.darkScrollBar9);
+            this.panel9.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel9.Location = new System.Drawing.Point(865, 327);
+            this.panel9.Name = "panel9";
+            this.panel9.Size = new System.Drawing.Size(426, 156);
+            this.panel9.TabIndex = 12;
+            // 
+            // chartCircularFitter
+            // 
+            this.chartCircularFitter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            chartArea9.AxisX.Interval = 50D;
+            chartArea9.AxisX.LabelAutoFitStyle = ((System.Windows.Forms.DataVisualization.Charting.LabelAutoFitStyles)((System.Windows.Forms.DataVisualization.Charting.LabelAutoFitStyles.IncreaseFont | System.Windows.Forms.DataVisualization.Charting.LabelAutoFitStyles.DecreaseFont)));
+            chartArea9.AxisX.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            chartArea9.AxisX.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            chartArea9.AxisX.LineWidth = 0;
+            chartArea9.AxisX.MajorGrid.Interval = 50D;
+            chartArea9.AxisX.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            chartArea9.AxisX.MajorTickMark.Interval = 50D;
+            chartArea9.AxisX.MajorTickMark.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(20)))), ((int)(((byte)(20)))), ((int)(((byte)(20)))));
+            chartArea9.AxisX.Maximum = 500D;
+            chartArea9.AxisX.Minimum = 0D;
+            chartArea9.AxisX.MinorGrid.Interval = 10D;
+            chartArea9.AxisX.MinorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+            chartArea9.AxisY.LabelStyle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            chartArea9.AxisY.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+            chartArea9.AxisY.LineWidth = 0;
+            chartArea9.AxisY.MajorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+            chartArea9.AxisY.MajorTickMark.LineColor = System.Drawing.Color.Transparent;
+            chartArea9.AxisY.Minimum = 0D;
+            chartArea9.AxisY.MinorGrid.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(48)))), ((int)(((byte)(48)))), ((int)(((byte)(48)))));
+            chartArea9.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            chartArea9.InnerPlotPosition.Auto = false;
+            chartArea9.InnerPlotPosition.Height = 86F;
+            chartArea9.InnerPlotPosition.Width = 89F;
+            chartArea9.InnerPlotPosition.X = 9F;
+            chartArea9.Name = "area";
+            chartArea9.Position.Auto = false;
+            chartArea9.Position.Height = 89F;
+            chartArea9.Position.Width = 100F;
+            chartArea9.Position.Y = 11F;
+            this.chartCircularFitter.ChartAreas.Add(chartArea9);
+            this.chartCircularFitter.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartCircularFitter.Location = new System.Drawing.Point(0, 0);
+            this.chartCircularFitter.Name = "chartCircularFitter";
+            this.chartCircularFitter.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.Bright;
+            this.chartCircularFitter.Size = new System.Drawing.Size(426, 139);
+            this.chartCircularFitter.TabIndex = 1;
+            title9.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
+            title9.Name = "Title1";
+            title9.Position.Auto = false;
+            title9.Position.Width = 94F;
+            title9.Position.X = 3F;
+            title9.Position.Y = 3F;
+            this.chartCircularFitter.Titles.Add(title9);
+            this.chartCircularFitter.SizeChanged += new System.EventHandler(this.chart_SizeChanged);
+            this.chartCircularFitter.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.chart_MouseDoubleClick);
+            this.chartCircularFitter.MouseLeave += new System.EventHandler(this.chart_MouseLeave);
+            this.chartCircularFitter.MouseMove += new System.Windows.Forms.MouseEventHandler(this.chart_MouseMove);
+            this.chartCircularFitter.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.chart_MouseWheel);
+            // 
+            // darkScrollBar9
+            // 
+            this.darkScrollBar9.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.darkScrollBar9.Location = new System.Drawing.Point(0, 139);
+            this.darkScrollBar9.Maximum = 1000000000;
+            this.darkScrollBar9.Name = "darkScrollBar9";
+            this.darkScrollBar9.ScrollOrientation = DarkUI.Controls.DarkScrollOrientation.Horizontal;
+            this.darkScrollBar9.Size = new System.Drawing.Size(426, 17);
+            this.darkScrollBar9.TabIndex = 5;
+            this.darkScrollBar9.ViewSize = 999999999;
+            this.darkScrollBar9.ValueChanged += new System.EventHandler<DarkUI.Controls.ScrollValueEventArgs>(this.chart_Scroll);
+            // 
             // tlpMain
             // 
             this.tlpMain.ColumnCount = 3;
             this.tlpMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tlpMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tlpMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlpMain.Controls.Add(this.fitter, 2, 0);
             this.tlpMain.Controls.Add(this.precisionPanel, 0, 0);
             this.tlpMain.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.tlpMain.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
-            this.tlpMain.Location = new System.Drawing.Point(0, 416);
+            this.tlpMain.Location = new System.Drawing.Point(0, 486);
             this.tlpMain.Name = "tlpMain";
             this.tlpMain.RowCount = 1;
             this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tlpMain.Size = new System.Drawing.Size(1294, 75);
             this.tlpMain.TabIndex = 1;
             // 
-            // fitter
-            // 
-            this.fitter.ColumnCount = 7;
-            this.fitter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.fitter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.fitter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.fitter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.fitter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.fitter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.fitter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.fitter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.fitter.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.11111F));
-            this.fitter.Controls.Add(this.label3, 0, 1);
-            this.fitter.Controls.Add(this.label2, 0, 2);
-            this.fitter.Controls.Add(this.label1, 0, 0);
-            this.fitter.Controls.Add(this.label5, 2, 0);
-            this.fitter.Controls.Add(this.label6, 3, 0);
-            this.fitter.Controls.Add(this.label7, 4, 0);
-            this.fitter.Controls.Add(this.label8, 5, 0);
-            this.fitter.Controls.Add(this.fitterCustomHz, 6, 0);
-            this.fitter.Controls.Add(this.label4, 1, 0);
-            this.fitter.Controls.Add(this.label9, 1, 1);
-            this.fitter.Controls.Add(this.label10, 2, 1);
-            this.fitter.Controls.Add(this.label11, 3, 1);
-            this.fitter.Controls.Add(this.label12, 4, 1);
-            this.fitter.Controls.Add(this.label13, 5, 1);
-            this.fitter.Controls.Add(this.label14, 6, 1);
-            this.fitter.Controls.Add(this.label15, 6, 2);
-            this.fitter.Controls.Add(this.label16, 5, 2);
-            this.fitter.Controls.Add(this.label17, 4, 2);
-            this.fitter.Controls.Add(this.label18, 3, 2);
-            this.fitter.Controls.Add(this.label19, 2, 2);
-            this.fitter.Controls.Add(this.label20, 1, 2);
-            this.fitter.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fitter.Location = new System.Drawing.Point(865, 3);
-            this.fitter.Name = "fitter";
-            this.fitter.RowCount = 3;
-            this.fitter.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.fitter.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.fitter.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.fitter.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.fitter.Size = new System.Drawing.Size(426, 69);
-            this.fitter.TabIndex = 4;
-            // 
-            // label3
-            // 
-            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label3.Location = new System.Drawing.Point(3, 23);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(54, 23);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "stddev";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label2
-            // 
-            this.label2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label2.Location = new System.Drawing.Point(3, 46);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(54, 23);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "amount";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label1
-            // 
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label1.Location = new System.Drawing.Point(3, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(54, 23);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Hz";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label5
-            // 
-            this.label5.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label5.Location = new System.Drawing.Point(123, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(54, 23);
-            this.label5.TabIndex = 3;
-            this.label5.Text = "125";
-            this.label5.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label6
-            // 
-            this.label6.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label6.Location = new System.Drawing.Point(183, 0);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(54, 23);
-            this.label6.TabIndex = 3;
-            this.label6.Text = "250";
-            this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label7
-            // 
-            this.label7.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label7.Location = new System.Drawing.Point(243, 0);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(54, 23);
-            this.label7.TabIndex = 3;
-            this.label7.Text = "500";
-            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label8
-            // 
-            this.label8.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label8.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label8.Location = new System.Drawing.Point(303, 0);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(54, 23);
-            this.label8.TabIndex = 3;
-            this.label8.Text = "1000";
-            this.label8.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // fitterCustomHz
-            // 
-            this.fitterCustomHz.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
-            this.fitterCustomHz.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.fitterCustomHz.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fitterCustomHz.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.fitterCustomHz.Location = new System.Drawing.Point(363, 3);
-            this.fitterCustomHz.Name = "fitterCustomHz";
-            this.fitterCustomHz.Size = new System.Drawing.Size(60, 20);
-            this.fitterCustomHz.TabIndex = 4;
-            this.fitterCustomHz.Text = "2000";
-            this.fitterCustomHz.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.fitterCustomHz.TextChanged += new System.EventHandler(this.fitterCustomHz_TextChanged);
-            // 
-            // label4
-            // 
-            this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label4.Location = new System.Drawing.Point(63, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(54, 23);
-            this.label4.TabIndex = 3;
-            this.label4.Text = "62.5";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label9
-            // 
-            this.label9.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label9.Location = new System.Drawing.Point(63, 23);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(54, 23);
-            this.label9.TabIndex = 3;
-            this.label9.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label10
-            // 
-            this.label10.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label10.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label10.Location = new System.Drawing.Point(123, 23);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(54, 23);
-            this.label10.TabIndex = 3;
-            this.label10.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label11
-            // 
-            this.label11.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label11.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label11.Location = new System.Drawing.Point(183, 23);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(54, 23);
-            this.label11.TabIndex = 3;
-            this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label12
-            // 
-            this.label12.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label12.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label12.Location = new System.Drawing.Point(243, 23);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(54, 23);
-            this.label12.TabIndex = 3;
-            this.label12.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label13
-            // 
-            this.label13.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label13.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label13.Location = new System.Drawing.Point(303, 23);
-            this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(54, 23);
-            this.label13.TabIndex = 3;
-            this.label13.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label14
-            // 
-            this.label14.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label14.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label14.Location = new System.Drawing.Point(363, 23);
-            this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(60, 23);
-            this.label14.TabIndex = 3;
-            this.label14.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label15
-            // 
-            this.label15.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label15.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label15.Location = new System.Drawing.Point(363, 46);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(60, 23);
-            this.label15.TabIndex = 3;
-            this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label16
-            // 
-            this.label16.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label16.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label16.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label16.Location = new System.Drawing.Point(303, 46);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(54, 23);
-            this.label16.TabIndex = 3;
-            this.label16.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label17
-            // 
-            this.label17.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label17.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label17.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label17.Location = new System.Drawing.Point(243, 46);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(54, 23);
-            this.label17.TabIndex = 3;
-            this.label17.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label18
-            // 
-            this.label18.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label18.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label18.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label18.Location = new System.Drawing.Point(183, 46);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(54, 23);
-            this.label18.TabIndex = 3;
-            this.label18.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label19
-            // 
-            this.label19.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label19.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label19.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label19.Location = new System.Drawing.Point(123, 46);
-            this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(54, 23);
-            this.label19.TabIndex = 3;
-            this.label19.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // label20
-            // 
-            this.label20.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label20.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label20.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label20.Location = new System.Drawing.Point(63, 46);
-            this.label20.Name = "label20";
-            this.label20.Size = new System.Drawing.Size(54, 23);
-            this.label20.TabIndex = 3;
-            this.label20.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
             // precisionPanel
             // 
-            this.tlpMain.SetColumnSpan(this.precisionPanel, 2);
+            this.tlpMain.SetColumnSpan(this.precisionPanel, 3);
             this.precisionPanel.Controls.Add(this.lowCut);
             this.precisionPanel.Controls.Add(this.label25);
             this.precisionPanel.Controls.Add(this.label24);
@@ -1035,7 +968,7 @@ namespace Keyboard_Inspector {
             this.precisionPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.precisionPanel.Location = new System.Drawing.Point(3, 3);
             this.precisionPanel.Name = "precisionPanel";
-            this.precisionPanel.Size = new System.Drawing.Size(856, 69);
+            this.precisionPanel.Size = new System.Drawing.Size(1288, 69);
             this.precisionPanel.TabIndex = 5;
             // 
             // lowCut
@@ -1254,14 +1187,14 @@ namespace Keyboard_Inspector {
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1294, 741);
+            this.ClientSize = new System.Drawing.Size(1294, 811);
             this.Controls.Add(this.split);
             this.Controls.Add(this.rec);
             this.Controls.Add(this.status);
             this.Controls.Add(this.mainmenu);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.mainmenu;
-            this.MinimumSize = new System.Drawing.Size(1310, 780);
+            this.MinimumSize = new System.Drawing.Size(1310, 850);
             this.Name = "MainForm";
             this.Text = "Keyboard Inspector";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
@@ -1287,9 +1220,13 @@ namespace Keyboard_Inspector {
             ((System.ComponentModel.ISupportInitialize)(this.chartCompoundFreq)).EndInit();
             this.panel6.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.chartCircularFreq)).EndInit();
+            this.panel7.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.chartDiffsFitter)).EndInit();
+            this.panel8.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.chartCompoundFitter)).EndInit();
+            this.panel9.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.chartCircularFitter)).EndInit();
             this.tlpMain.ResumeLayout(false);
-            this.fitter.ResumeLayout(false);
-            this.fitter.PerformLayout();
             this.precisionPanel.ResumeLayout(false);
             this.precisionPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.hps)).EndInit();
@@ -1317,28 +1254,6 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.DataVisualization.Charting.Chart chartCircularFreq;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartCompoundFreq;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartDiffsFreq;
-        private System.Windows.Forms.TableLayoutPanel fitter;
-        private DarkUI.Controls.DarkLabel label1;
-        private DarkUI.Controls.DarkLabel label3;
-        private DarkUI.Controls.DarkLabel label2;
-        private DarkUI.Controls.DarkLabel label4;
-        private DarkUI.Controls.DarkLabel label5;
-        private DarkUI.Controls.DarkLabel label6;
-        private DarkUI.Controls.DarkLabel label7;
-        private DarkUI.Controls.DarkLabel label8;
-        private DarkUI.Controls.DarkTextBox fitterCustomHz;
-        private DarkUI.Controls.DarkLabel label9;
-        private DarkUI.Controls.DarkLabel label10;
-        private DarkUI.Controls.DarkLabel label11;
-        private DarkUI.Controls.DarkLabel label12;
-        private DarkUI.Controls.DarkLabel label13;
-        private DarkUI.Controls.DarkLabel label14;
-        private DarkUI.Controls.DarkLabel label15;
-        private DarkUI.Controls.DarkLabel label16;
-        private DarkUI.Controls.DarkLabel label17;
-        private DarkUI.Controls.DarkLabel label18;
-        private DarkUI.Controls.DarkLabel label19;
-        private DarkUI.Controls.DarkLabel label20;
         private System.Windows.Forms.Panel precisionPanel;
         private DarkUI.Controls.DarkLabel labelN;
         private DarkUI.Controls.DarkTextBox tbPrecision;
@@ -1372,5 +1287,14 @@ namespace Keyboard_Inspector {
         private DarkUI.Controls.DarkScrollBar darkScrollBar4;
         private DarkUI.Controls.DarkCheckBox lowCut;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Panel panel7;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartDiffsFitter;
+        private DarkUI.Controls.DarkScrollBar darkScrollBar7;
+        private System.Windows.Forms.Panel panel8;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartCompoundFitter;
+        private DarkUI.Controls.DarkScrollBar darkScrollBar8;
+        private System.Windows.Forms.Panel panel9;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartCircularFitter;
+        private DarkUI.Controls.DarkScrollBar darkScrollBar9;
     }
 }

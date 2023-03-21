@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Windows.Forms.DataVisualization.Charting;
 using DarkUI.Controls;
 
 namespace Keyboard_Inspector {
@@ -8,6 +8,11 @@ namespace Keyboard_Inspector {
         public double Viewport { get; private set; }
         readonly Func<int, double> IntervalGenerator;
         public string BaseTitle = null;
+        public string SecondaryTitle = null;
+        public Action<Scope> Default = i => i.Reset();
+        public Chart Chart;
+
+        public void SetToDefault() => Default(this);
 
         public void Reset() {
             Zoom = 1;
