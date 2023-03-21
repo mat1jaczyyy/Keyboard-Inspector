@@ -7,23 +7,29 @@ using System.Windows.Forms;
 using DarkUI.Controls;
 using DarkUI.Forms;
 
-using Newtonsoft.Json.Linq;
-
 namespace Keyboard_Inspector {
     public partial class TTRMPickerForm: DarkForm {
         public dynamic SelectedReplay { get; private set; }
         public int SelectedIndex { get; private set; }
         public int SelectedPlayer { get; private set; }
 
+        static int EventCount(dynamic events) {
+            int cnt = 0;
+            foreach (var i in events) {
+                if (!i.type.StartsWith("key")) continue;
+                if (i.data.hoisted() && i.data.hoisted == true) continue;
+                cnt++;
+            }
+            return cnt;
+        }
+
         public TTRMPickerForm(dynamic ttr) {
             InitializeComponent();
 
-            p1.Text = ttr.endcontext[0].user.username.Value.ToUpper();
-            p2.Text = ttr.endcontext[1].user.username.Value.ToUpper();
+            p1.Text = ttr.endcontext[0].user.username.ToUpper();
+            p2.Text = ttr.endcontext[1].user.username.ToUpper();
 
-            var data = ttr.data as JArray;
-
-            for (int i = 0; i < data.Count; i++) {
+            for (int i = 0; i < ttr.data.Count; i++) {
                 var left = new DarkLabel();
                 var right = new DarkLabel();
                 var time = new DarkLabel();
@@ -47,24 +53,19 @@ namespace Keyboard_Inspector {
                 time.Location = new Point(vs.Location.X, 41 + i * 20);
                 time.Size = new Size(vs.Width, 13);
 
-                var round = data[i] as dynamic;
+                var round = ttr.data[i];
 
-                left.Text = (round.replays[0].events as JArray)
-                    .Select(j => j as dynamic)
-                    .Count(j => j.type.Value.StartsWith("key") && j.data.hoisted?.Value != true).ToString();
+                left.Text = EventCount(round.replays[0].events).ToString();
+                right.Text = EventCount(round.replays[1].events).ToString();
 
-                right.Text = (round.replays[1].events as JArray)
-                    .Select(j => j as dynamic)
-                    .Count(j => j.type.Value.StartsWith("key") && j.data.hoisted?.Value != true).ToString();
-
-                var seconds = (int)(Math.Min(round.replays[0].frames.Value, round.replays[1].frames.Value) / 60.0);
+                var seconds = (int)(Math.Min(round.replays[0].frames, round.replays[1].frames) / 60.0);
 
                 time.Text = $"{seconds / 60:0}:{seconds % 60:00}";
 
-                if (round.board[0].success.Value)
+                if (round.board[0].success)
                     left.BackColor = p1.BackColor;
 
-                if (round.board[1].success.Value)
+                if (round.board[1].success)
                     right.BackColor = p2.BackColor;
 
                 Controls.Add(left);
@@ -90,7 +91,7 @@ namespace Keyboard_Inspector {
                 };
             }
 
-            Height += data.Count * 20;
+            Height += ttr.data.Count * 20;
         }
     }
 }
