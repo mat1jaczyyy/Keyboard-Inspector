@@ -107,27 +107,32 @@ namespace Keyboard_Inspector {
             }
         }
 
-        void resultLoaded()
-            => RunSuspendedAction(() => {
-                string title = result?.GetTitle();
-                Text = (string.IsNullOrWhiteSpace(title) ? "" : $"{title} - ") + "Keyboard Inspector";
+        void resultLoaded() {
+            string title = result?.GetTitle();
+            Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
 
-                key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
-                save.Enabled = split.Visible = hasResult;
+            key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
+            save.Enabled = split.Visible = hasResult;
 
-                Redraw();
-                UpdateScroll(scroll, scope);
+            Redraw();
+            UpdateScroll(scroll, scope);
 
-                labelN.Text = result?.Events.Count.ToString();
+            labelN.Text = result?.Events.Count.ToString();
 
-                if (hasResult) {
-                    CalcDiffs();
-                    CalcCompound();
-                    CalcCircular();
-                }
+            if (!PrecisionValid) {
+                silentAnalysis = true;
+                tbPrecision.Text = "4000";
+                silentAnalysis = false;
+            }
 
-                CreateCharts();
-            });
+            if (hasResult) {
+                CalcDiffs();
+                CalcCompound();
+                CalcCircular();
+            }
+
+            CreateCharts();
+        }
 
         void rec_Click(object sender, EventArgs e) {
             status.TextAlign = ContentAlignment.TopRight;
@@ -318,7 +323,6 @@ namespace Keyboard_Inspector {
             }
 
             screen.Image = img;
-            Update();
         }
 
         bool IntersectKey(Point pt, out int result) {
@@ -651,48 +655,38 @@ namespace Keyboard_Inspector {
         }
 
         int precision = 4000;
+        bool PrecisionValid => precision >= 20;
+
         int hpsIterations => (int)hps.Value;
 
         List<Chart> allCharts;
 
-        void RunSuspendedAction(Action action) {
+        void RunChartsSuspendedAction(Action action) {
             try {
-                SuspendDrawing();
+                foreach (var chart in allCharts) {
+                    chart.Series.SuspendUpdates();
+                    chart.Titles.SuspendUpdates();
+                }
                 action();
 
             } finally {
-                ResumeDrawing();
+                foreach (var chart in allCharts) {
+                    ResizeChart(chart);
+                    ChartApplyScope(chart);
+                    UpdateScroll(chart);
+
+                    chart.Series.ResumeUpdates();
+                    chart.Titles.ResumeUpdates();
+                }
             }
         }
-
-        void RunChartsSuspendedAction(Action action)
-            => RunSuspendedAction(() => {
-                try {
-                    foreach (var chart in allCharts) {
-                        chart.Series.SuspendUpdates();
-                        chart.Titles.SuspendUpdates();
-                    }
-                    action();
-
-                } finally {
-
-                    foreach (var chart in allCharts) {
-                        ResizeChart(chart);
-                        ChartApplyScope(chart);
-                        UpdateScroll(chart);
-
-                        chart.Series.ResumeUpdates();
-                        chart.Titles.ResumeUpdates();
-                    }
-                }
-            });
 
         void CreateCharts() {
             if (!hasResult) return;
 
             int.TryParse(tbPrecision.Text, out precision);
 
-            if (precision <= 0) return;
+            if (!PrecisionValid) return;
 
             RunChartsSuspendedAction(() => {
                 RunGraphJob(cacheDiffs, chartDiffs, chartDiffsFreq);
@@ -812,7 +806,7 @@ namespace Keyboard_Inspector {
         }
 
         void chart_MouseWheel(object sender, MouseEventArgs e) {
-            if (result == null || precision <= 0) return;
+            if (result == null || !PrecisionValid) return;
 
             Chart c = sender as Chart;
             Axis a = c.ChartAreas[0].AxisX;
@@ -826,7 +820,7 @@ namespace Keyboard_Inspector {
         }
 
         private void chart_Scroll(object sender, ScrollValueEventArgs e) {
-            if (result == null || precision <= 0 || updatingScroll) return;
+            if (result == null || !PrecisionValid || updatingScroll) return;
 
             DarkScrollBar scroll = sender as DarkScrollBar;
             Chart c = scroll.Parent.Controls.OfType<Chart>().Single();
