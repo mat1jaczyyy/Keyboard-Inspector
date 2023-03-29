@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
+using System.Drawing;
 using System.IO;
-using System.Text;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
+
+using DarkUI.Win32;
 
 using FFTW.NET;
 
@@ -27,6 +26,7 @@ namespace Keyboard_Inspector {
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Application.AddMessageFilter(new ControlScrollFilter());
             Application.Run(new MainForm());
         }
 
@@ -37,10 +37,22 @@ namespace Keyboard_Inspector {
                 i.ToBinary(bw);
         }
 
-        public static int GetLastIndex(this Chart c)
-            => (int)c.Series[0].Tag;
+        public static Color Blend(this Color color, Color backColor, double amount) {
+            byte r = (byte)(color.R * amount + backColor.R * (1 - amount));
+            byte g = (byte)(color.G * amount + backColor.G * (1 - amount));
+            byte b = (byte)(color.B * amount + backColor.B * (1 - amount));
+            return Color.FromArgb(r, g, b);
+        }
 
-        public static DataPoint GetLast(this Chart c)
-            => c.Series[0].Points[c.GetLastIndex()];
+        public static void DrawShadowString(this Graphics g, string text, Font font, Brush textBrush, Brush shadowBrush, RectangleF rect, bool center = false) {
+            StringFormat format = center? new StringFormat() { Alignment = StringAlignment.Center } : null;
+
+            rect.Offset(-1, -1);
+            g.DrawString(text, font, shadowBrush, rect, format);
+            rect.Offset(2, 2);
+            g.DrawString(text, font, shadowBrush, rect, format);
+            rect.Offset(-1, -1);
+            g.DrawString(text, font, textBrush, rect, format);
+        }
     }
 }

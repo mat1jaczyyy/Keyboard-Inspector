@@ -7,16 +7,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Windows.Forms;
-using System.Windows.Forms.DataVisualization.Charting;
-
-using Control = System.Windows.Forms.Control;
-using Series = System.Windows.Forms.DataVisualization.Charting.Series;
 
 using DarkUI.Controls;
 using DarkUI.Forms;
-
-using MathNet.Numerics;
-using MathNet.Numerics.Statistics;
 
 using FFTW.NET;
 
@@ -32,44 +25,21 @@ namespace Keyboard_Inspector {
             base.WndProc(ref m);
         }
 
-        [DllImport("user32.dll")]
-        public static extern int SendMessage(IntPtr hWnd, Int32 wMsg, bool wParam, Int32 lParam);
-
-        private const int WM_SETREDRAW = 11;
-
-        // Necessary during long drawings to avoid WM_PAINT clogging main thread
-        public void SuspendDrawing() {
-            SendMessage(Handle, WM_SETREDRAW, false, 0);
-        }
-
-        public void ResumeDrawing() {
-            SendMessage(Handle, WM_SETREDRAW, true, 0);
-            Refresh();
-        }
-
         public MainForm() {
             if (Instance != null) throw new Exception("Can't have more than one MainForm");
             Instance = this;
 
             InitializeComponent();
 
+            scope.ScrollBar = scroll;
             screen.AllowDrop = true;
             key.DropDown.Closing += (s, e) => e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked;
 
+            // TODO REFACTOR ALL BELOW THIS
             InitFileFormats();
 
-            allCharts = tlpCharts.Controls.OfType<Panel>().SelectMany(i => i.Controls.OfType<Chart>()).ToList();
+            allCharts = tlpCharts.Controls.OfType<Chart>().ToList();
             InitChartTags();
-        }
-
-        protected override void OnResizeBegin(EventArgs e) {
-            SuspendDrawing();
-            base.OnResizeBegin(e);
-        }
-
-        protected override void OnResizeEnd(EventArgs e) {
-            base.OnResizeEnd(e);
-            ResumeDrawing();
         }
 
         int elapsed;
@@ -88,7 +58,7 @@ namespace Keyboard_Inspector {
             if (i <= 17) return Math.Pow(2, i - 16) * 300;
             return Math.Pow(2, i - 18) * 1800;
         }
-        Scope scope = new Scope(ScreenInterval);
+        Scope scope = new Scope(null, null, ScreenInterval);
 
         double areaWidth, areaX;
         List<Input> inputs;
@@ -115,7 +85,6 @@ namespace Keyboard_Inspector {
             save.Enabled = split.Visible = hasResult;
 
             Redraw();
-            UpdateScroll(scroll, scope);
 
             labelN.Text = result?.Events.Count.ToString();
 
@@ -175,16 +144,16 @@ namespace Keyboard_Inspector {
         void screen_MouseWheel(object sender, MouseEventArgs e) {
             if (result == null) return;
             if (!scope.ApplyWheel(e.Delta, (int)(e.X - areaX) / areaWidth)) return;
-            
+
+            // TODO when you rewrite screen to use Chart properly, just ignore this
+            scope.UpdateScroll();
             Redraw();
-            UpdateScroll(scroll, scope);
         }
 
         private void scroll_Scroll(object sender, ScrollValueEventArgs e) {
-            if (result == null || updatingScroll) return;
+            if (result == null) return;
 
-            scope.ScrollBar(scroll);
-
+            // TODO when you rewrite screen to use Chart properly, just ignore this
             Redraw();
         }
 
@@ -251,10 +220,7 @@ namespace Keyboard_Inspector {
                         );
                     }
 
-                    double interval = scope.GetInterval(result.Time, areaWidth, out double px);
-
-                    double pos = scope.Viewport * result.Time / interval;
-
+                    double interval = scope.GetInterval(result.Time, areaWidth, out double px, out double pos);
                     int posCeil = (int)Math.Ceiling(pos);
 
                     for (float s = (float)((posCeil - pos) * px); s < areaWidth; s = (float)((++posCeil - pos) * px)) {
@@ -536,33 +502,12 @@ namespace Keyboard_Inspector {
         }
 
         void DrawGraph(Chart chart, IEnumerable<double> data, double xFactor = 1, string estimate = "") {
-            var points = chart.Series[0].Points;
+            chart.Area.LoadData(data, xFactor);
 
-            int i = 0;
-            double max = 0;
-            foreach (double v in data) {
-                points[i].SetValueXY(i * xFactor, v);
-                if (v > max) max = v;
-                i++;
-            }
+            int row = tlpCharts.GetRow(chart);
+            int col = tlpCharts.GetColumn(chart);
 
-            chart.Series[0].Tag = i - 1;
-
-            double last = points[i - 1].XValue;
-            double dummy = points[i - 1].XValue + 1000;
-
-            for (; i < points.Count; i++) {
-                if (points[i].XValue > last) break;
-                points[i].SetValueXY(dummy, 0);
-            }
-
-            Scope scope = chart.Tag as Scope;
-            string title = $"{scope.BaseTitle} ({scope.SecondaryTitle}{estimate})";
-
-            chart.Titles[0].Text = title;
-            chart.ChartAreas[0].RecalculateAxesScale();
-
-            scope.SetToDefault();
+            chart.Area.Title = $"{BaseTitles[col]} ({SecondaryTitles[row]}{estimate})";
         }
 
         Dictionary<Chart, double[]> beforeLowCut = new Dictionary<Chart, double[]>();
@@ -585,7 +530,7 @@ namespace Keyboard_Inspector {
 
             double[] freq = new double[input.Length];
             for (int i = 0; i < freq.Length; i++)
-                freq[i] = Math.Sqrt(input[i].MagnitudeSquared());
+                freq[i] = Math.Sqrt(input[i].Real * input[i].Real + input[i].Imaginary * input[i].Imaginary);
 
             beforeLowCut[freqChart] = freq;
             RunFromLowCut(freqChart);
@@ -663,21 +608,14 @@ namespace Keyboard_Inspector {
 
         void RunChartsSuspendedAction(Action action) {
             try {
-                foreach (var chart in allCharts) {
-                    chart.Series.SuspendUpdates();
-                    chart.Titles.SuspendUpdates();
-                }
+                foreach (var chart in allCharts)
+                    chart.Area.SuspendPaint();
+
                 action();
 
             } finally {
-                foreach (var chart in allCharts) {
-                    ResizeChart(chart);
-                    ChartApplyScope(chart);
-                    UpdateScroll(chart);
-
-                    chart.Series.ResumeUpdates();
-                    chart.Titles.ResumeUpdates();
-                }
+                foreach (var chart in allCharts)
+                    chart.Area.ResumePaint();
             }
         }
 
@@ -721,7 +659,7 @@ namespace Keyboard_Inspector {
         };
 
         Action<Scope>[] ScopeDefaults = new Action<Scope>[] {
-            i => i.SetBetween(0, 100, i.Chart.GetLast().XValue),
+            i => i.SetBetween(0, 100, (i.Control as ChartArea).XMaxValue),
             i => i.Reset()
         };
 
@@ -733,298 +671,37 @@ namespace Keyboard_Inspector {
                 return Math.Pow(2, i - 4) * 125;
             });
 
-            foreach (Chart c in allCharts) {
-                int row = tlpCharts.GetRow(c.Parent);
-                int col = tlpCharts.GetColumn(c.Parent);
+            foreach (var chart in allCharts) {
+                int row = tlpCharts.GetRow(chart);
+                int col = tlpCharts.GetColumn(chart);
 
-                c.Tag = new Scope(row == 0? TimeInterval : FreqInterval) {
-                    BaseTitle = BaseTitles[col],
-                    SecondaryTitle = SecondaryTitles[row],
-                    Chart = c,
-                    Default = ScopeDefaults[row]
-                };
+                chart.Area.Scope.IntervalGenerator = row == 0? TimeInterval : FreqInterval;
+                chart.Area.Scope.Default = ScopeDefaults[row];
 
-                c.Series.SuspendUpdates();
-                c.Series.Add(new Series() { ChartType = SeriesChartType.FastLine });
-
-                var points = c.Series[0].Points;
-                int cnt = row == 1? (precisionLimit / 2 + 1) : precisionLimit;
-
-                for (int i = 0; i < cnt; i++)
-                    points.AddXY(cnt + 1000, 0);
-
-                c.Series.ResumeUpdates();
+                chart.Area.Spotlight += chart_Spotlight;
             }
         }
 
-        void ChartApplyScope(Chart c) {
-            Axis a = c.ChartAreas[0].AxisX;
-
-            if (c.Series.Count == 0) return;
-            if (c.Series[0].Points.Count == 0) return;
-
-            double max = c.GetLast().XValue;
-
-            Scope scope = c.Tag as Scope;
-
-            a.Minimum = scope.Viewport * max;
-            a.Maximum = max / scope.Zoom + a.Minimum;
-
-            a.Interval =
-            a.MajorGrid.Interval =
-            a.MajorTickMark.Interval = scope.GetInterval(max, a.ValueToPixelPosition(a.Maximum) - a.ValueToPixelPosition(a.Minimum), out _);
-
-            a.IntervalOffset =
-            a.MajorGrid.IntervalOffset =
-            a.MajorTickMark.IntervalOffset = (-a.Minimum) % a.Interval;
-        }
-
-        bool updatingScroll = false;
-
-        void UpdateScroll(Chart c)
-            => UpdateScroll(c.Parent.Controls.OfType<DarkScrollBar>().First(), c.Tag as Scope);
-
-        void UpdateScroll(DarkScrollBar scroll, Scope scope = null) {
-            try {
-                updatingScroll = true;
-
-                scroll.Enabled = hasResult;
-                if (!hasResult) return;
-
-                scope = scope?? scroll.Parent.Controls.OfType<Chart>().First().Tag as Scope;
-
-                scroll.ViewSize = (int)(scroll.Maximum / scope.Zoom);
-
-                if (scroll.ViewSize == scroll.Maximum)
-                    scroll.ViewSize -= 1;
-
-                scroll.Value = (int)(scroll.Maximum * scope.Viewport);
-
-            } finally {
-                updatingScroll = false;
-            }
-        }
-
-        void chart_MouseWheel(object sender, MouseEventArgs e) {
-            if (result == null || !PrecisionValid) return;
-
-            Chart c = sender as Chart;
-            Axis a = c.ChartAreas[0].AxisX;
-
-            if (!(c.Tag as Scope).ApplyWheel(e.Delta, (a.PixelPositionToValue(e.X) - a.Minimum) / (a.Maximum - a.Minimum))) return;
-
-            ChartApplyScope(c);
-            UpdateScroll(c);
-
-            chart_MouseMove(sender, e, true);
-        }
-
-        private void chart_Scroll(object sender, ScrollValueEventArgs e) {
-            if (result == null || !PrecisionValid || updatingScroll) return;
-
-            DarkScrollBar scroll = sender as DarkScrollBar;
-            Chart c = scroll.Parent.Controls.OfType<Chart>().Single();
-
-            (c.Tag as Scope).ScrollBar(scroll);
-
-            ChartApplyScope(c);
-        }
-
-        private void chart_MouseDoubleClick(object sender, MouseEventArgs e) {
-            if (e.Button != MouseButtons.Left) return;
-
+        void chart_Spotlight(object sender, EventArgs e) {
             var chart = sender as Chart;
-            var panel = chart.Parent as Panel;
 
-            if (panel.Parent == tlpCharts) {
-                panel.SuspendLayout();
+            if (chart.Parent == tlpCharts) {
+                chart.SuspendLayout();
 
-                tlpCharts.Controls.Remove(panel);
-                split.Panel1.Controls.Add(panel);
-                split.Panel1.Controls.SetChildIndex(panel, 0);
+                tlpCharts.Controls.Remove(chart);
+                split.Panel1.Controls.Add(chart);
+                split.Panel1.Controls.SetChildIndex(chart, 0);
 
-                panel.ResumeLayout();
+                chart.ResumeLayout();
 
-            } else if (panel.Parent == split.Panel1) {
-                panel.SuspendLayout();
+            } else if (chart.Parent == split.Panel1) {
+                chart.SuspendLayout();
 
-                split.Panel1.Controls.Remove(panel);
-                tlpCharts.Controls.Add(panel);
+                split.Panel1.Controls.Remove(chart);
+                tlpCharts.Controls.Add(chart);
 
-                panel.ResumeLayout();
+                chart.ResumeLayout();
             }
-        }
-
-        int BinarySearchX(double val, DataPointCollection arr, int end) {
-            if (arr.Count == 0) return -1;
-
-            int start = 0;
-
-            if (arr[start].XValue >= val) return 0;
-            if (arr[end].XValue <= val) return end;
-
-            while (start <= end) {
-                int mid = (start + end) / 2;
-
-                // value is in interval from previous to current element
-                if (mid == 0) {
-                    return mid;
-
-                } else if (val >= arr[mid - 1].XValue && val <= arr[mid].XValue) {
-                    return mid - 1;
-
-                } else if (arr[mid].XValue < val) {
-                    start = mid + 1;
-
-                } else {
-                    end = mid - 1;
-                }
-            }
-
-            return -1;
-        }
-
-        const double hoverRadius = 29;
-
-        void chart_MouseMove(object sender, MouseEventArgs e)
-            => chart_MouseMove(sender, e, false);
-
-        void chart_MouseMove(object sender, MouseEventArgs e, bool remake) {
-            Chart c = sender as Chart;
-
-            if (c.Series.Count == 0) return;
-            if (c.Series[0].Points.Count == 0) return;
-
-            Axis ax = c.ChartAreas[0].AxisX;
-            Axis ay = c.ChartAreas[0].AxisY;
-
-            double x, y;
-
-            try {
-                x = ax.PixelPositionToValue(e.X);
-                y = ay.PixelPositionToValue(e.Y);
-
-            } catch { // ArgumentException if cursor is out of bounds for some reason
-                chart_MouseLeave(sender, e);
-                return;
-            }
-
-            var points = c.Series[0].Points;
-            int last = c.GetLastIndex();
-
-            // Hacky way to get XValue size of radius
-            var r = ax.PixelPositionToValue(hoverRadius) - ax.PixelPositionToValue(0);
-
-            double w = (ax.ValueToPixelPosition(ax.Maximum) - ax.ValueToPixelPosition(ax.Minimum)) / (ax.Maximum - ax.Minimum);
-            double h = (ay.ValueToPixelPosition(ay.Maximum) - ay.ValueToPixelPosition(ay.Minimum)) / (ay.Maximum - ay.Minimum);
-            double aspect = h / w;
-
-            // Discard values that are too far away to match
-            double lowest = Math.Max(ax.Minimum, x - r);
-            double highest = Math.Min(ax.Maximum, x + r);
-            int start = BinarySearchX(lowest, points, last);
-
-            if (start == -1) {
-                chart_MouseLeave(sender, e);
-                return;
-            }
-
-            double min = r * r;
-            DataPoint win = null;
-
-            // foreach (var p in series.Skip(start)) is really slow here for some reason, keep the regular loop
-            for (int i = start; i <= last; i++) {
-                var p = points[i];
-
-                if (p.XValue < lowest) continue;
-                if (p.XValue > highest) break;
-
-                var x2 = p.XValue - x;
-                x2 *= x2;
-                var y2 = (p.YValues[0] - y) * aspect;
-                y2 *= y2;
-                var d = x2 + y2;
-
-                if (d < min) {
-                    min = d;
-                    win = p;
-                }
-            }
-
-            if (win == null) {
-                chart_MouseLeave(sender, e);
-                return;
-            }
-
-            var l = Controls.OfType<HTTransparentDarkLabel>().SingleOrDefault();
-            if (!remake && l != null && l.Tag is DataPoint prev && prev == win) return;
-
-            chart_MouseLeave(sender, e);
-
-            l = new HTTransparentDarkLabel();
-            l.AutoSize = true;
-            l.Text = $"({win.XValue:0.###}, {win.YValues[0]:0.###})";
-            l.Tag = win;
-            l.Location = PointToClient(c.PointToScreen(new Point(
-                (int)Math.Round(ax.ValueToPixelPosition(win.XValue)),
-                (int)Math.Round(ay.ValueToPixelPosition(win.YValues[0]))
-            ))) + new Size(7, 10 - l.Height);
-
-            Controls.Add(l);
-            Controls.SetChildIndex(l, 0);
-
-            c.Series.Add(new Series() {
-                ChartType = SeriesChartType.Point,
-                Palette = c.Palette,
-                MarkerSize = 6,
-                MarkerStyle = MarkerStyle.Circle,
-                Points = { win }
-            });
-        }
-
-        private void chart_MouseLeave(object sender, EventArgs e) {
-            var l = Controls.OfType<HTTransparentDarkLabel>().SingleOrDefault();
-            if (l != null)
-                Controls.Remove(l);
-
-            Chart c = sender as Chart;
-
-            if (c.Series.Count > 1)
-                c.Series.RemoveAt(1);
-        }
-
-        static double[] rampW = new double[] { 425, 1294, 1920 };
-        static double[] rampH = new double[] { 185, 399, 675 };
-
-        static Polynomial titleY = Polynomial.Fit(rampH, new double[] { 3, 2.1, 1.5 }, 2);
-        static Polynomial innerX = Polynomial.Fit(rampW, new double[] { 9, 3.8, 2.9 }, 2);
-        static Polynomial innerW = Polynomial.Fit(rampW, new double[] { 86, 94, 95.6 }, 2);
-        static Polynomial innerH = Polynomial.Fit(rampH, new double[] { 86, 93, 96 }, 2);
-        static Polynomial posY = Polynomial.Fit(rampH, new double[] { 11, 5.9, 3.5 }, 2);
-
-        void ResizeChart(Chart c) {
-            double w = Math.Min(c.Width, rampW.Last());
-            double h = Math.Min(c.Height, rampH.Last());
-
-            c.Titles.SuspendUpdates();
-            c.ChartAreas.SuspendUpdates();
-
-            c.Titles[0].Position.Y = (float)titleY.Evaluate(h);
-            c.ChartAreas[0].InnerPlotPosition.X = (float)innerX.Evaluate(w);
-            c.ChartAreas[0].InnerPlotPosition.Width = (float)innerW.Evaluate(w);
-            c.ChartAreas[0].InnerPlotPosition.Height = (float)innerH.Evaluate(h);
-            c.ChartAreas[0].Position.Y = (float)posY.Evaluate(h);
-            c.ChartAreas[0].Position.Height = 100 - c.ChartAreas[0].Position.Y;
-
-            c.Titles.ResumeUpdates();
-            c.ChartAreas.ResumeUpdates();
-        }
-
-        private void chart_SizeChanged(object sender, EventArgs e) {
-            Chart chart = sender as Chart;
-
-            ResizeChart(chart);
-            ChartApplyScope(chart);
         }
 
         FileFormat[] fileFormats;
@@ -1149,10 +826,6 @@ namespace Keyboard_Inspector {
         }
 
         private void MainForm_Shown(object sender, EventArgs e) {
-            // Stupid hack to calculate PlotAreaPosition so Interval can be calculated before first chart draw...
-            foreach (var c in allCharts)
-                c.DrawToBitmap(new Bitmap(c.Width, c.Height), new Rectangle(0, 0, c.Width, c.Height));
-
             if (Program.Args.Length > 0)
                 LoadFile(Program.Args[0]);
         }

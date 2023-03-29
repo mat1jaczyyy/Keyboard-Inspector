@@ -1,31 +1,85 @@
 ﻿using System;
-using System.Windows.Forms.DataVisualization.Charting;
+using System.Windows.Forms;
+
 using DarkUI.Controls;
 
 namespace Keyboard_Inspector {
     class Scope {
         public double Zoom { get; private set; }
         public double Viewport { get; private set; }
-        readonly Func<int, double> IntervalGenerator;
-        public string BaseTitle = null;
-        public string SecondaryTitle = null;
+        public Func<int, double> IntervalGenerator = i => Math.Pow(2, i - 10);
         public Action<Scope> Default = i => i.Reset();
-        public Chart Chart;
+        public Control Control { get; private set; }
+
+        DarkScrollBar _scroll;
+        public DarkScrollBar ScrollBar {
+            get => _scroll;
+            set {
+                if (_scroll != null)
+                    _scroll.ValueChanged -= Scrolled;
+
+                _scroll = value;
+
+                if (_scroll != null)
+                    _scroll.ValueChanged += Scrolled;
+
+                UpdateScroll();
+            }
+        }
+
+        public Scope(Control control, DarkScrollBar scroll) {
+            Control = control;
+            ScrollBar = scroll;
+
+            Reset();
+        }
+
+        public Scope(Control control, DarkScrollBar scroll, Func<int, double> intervalGenerator) : this(control, scroll)
+            => IntervalGenerator = intervalGenerator ?? (i => Math.Pow(2, i - 10));
+
+        void Scrolled(object sender, EventArgs e) {
+            if (updatingScroll) return;
+
+            Viewport = (double)ScrollBar.Value / ScrollBar.Maximum;
+            Control?.Invalidate();
+        }
+
+        bool updatingScroll = false;
+
+        public void UpdateScroll() {
+            if (ScrollBar == null) return;
+
+            try {
+                updatingScroll = true;
+                ScrollBar.ViewSize = (int)(ScrollBar.Maximum / Zoom);
+
+                if (ScrollBar.ViewSize == ScrollBar.Maximum)
+                    ScrollBar.ViewSize--;
+
+                ScrollBar.Value = (int)(ScrollBar.Maximum * Viewport);
+
+            } finally {
+                updatingScroll = false;
+            }
+        }
 
         public void SetToDefault() => Default(this);
 
         public void Reset() {
             Zoom = 1;
             Viewport = 0;
+
+            Control?.Invalidate();
+            UpdateScroll();
         }
 
-        public Scope(Func<int, double> intervalGenerator) {
-            Reset();
-            IntervalGenerator = intervalGenerator?? (i => Math.Pow(2, i - 10));
-        }
+        public void SetBetween(double lo, double hi, double max) {
+            Zoom = max / (hi - lo);
+            Viewport = lo / max;
 
-        public void ScrollBar(DarkScrollBar scroll)
-            => Viewport = (double)scroll.Value / scroll.Maximum;
+            Control?.Invalidate();
+            UpdateScroll();
+        }
 
         public bool ApplyWheel(double delta, double x) {
             if (x < 0 || 1 <= x) return false;
@@ -55,11 +109,14 @@ namespace Keyboard_Inspector {
                 }
             }
 
+            Control?.Invalidate();
+            UpdateScroll();
+
             return true;
         }
 
-        public double GetInterval(double xMax, double areaWidth, out double px) {
-            int incIndex = 4;
+        public double GetInterval(double xMax, double areaWidth, out double px, out double pos) {
+            int incIndex = 0;
             double interval;
 
             for (;;) {
@@ -72,12 +129,9 @@ namespace Keyboard_Inspector {
                 else break;
             }
 
-            return interval;
-        }
+            pos = Viewport * xMax / interval;
 
-        public void SetBetween(double lo, double hi, double max) {
-            Zoom = max / (hi - lo);
-            Viewport = lo / max;
+            return interval;
         }
     }
 }
