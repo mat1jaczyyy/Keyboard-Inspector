@@ -24,7 +24,7 @@ namespace Keyboard_Inspector {
 
         public static List<Event> ListFromBinary(BinaryReader br, uint fileVersion) {
             int n = br.ReadInt32();
-            var ret = new List<Event>();
+            var ret = new List<Event>(n);
 
             for (int i = 0; i < n; i++) {
                 ret.Add(new Event(

@@ -20,6 +20,7 @@ namespace Keyboard_Inspector {
             if (IsRecording)
                 StopRecording();
 
+            // TODO maybe increase capacity?
             events = new List<Event>();
 
             time?.Stop();

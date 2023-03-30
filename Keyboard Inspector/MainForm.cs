@@ -215,7 +215,7 @@ namespace Keyboard_Inspector {
         }
 
         void Normalize(double[] data) {
-            double max = data.Max();
+            double max = Math.Max(1, data.Max());
 
             for (int i = 0; i < data.Length; i++)
                 data[i] /= max;

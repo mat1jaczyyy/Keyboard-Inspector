@@ -24,10 +24,18 @@ namespace Keyboard_Inspector {
             Time = time;
             
             // Filter auto-repeat
-            // TODO Optimize
-            Events = events
-                .Where((x, i) => !x.Pressed || !(events.Take(i).Where(j => j.Input == x.Input).LastOrDefault()?.Pressed ?? false))
-                .ToList();
+            Dictionary<Input, bool> last = new Dictionary<Input, bool>();
+            Events = new List<Event>(events.Count);
+
+            for (int i = 0; i < events.Count; i++) {
+                var e = events[i];
+
+                if (last.ContainsKey(e.Input) && last[e.Input] == e.Pressed)
+                    continue;
+
+                last[e.Input] = e.Pressed;
+                Events.Add(e);
+            }
         }
 
         public void ToBinary(BinaryWriter bw) {
@@ -55,6 +63,6 @@ namespace Keyboard_Inspector {
             );
         }
 
-        public static bool IsEmpty(Result result) => (result?.Events.Count?? 0) <= 1;
+        public static bool IsEmpty(Result result) => result?.Events.Any() != true;
     }
 }

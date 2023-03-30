@@ -67,7 +67,7 @@ namespace Keyboard_Inspector {
                 kind = Kind.Line;
                 _xfactor = xfactor;
 
-                YMaxValue = LineData.Max();
+                YMaxValue = Math.Max(1, LineData.Max());
                 Scope.SetToDefault();
 
             } else {
