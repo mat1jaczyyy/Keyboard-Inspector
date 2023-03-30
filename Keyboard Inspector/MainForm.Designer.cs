@@ -28,8 +28,6 @@ namespace Keyboard_Inspector {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.rec = new DarkUI.Controls.DarkButton();
             this.t = new System.Windows.Forms.Timer(this.components);
-            this.screen = new System.Windows.Forms.PictureBox();
-            this.scroll = new DarkUI.Controls.DarkScrollBar();
             this.keymenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.color = new System.Windows.Forms.ToolStripMenuItem();
             this.hide = new System.Windows.Forms.ToolStripMenuItem();
@@ -63,7 +61,7 @@ namespace Keyboard_Inspector {
             this.unhide = new System.Windows.Forms.ToolStripMenuItem();
             this.mainmenu = new DarkUI.Controls.DarkMenuStrip();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            ((System.ComponentModel.ISupportInitialize)(this.screen)).BeginInit();
+            this.screen = new Keyboard_Inspector.Chart();
             this.keymenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
             this.split.Panel1.SuspendLayout();
@@ -92,34 +90,6 @@ namespace Keyboard_Inspector {
             this.t.Interval = 1000;
             this.t.Tick += new System.EventHandler(this.t_Tick);
             // 
-            // screen
-            // 
-            this.screen.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.screen.Location = new System.Drawing.Point(0, 0);
-            this.screen.Name = "screen";
-            this.screen.Size = new System.Drawing.Size(1294, 205);
-            this.screen.TabIndex = 2;
-            this.screen.TabStop = false;
-            this.screen.SizeChanged += new System.EventHandler(this.screen_SizeChanged);
-            this.screen.DragDrop += new System.Windows.Forms.DragEventHandler(this.screen_DragDrop);
-            this.screen.DragOver += new System.Windows.Forms.DragEventHandler(this.screen_DragOver);
-            this.screen.MouseClick += new System.Windows.Forms.MouseEventHandler(this.screen_MouseClick);
-            this.screen.MouseDown += new System.Windows.Forms.MouseEventHandler(this.screen_MouseDown);
-            this.screen.MouseMove += new System.Windows.Forms.MouseEventHandler(this.screen_MouseMove);
-            this.screen.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.screen_MouseWheel);
-            // 
-            // scroll
-            // 
-            this.scroll.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.scroll.Location = new System.Drawing.Point(0, 205);
-            this.scroll.Maximum = 1000000000;
-            this.scroll.Name = "scroll";
-            this.scroll.ScrollOrientation = DarkUI.Controls.DarkScrollOrientation.Horizontal;
-            this.scroll.Size = new System.Drawing.Size(1294, 17);
-            this.scroll.TabIndex = 3;
-            this.scroll.ViewSize = 999999999;
-            this.scroll.ValueChanged += new System.EventHandler<DarkUI.Controls.ScrollValueEventArgs>(this.scroll_Scroll);
-            // 
             // keymenu
             // 
             this.keymenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -133,14 +103,12 @@ namespace Keyboard_Inspector {
             this.color.Name = "color";
             this.color.Size = new System.Drawing.Size(156, 22);
             this.color.Text = "Change &Color...";
-            this.color.Click += new System.EventHandler(this.color_Click);
             // 
             // hide
             // 
             this.hide.Name = "hide";
             this.hide.Size = new System.Drawing.Size(156, 22);
             this.hide.Text = "&Hide Key";
-            this.hide.Click += new System.EventHandler(this.hide_Click);
             // 
             // status
             // 
@@ -170,7 +138,6 @@ namespace Keyboard_Inspector {
             // split.Panel2
             // 
             this.split.Panel2.Controls.Add(this.screen);
-            this.split.Panel2.Controls.Add(this.scroll);
             this.split.Panel2MinSize = 125;
             this.split.Size = new System.Drawing.Size(1294, 787);
             this.split.SplitterDistance = 561;
@@ -202,7 +169,6 @@ namespace Keyboard_Inspector {
             // chartDiffs
             // 
             this.chartDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartDiffs.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
             this.chartDiffs.Location = new System.Drawing.Point(3, 3);
             this.chartDiffs.Name = "chartDiffs";
             this.chartDiffs.Size = new System.Drawing.Size(425, 237);
@@ -211,7 +177,6 @@ namespace Keyboard_Inspector {
             // chartCompound
             // 
             this.chartCompound.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartCompound.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
             this.chartCompound.Location = new System.Drawing.Point(434, 3);
             this.chartCompound.Name = "chartCompound";
             this.chartCompound.Size = new System.Drawing.Size(425, 237);
@@ -220,7 +185,6 @@ namespace Keyboard_Inspector {
             // chartCircular
             // 
             this.chartCircular.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartCircular.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
             this.chartCircular.Location = new System.Drawing.Point(865, 3);
             this.chartCircular.Name = "chartCircular";
             this.chartCircular.Size = new System.Drawing.Size(426, 237);
@@ -484,7 +448,6 @@ namespace Keyboard_Inspector {
             this.unhide.Name = "unhide";
             this.unhide.Size = new System.Drawing.Size(134, 22);
             this.unhide.Text = "&Unhide All";
-            this.unhide.Click += new System.EventHandler(this.unhide_Click);
             // 
             // mainmenu
             // 
@@ -499,6 +462,14 @@ namespace Keyboard_Inspector {
             this.mainmenu.Size = new System.Drawing.Size(1294, 24);
             this.mainmenu.TabIndex = 7;
             this.mainmenu.Text = "menuStrip1";
+            // 
+            // screen
+            // 
+            this.screen.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.screen.Location = new System.Drawing.Point(0, 0);
+            this.screen.Name = "screen";
+            this.screen.Size = new System.Drawing.Size(1294, 222);
+            this.screen.TabIndex = 1;
             // 
             // MainForm
             // 
@@ -519,7 +490,6 @@ namespace Keyboard_Inspector {
             this.Shown += new System.EventHandler(this.MainForm_Shown);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.MainForm_DragDrop);
             this.DragOver += new System.Windows.Forms.DragEventHandler(this.MainForm_DragOver);
-            ((System.ComponentModel.ISupportInitialize)(this.screen)).EndInit();
             this.keymenu.ResumeLayout(false);
             this.split.Panel1.ResumeLayout(false);
             this.split.Panel2.ResumeLayout(false);
@@ -540,8 +510,6 @@ namespace Keyboard_Inspector {
         #endregion
         private DarkUI.Controls.DarkButton rec;
         private System.Windows.Forms.Timer t;
-        private System.Windows.Forms.PictureBox screen;
-        private DarkUI.Controls.DarkScrollBar scroll;
         private System.Windows.Forms.ContextMenuStrip keymenu;
         private System.Windows.Forms.ToolStripMenuItem color;
         private System.Windows.Forms.ToolStripMenuItem hide;
@@ -575,5 +543,6 @@ namespace Keyboard_Inspector {
         private Chart chartDiffsFreq;
         private Chart chartCompoundFreq;
         private Chart chartCircularFreq;
+        private Chart screen;
     }
 }

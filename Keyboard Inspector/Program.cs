@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -30,10 +30,10 @@ namespace Keyboard_Inspector {
             Application.Run(new MainForm());
         }
 
-        public static void ToBinary<T>(this ReadOnlyCollection<T> c, BinaryWriter bw) where T: IBinary {
-            bw.Write(c.Count);
+        public static void ToBinary<T>(this List<T> l, BinaryWriter bw) where T: IBinary {
+            bw.Write(l.Count);
             
-            foreach (var i in c)
+            foreach (var i in l)
                 i.ToBinary(bw);
         }
 

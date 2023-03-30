@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using DarkUI.Controls;
 
 namespace Keyboard_Inspector {
+    // TODO Move into Chart
     class Scope {
         public double Zoom { get; private set; }
         public double Viewport { get; private set; }
@@ -115,7 +116,7 @@ namespace Keyboard_Inspector {
             return true;
         }
 
-        public double GetInterval(double xMax, double areaWidth, out double px, out double pos) {
+        public double GetInterval(double xMax, double areaWidth, double lowestPx, out double px, out double pos) {
             int incIndex = 0;
             double interval;
 
@@ -124,8 +125,7 @@ namespace Keyboard_Inspector {
 
                 px = interval / xMax * areaWidth * Zoom;
 
-                if (px < 30) incIndex++;
-                else if (px >= 90 && incIndex > 0) incIndex--;
+                if (px < lowestPx) incIndex++;
                 else break;
             }
 

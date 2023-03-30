@@ -31,20 +31,19 @@ namespace Keyboard_Inspector {
 
             InitializeComponent();
 
-            scope.ScrollBar = scroll;
-            screen.AllowDrop = true;
             key.DropDown.Closing += (s, e) => e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked;
 
             // TODO REFACTOR ALL BELOW THIS
             InitFileFormats();
 
             allCharts = tlpCharts.Controls.OfType<Chart>().ToList();
-            InitChartTags();
+            freqCharts = allCharts.Where(i => tlpCharts.GetRow(i) == 1).ToList();
+
+            InitCharts();
         }
 
         int elapsed;
         Result result = null;
-        bool hasResult => result?.Events.Any() == true;
 
         static double ScreenInterval(int i) {
             if (i <= 3) return Math.Pow(2, i) / 1000;
@@ -58,35 +57,17 @@ namespace Keyboard_Inspector {
             if (i <= 17) return Math.Pow(2, i - 16) * 300;
             return Math.Pow(2, i - 18) * 1800;
         }
-        Scope scope = new Scope(null, null, ScreenInterval);
-
-        double areaWidth, areaX;
-        List<Input> inputs;
-        List<RectangleF> textRects = new List<RectangleF>();
-        Dictionary<Input, Color> colors = new Dictionary<Input, Color>();
-
-        void processResult() {
-            if (!hasResult) return;
-
-            if (freeze.Checked && inputs?.Any() != true)
-                freeze.Checked = false;
-
-            if (!freeze.Checked) {
-                inputs = result.Events.Select(i => i.Input).Distinct().ToList();
-                colors.Clear();
-            }
-        }
 
         void resultLoaded() {
-            string title = result?.GetTitle();
+            string title = Result.IsEmpty(result)? "" : result.GetTitle();
             Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
 
             key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
-            save.Enabled = split.Visible = hasResult;
+            save.Enabled = split.Visible = !Result.IsEmpty(result);
 
-            Redraw();
+            labelN.Text = Result.IsEmpty(result)? "" : result.Events.Count.ToString();
 
-            labelN.Text = result?.Events.Count.ToString();
+            screen.Area.LoadData(result);
 
             if (!PrecisionValid) {
                 silentAnalysis = true;
@@ -94,7 +75,7 @@ namespace Keyboard_Inspector {
                 silentAnalysis = false;
             }
 
-            if (hasResult) {
+            if (!Result.IsEmpty(result)) {
                 CalcDiffs();
                 CalcCompound();
                 CalcCircular();
@@ -115,8 +96,6 @@ namespace Keyboard_Inspector {
 
                 Recorder.StartRecording();
 
-                scope.Reset();
-
                 elapsed = -1;
                 t_Tick(sender, e);
                 t.Enabled = true;
@@ -128,8 +107,6 @@ namespace Keyboard_Inspector {
 
                 result = Recorder.StopRecording();
 
-                processResult();
-
                 t.Enabled = false;
             }
 
@@ -140,263 +117,6 @@ namespace Keyboard_Inspector {
             status.TextAlign = ContentAlignment.TopRight;
             status.Text = $"Recording... {TimeSpan.FromSeconds(++elapsed):hh\\:mm\\:ss}";
         }
-
-        void screen_MouseWheel(object sender, MouseEventArgs e) {
-            if (result == null) return;
-            if (!scope.ApplyWheel(e.Delta, (int)(e.X - areaX) / areaWidth)) return;
-
-            // TODO when you rewrite screen to use Chart properly, just ignore this
-            scope.UpdateScroll();
-            Redraw();
-        }
-
-        private void scroll_Scroll(object sender, ScrollValueEventArgs e) {
-            if (result == null) return;
-
-            // TODO when you rewrite screen to use Chart properly, just ignore this
-            Redraw();
-        }
-
-        new const int Margin = 5;
-        const int BarMargin = 1;
-
-        void Redraw() {
-            if (screen.Width <= 0 || screen.Height <= 0) return;
-
-            Bitmap img = new Bitmap(screen.Width, screen.Height);
-
-            if (result != null && inputs?.Any() == true) {
-                textRects.Clear();
-
-                Font font = status.Font;
-                Brush textBrush = new SolidBrush(Color.FromArgb(160, 160, 160));
-                Pen penMajor = new Pen(Color.FromArgb(20, 20, 20));
-                Pen penMinor = new Pen(Color.FromArgb(48, 48, 48));
-
-                bool multipleSources = inputs.Select(i => i.Source).Distinct().Count() > 1;
-
-                using (Graphics gfx = Graphics.FromImage(img)) {
-                    gfx.FillRectangle(new SolidBrush(screen.BackColor), 0, 0, screen.Width, screen.Height);
-
-                    SizeF[] textSize = inputs.Select(i => gfx.MeasureString(i.ToString(multipleSources), status.Font)).ToArray();
-                    float textWidth = textSize.Max(i => i.Width);
-                    float textHeight = textSize[0].Height;
-                    areaX = 2 * Margin + textWidth;
-                    areaWidth = screen.Width - Margin - areaX;
-
-                    float keyHeight = (float)(screen.Height - 3 * Margin - textHeight) / inputs.Count;
-
-                    for (int k = 0; k < inputs.Count; k++) {
-                        RectangleF stringRect = new RectangleF(
-                            new PointF(
-                                Margin + textWidth - textSize[k].Width,
-                                Margin + keyHeight * k + (keyHeight - textHeight) / 2
-                            ),
-                            textSize[k]
-                        );
-
-                        textRects.Add(new RectangleF(
-                            new PointF(
-                                Margin + textWidth - textSize[k].Width,
-                                Margin + keyHeight * k
-                            ),
-                            new SizeF(
-                                textSize[k].Width,
-                                keyHeight
-                            )
-                        ));
-
-                        gfx.DrawString(
-                            inputs[k].ToString(multipleSources), font, textBrush,
-                            stringRect.X, stringRect.Y
-                        );
-
-                        gfx.DrawLine(
-                            penMinor,
-                            2 * Margin + textWidth,
-                            Margin + keyHeight * (k + 0.5f),
-                            screen.Width - Margin,
-                            Margin + keyHeight * (k + 0.5f)
-                        );
-                    }
-
-                    double interval = scope.GetInterval(result.Time, areaWidth, out double px, out double pos);
-                    int posCeil = (int)Math.Ceiling(pos);
-
-                    for (float s = (float)((posCeil - pos) * px); s < areaWidth; s = (float)((++posCeil - pos) * px)) {
-                        gfx.DrawLine(
-                            penMajor,
-                            2 * Margin + textWidth + s,
-                            Margin,
-                            2 * Margin + textWidth + s,
-                            screen.Height - 2 * Margin - textHeight
-                        );
-
-                        string t = (interval * posCeil).ToString("0.###");
-
-                        gfx.DrawString(
-                            t, font, textBrush,
-                            2 * Margin + textWidth + s - gfx.MeasureString(t, font).Width / 2,
-                            screen.Height - Margin - textHeight
-                        );
-                    }
-
-                    for (int k = 0; k < inputs.Count; k++) {
-                        Event[] events = result.Events.Where(i => i.Input == inputs[k]).ToArray();
-                        Brush brush = new SolidBrush(colors.ContainsKey(inputs[k])? colors[inputs[k]] : inputs[k].DefaultColor);
-
-                        if (events.Any()) {
-                            void drawBar(double start, double end) {
-                                start = (start - scope.Viewport * result.Time) * scope.Zoom / result.Time;
-                                end = (end - scope.Viewport * result.Time) * scope.Zoom / result.Time;
-
-                                if (start <= 0) start = 0;
-                                if (start >= 1) return;
-                                if (end <= 0) return;
-                                if (end >= 1) end = 1;
-
-                                gfx.FillRectangle(
-                                    brush,
-                                    2 * Margin + textWidth + (float)(start * areaWidth),
-                                    Margin + keyHeight * k + BarMargin,
-                                    (float)((end - start) * areaWidth),
-                                    keyHeight - 2 * BarMargin
-                                );
-                            }
-
-                            int e = 0;
-                            if (!events[0].Pressed) {
-                                e = 1;
-                                drawBar(0, events[0].Time);
-                            }
-
-                            while (e < events.Length) {
-                                int f;
-                                for (f = e + 1; f < events.Length && events[f].Pressed; f++);
-
-                                drawBar(
-                                    events[e].Time,
-                                    f < events.Length ? events[f].Time : result.Time
-                                );
-
-                                e = f + 1;
-                            }
-                        }
-                    }
-
-                    gfx.Flush();
-                }
-            }
-
-            screen.Image = img;
-        }
-
-        bool IntersectKey(Point pt, out int result) {
-            result = -1;
-
-            for (int i = 0; i < textRects.Count; i++) {
-                if (textRects[i].Contains(pt)) {
-                    result = i;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        void screen_MouseMove(object sender, MouseEventArgs e) {
-            if (result == null) return;
-
-            screen.Cursor = IntersectKey(e.Location, out _)
-                ? Cursors.NoMoveVert
-                : Cursors.Default;
-        }
-
-        void screen_MouseClick(object sender, MouseEventArgs e) {
-            if (result == null || e.Button != MouseButtons.Right) return;
-
-            if (IntersectKey(e.Location, out int i)) {
-                screen.Cursor = Cursors.Default;
-
-                keymenu.Tag = i;
-                keymenu.Show(screen.PointToScreen(e.Location));
-            }
-        }
-
-        void color_Click(object sender, EventArgs e) {
-            if (!(keymenu.Tag is int i)) return;
-
-            ColorDialog cd = new ColorDialog();
-            cd.Color = colors.ContainsKey(inputs[i])? colors[inputs[i]] : inputs[i].DefaultColor;
-
-            if (cd.ShowDialog() == DialogResult.OK) {
-                colors[inputs[i]] = cd.Color;
-                Redraw();
-            }
-        }
-
-        void hide_Click(object sender, EventArgs e) {
-            if (!(keymenu.Tag is int i)) return;
-
-            inputs.RemoveAt(i);
-            Redraw();
-        }
-
-        void unhide_Click(object sender, EventArgs e) {
-            if (sender is ToolStripMenuItem item && item.GetCurrentParent() is ToolStripDropDownMenu menu)
-                menu.Close();
-
-            if (result == null)
-                return;
-
-            IEnumerable<Input> unhidden = result.Events.Select(i => i.Input);
-
-            if (freeze.Checked)
-                unhidden = inputs.Concat(unhidden);
-
-            inputs = unhidden.Distinct().ToList();
-
-            Redraw();
-        }
-
-        void screen_MouseDown(object sender, MouseEventArgs e) {
-            if (result == null || e.Button != MouseButtons.Left) return;
-
-            if (IntersectKey(e.Location, out int i))
-                screen.DoDragDrop(i, DragDropEffects.Move);
-        }
-
-        bool ValidateDrag(DragEventArgs e, out int result) {
-            result = -1;
-            if (!e.Data.GetDataPresent("System.Int32")) return false;
-
-            result = (int)e.Data.GetData("System.Int32");
-            return !(result < 0 || textRects.Count <= result);
-        }
-
-        void screen_DragOver(object sender, DragEventArgs e) {
-            e.Effect = DragDropEffects.None;
-
-            if (result == null || !ValidateDrag(e, out _)) return;
-
-            if (IntersectKey(screen.PointToClient(new Point(e.X, e.Y)), out _))
-                e.Effect = DragDropEffects.Move;
-        }
-
-        void screen_DragDrop(object sender, DragEventArgs e) {
-            if (result == null || !ValidateDrag(e, out int d)) return;
-
-            if (IntersectKey(screen.PointToClient(new Point(e.X, e.Y)), out int i)) {
-                Input k = inputs[d];
-                inputs.RemoveAt(d);
-                inputs.Insert(i, k);
-
-                Redraw();
-            }
-        }
-
-        private void screen_SizeChanged(object sender, EventArgs e)
-            => Redraw();
 
         bool EstimatePeak(double[] data, out int result) {
             double max = double.MaxValue;
@@ -582,7 +302,7 @@ namespace Keyboard_Inspector {
         private void lowCut_CheckedChanged(object sender, EventArgs e) {
             if (silentAnalysis) return;
 
-            RunChartsSuspendedAction(() => {
+            RunChartsSuspendedAction(freqCharts, () => {
                 RunFromLowCut(chartDiffsFreq);
                 RunFromLowCut(chartCompoundFreq);
                 RunFromLowCut(chartCircularFreq);
@@ -592,7 +312,7 @@ namespace Keyboard_Inspector {
         private void hps_ValueChanged(object sender, EventArgs e) {
             if (silentAnalysis) return;
 
-            RunChartsSuspendedAction(() => {
+            RunChartsSuspendedAction(freqCharts, () => {
                 RunFromHPS(chartDiffsFreq);
                 RunFromHPS(chartCompoundFreq);
                 RunFromHPS(chartCircularFreq);
@@ -604,29 +324,29 @@ namespace Keyboard_Inspector {
 
         int hpsIterations => (int)hps.Value;
 
-        List<Chart> allCharts;
+        List<Chart> allCharts, freqCharts;
 
-        void RunChartsSuspendedAction(Action action) {
+        void RunChartsSuspendedAction(IEnumerable<Chart> charts, Action action) {
             try {
-                foreach (var chart in allCharts)
+                foreach (var chart in charts)
                     chart.Area.SuspendPaint();
 
                 action();
 
             } finally {
-                foreach (var chart in allCharts)
+                foreach (var chart in charts)
                     chart.Area.ResumePaint();
             }
         }
 
         void CreateCharts() {
-            if (!hasResult) return;
+            if (Result.IsEmpty(result)) return;
 
             int.TryParse(tbPrecision.Text, out precision);
 
             if (!PrecisionValid) return;
 
-            RunChartsSuspendedAction(() => {
+            RunChartsSuspendedAction(allCharts, () => {
                 RunGraphJob(cacheDiffs, chartDiffs, chartDiffsFreq);
                 RunGraphJob(cacheCompound, chartCompound, chartCompoundFreq);
                 RunGraphJob(cacheCircular, chartCircular, chartCircularFreq, CircularRotationFix);
@@ -659,11 +379,11 @@ namespace Keyboard_Inspector {
         };
 
         Action<Scope>[] ScopeDefaults = new Action<Scope>[] {
-            i => i.SetBetween(0, 100, (i.Control as ChartArea).XMaxValue),
+            i => i.SetBetween(0, 100, (i.Control as ChartArea).XMaxFactored),
             i => i.Reset()
         };
 
-        void InitChartTags() {
+        void InitCharts() {
             var TimeInterval = (Func<int, double>)(i => ScreenInterval(i) * 1000);
             var FreqInterval = (Func<int, double>)(i => {
                 if (i < 2) return (i + 1) * 5;
@@ -680,6 +400,8 @@ namespace Keyboard_Inspector {
 
                 chart.Area.Spotlight += chart_Spotlight;
             }
+
+            screen.Area.Scope.IntervalGenerator = ScreenInterval;
         }
 
         void chart_Spotlight(object sender, EventArgs e) {
@@ -762,10 +484,6 @@ namespace Keyboard_Inspector {
         void LoadFile(string filename) {
             try {
                 result = fileFormats.First(i => i.Match(filename)).Read(filename);
-
-                scope.Reset();
-
-                processResult();
                 resultLoaded();
 
             } catch {
@@ -796,7 +514,7 @@ namespace Keyboard_Inspector {
         }
 
         void save_Click(object sender, EventArgs e) {
-            if (hasResult && sfd.ShowDialog() == DialogResult.OK)
+            if (!Result.IsEmpty(result) && sfd.ShowDialog() == DialogResult.OK)
                 SaveFile(sfd.FileName);
         }
 

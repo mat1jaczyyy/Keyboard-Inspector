@@ -75,9 +75,6 @@
     <Compile Include="Chart\ChartArea.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="HTTransparentDarkLabel.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Event.cs" />
     <Compile Include="FileFormat.cs" />
     <Compile Include="Input.cs" />
@@ -116,12 +113,6 @@
     <None Include="keyboard.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Chart\Chart.resx">
-      <DependentUpon>Chart.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Chart\ChartArea.resx">
-      <DependentUpon>ChartArea.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

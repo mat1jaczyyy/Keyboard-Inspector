@@ -46,7 +46,6 @@
             this.Area.Name = "Area";
             this.Area.Size = new System.Drawing.Size(150, 133);
             this.Area.TabIndex = 5;
-            this.Area.XFactor = 1D;
             // 
             // Chart
             // 

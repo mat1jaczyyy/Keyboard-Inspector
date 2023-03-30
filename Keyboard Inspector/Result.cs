@@ -16,7 +16,7 @@ namespace Keyboard_Inspector {
         public DateTime Recorded;
 
         public double Time;
-        public ReadOnlyCollection<Event> Events;
+        public List<Event> Events;
 
         public Result(string title, DateTime recorded, double time, List<Event> events) {
             Title = title?? "";
@@ -24,9 +24,10 @@ namespace Keyboard_Inspector {
             Time = time;
             
             // Filter auto-repeat
+            // TODO Optimize
             Events = events
                 .Where((x, i) => !x.Pressed || !(events.Take(i).Where(j => j.Input == x.Input).LastOrDefault()?.Pressed ?? false))
-                .ToList().AsReadOnly();
+                .ToList();
         }
 
         public void ToBinary(BinaryWriter bw) {
@@ -53,5 +54,7 @@ namespace Keyboard_Inspector {
                 Event.ListFromBinary(br, fileVersion)
             );
         }
+
+        public static bool IsEmpty(Result result) => (result?.Events.Count?? 0) <= 1;
     }
 }
