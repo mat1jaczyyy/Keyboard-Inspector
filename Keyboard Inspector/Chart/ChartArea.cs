@@ -151,6 +151,11 @@ namespace Keyboard_Inspector {
             return double.NaN;
         }
 
+        double GetValue(int index) {
+            if (kind == Kind.KeyHistory) return Convert.ToInt32(KeyHistory.Events[index].Pressed);
+            return GetY(index);
+        }
+
         int BinarySearch(List<Event> events, double x, int ceil) {
             int start = 0;
             int end = events.Count - 1;
@@ -445,7 +450,7 @@ namespace Keyboard_Inspector {
 
             /* Line chart */
             if (kind == Kind.Line) {
-                //PointColor = _ => cs.LineColor;
+                PointColor = _ => cs.LineColor;
 
                 int first = GetPointLeft(u.Min);
                 int last = GetPointRight(u.Max);
@@ -510,7 +515,7 @@ namespace Keyboard_Inspector {
 
             /* KeyHistory chart */
             if (kind == Kind.KeyHistory) {
-                //PointColor = _ => KeyHistory.Events[_].Input.DefaultColor;
+                PointColor = _ => KeyHistory.Events[_].Input.DefaultColor;
 
                 e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
                 
@@ -578,14 +583,14 @@ namespace Keyboard_Inspector {
                 var point = ToPointF(HighlightPoint);
                 var marker = new RectangleF(point.X - 3, point.Y - 3, 6, 6);
 
-                Color color = PointColor(HighlightPoint);
+                Color color = PointColor(HighlightPoint).Blend(Color.White, 0.16);
 
                 e.Graphics.FillEllipse(new SolidBrush(Color.FromArgb(128, color)), marker);
                 e.Graphics.DrawEllipse(new Pen(color), marker);
 
                 point = new PointF((float)Math.Round(point.X), (float)Math.Round(point.Y));
 
-                string text = $"({GetXFactored(HighlightPoint):0.###}, {GetY(HighlightPoint):0.###})";
+                string text = $"({GetXFactored(HighlightPoint):0.###}, {GetValue(HighlightPoint):0.###})";
                 var textSize = e.Graphics.MeasureString(text, Font);
                 var textRect = new RectangleF(point.X + 9, point.Y - 1 - (float)Math.Ceiling(textSize.Height), textSize.Width, textSize.Height);
 

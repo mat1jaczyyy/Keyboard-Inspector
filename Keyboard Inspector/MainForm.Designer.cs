@@ -28,9 +28,6 @@ namespace Keyboard_Inspector {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.rec = new DarkUI.Controls.DarkButton();
             this.t = new System.Windows.Forms.Timer(this.components);
-            this.keymenu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.color = new System.Windows.Forms.ToolStripMenuItem();
-            this.hide = new System.Windows.Forms.ToolStripMenuItem();
             this.status = new DarkUI.Controls.DarkLabel();
             this.split = new System.Windows.Forms.SplitContainer();
             this.tlpCharts = new System.Windows.Forms.TableLayoutPanel();
@@ -53,6 +50,7 @@ namespace Keyboard_Inspector {
             this.tbPrecision = new DarkUI.Controls.DarkTextBox();
             this.label21 = new DarkUI.Controls.DarkLabel();
             this.label22 = new DarkUI.Controls.DarkLabel();
+            this.screen = new Keyboard_Inspector.Chart();
             this.recording = new System.Windows.Forms.ToolStripMenuItem();
             this.open = new System.Windows.Forms.ToolStripMenuItem();
             this.save = new System.Windows.Forms.ToolStripMenuItem();
@@ -61,8 +59,6 @@ namespace Keyboard_Inspector {
             this.unhide = new System.Windows.Forms.ToolStripMenuItem();
             this.mainmenu = new DarkUI.Controls.DarkMenuStrip();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.screen = new Keyboard_Inspector.Chart();
-            this.keymenu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
             this.split.Panel1.SuspendLayout();
             this.split.Panel2.SuspendLayout();
@@ -89,26 +85,6 @@ namespace Keyboard_Inspector {
             // 
             this.t.Interval = 1000;
             this.t.Tick += new System.EventHandler(this.t_Tick);
-            // 
-            // keymenu
-            // 
-            this.keymenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.color,
-            this.hide});
-            this.keymenu.Name = "keymenu";
-            this.keymenu.Size = new System.Drawing.Size(157, 48);
-            // 
-            // color
-            // 
-            this.color.Name = "color";
-            this.color.Size = new System.Drawing.Size(156, 22);
-            this.color.Text = "Change &Color...";
-            // 
-            // hide
-            // 
-            this.hide.Name = "hide";
-            this.hide.Size = new System.Drawing.Size(156, 22);
-            this.hide.Text = "&Hide Key";
             // 
             // status
             // 
@@ -388,6 +364,14 @@ namespace Keyboard_Inspector {
             this.label22.Text = "Hz";
             this.label22.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
+            // screen
+            // 
+            this.screen.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.screen.Location = new System.Drawing.Point(0, 0);
+            this.screen.Name = "screen";
+            this.screen.Size = new System.Drawing.Size(1294, 222);
+            this.screen.TabIndex = 1;
+            // 
             // recording
             // 
             this.recording.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
@@ -463,14 +447,6 @@ namespace Keyboard_Inspector {
             this.mainmenu.TabIndex = 7;
             this.mainmenu.Text = "menuStrip1";
             // 
-            // screen
-            // 
-            this.screen.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.screen.Location = new System.Drawing.Point(0, 0);
-            this.screen.Name = "screen";
-            this.screen.Size = new System.Drawing.Size(1294, 222);
-            this.screen.TabIndex = 1;
-            // 
             // MainForm
             // 
             this.AllowDrop = true;
@@ -490,7 +466,6 @@ namespace Keyboard_Inspector {
             this.Shown += new System.EventHandler(this.MainForm_Shown);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.MainForm_DragDrop);
             this.DragOver += new System.Windows.Forms.DragEventHandler(this.MainForm_DragOver);
-            this.keymenu.ResumeLayout(false);
             this.split.Panel1.ResumeLayout(false);
             this.split.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.split)).EndInit();
@@ -510,9 +485,6 @@ namespace Keyboard_Inspector {
         #endregion
         private DarkUI.Controls.DarkButton rec;
         private System.Windows.Forms.Timer t;
-        private System.Windows.Forms.ContextMenuStrip keymenu;
-        private System.Windows.Forms.ToolStripMenuItem color;
-        private System.Windows.Forms.ToolStripMenuItem hide;
         private DarkUI.Controls.DarkLabel status;
         private System.Windows.Forms.SplitContainer split;
         private System.Windows.Forms.TableLayoutPanel tlpCharts;
