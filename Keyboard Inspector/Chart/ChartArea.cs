@@ -13,6 +13,7 @@ namespace Keyboard_Inspector {
         ContextMenuStrip KeyMenu;
 
         public ChartArea() {
+            AllowDrop = true;
             DoubleBuffered = true;
             ResizeRedraw = true;
 
@@ -28,7 +29,10 @@ namespace Keyboard_Inspector {
                 new ToolStripMenuItem("&Reset Color"),
                 new ToolStripSeparator(),
                 new ToolStripMenuItem("&Hide Key"),
-                new ToolStripMenuItem("Show &All Keys")
+                new ToolStripMenuItem("Show &All Keys"),
+                new ToolStripSeparator(),
+                new ToolStripMenuItem("&Freeze"),
+                new ToolStripMenuItem("Un&freeze")
             });
 
             KeyMenu.Items[0].Click += (_, __) => {
@@ -85,9 +89,27 @@ namespace Keyboard_Inspector {
                 Invalidate();
             };
 
-            KeyMenu.ResumeLayout(false);
+            KeyMenu.Items[6].Click += (_, __) => {
+                if (!HasHistory) return;
 
-            AllowDrop = true;
+                KeyMenu.Tag = null;
+
+                Frozen = true;
+
+                Invalidate();
+            };
+
+            KeyMenu.Items[7].Click += (_, __) => {
+                if (!HasHistory) return;
+
+                KeyMenu.Tag = null;
+
+                Frozen = false;
+
+                Invalidate();
+            };
+
+            KeyMenu.ResumeLayout(false);
         }
 
         bool Suspended = false;
@@ -168,8 +190,9 @@ namespace Keyboard_Inspector {
         bool HasHistory => !Result.IsEmpty(KeyHistory);
 
         List<InputHolder> Inputs;
-
         List<InputHolder> VisibleInputs;
+        
+        bool Frozen;
         bool MultipleSources;
 
         void RefreshVisibleInputs() {
@@ -188,7 +211,24 @@ namespace Keyboard_Inspector {
             if (HasHistory) {
                 kind = Kind.KeyHistory;
                 
-                Inputs = KeyHistory.Events.Select(i => i.Input).Distinct().Select(i => new InputHolder(i)).ToList();
+                var newInputs = KeyHistory.Events.Select(i => i.Input).Distinct().Select(i => new InputHolder(i)).ToList();
+
+                if (Frozen) {
+                    Inputs.RemoveAll(i => !i.Visible);
+                    YMaxValue = Inputs.Count;
+
+                    foreach (var i in newInputs) {
+                        if (Inputs.Any(j => j.Input == i.Input)) continue;
+
+                        i.Visible = false;
+                        Inputs.Add(i);
+                    }
+
+                } else {
+                    Inputs = newInputs;
+                    YMaxValue = Inputs.Count;
+                }
+
                 RefreshVisibleInputs();
 
                 InputIndexes = new Dictionary<Input, int>();
@@ -203,7 +243,6 @@ namespace Keyboard_Inspector {
                     Inputs[InputIndexes[e.Input]].Events.Add(e);
                 }
 
-                YMaxValue = Inputs.Count;
                 Scope.SetToDefault();
 
             } else {
@@ -414,16 +453,16 @@ namespace Keyboard_Inspector {
             bool intersects = IntersectForMenu(e.Location, out int k);
             if (intersects) KeyMenu.Tag = k;
 
-            bool canHide = intersects && VisibleInputs.Count > 1;
-            bool canShowAll = Inputs.Any(i => !i.Visible);
+            KeyMenu.Items[0].Available = intersects;
+            KeyMenu.Items[1].Available = intersects && Inputs[k].Color != Inputs[k].Input.DefaultColor;
 
-            KeyMenu.Items[0].Visible = intersects;
-            KeyMenu.Items[1].Visible = intersects && Inputs[k].Color != Inputs[k].Input.DefaultColor;
+            KeyMenu.Items[3].Available = intersects && VisibleInputs.Count > 1;
+            KeyMenu.Items[4].Available = Inputs.Any(i => !i.Visible);
 
-            KeyMenu.Items[3].Visible = intersects && VisibleInputs.Count > 1;
-            KeyMenu.Items[4].Visible = Inputs.Any(i => !i.Visible);
+            KeyMenu.Items[6].Available = !Frozen;
+            KeyMenu.Items[7].Available = Frozen;
 
-            KeyMenu.Items[2].Visible = intersects && (canHide || canShowAll);
+            KeyMenu.Items.AutoSeparators();
 
             Cursor = Cursors.Default;
             KeyMenu.Show(this, e.Location);
@@ -563,7 +602,7 @@ namespace Keyboard_Inspector {
         // TODO Remove unused
         class ColorSet {
             public Color TextColor, BackColor, LineColor, LowColor, LowTransparentColor, PointColor;
-            public Brush TextBrush, BackBrush, LineBrush, LowBrush, LowTransparentBrush, ShadowBrush, ShadowTextBrush;
+            public Brush TextBrush, BackBrush, LineBrush, LowBrush, LowTransparentBrush, ShadowBrush, ShadowTextBrush, FrozenBrush;
             public LinearGradientBrush GradientBrush, PointBrush;
             public Pen LinePen, GradientPen, XPen, YPen;
         }
@@ -599,6 +638,7 @@ namespace Keyboard_Inspector {
 
             cs.ShadowBrush = new SolidBrush(Color.FromArgb(200, cs.BackColor));
             cs.ShadowTextBrush = new SolidBrush(Color.FromArgb(224, (byte)(BackColor.R * 0.75), (byte)(BackColor.G * 0.75), (byte)(BackColor.B * 0.75)));
+            cs.FrozenBrush = new SolidBrush(cs.TextColor.Blend(Color.SkyBlue, 0.45));
 
             cs.LinePen = new Pen(cs.LineBrush);
             cs.GradientPen = new Pen(cs.GradientBrush);
@@ -736,19 +776,17 @@ namespace Keyboard_Inspector {
             /* KeyHistory chart */
             if (kind == Kind.KeyHistory) {
                 PointColor = _ => Inputs[InputIndexes[KeyHistory.Events[_].Input]].Color; // it's weird, but good enough
-
-                e.Graphics.SmoothingMode = SmoothingMode.HighSpeed;
                 
                 var blend = new ColorBlend();
                 blend.Positions = new float[] { 0f, 0.1f, 0.3f, 1 };
 
-                RectangleF bar = new RectangleF(u.Chart.X, 0, u.Chart.Width, (float)(u.YUnit - 2));
+                RectangleF bar = new RectangleF(u.Chart.X, 0, u.Chart.Width, (float)Math.Round(u.YUnit - 2));
 
                 for (int k = 0; k < VisibleInputs.Count; k++) {
                     var i = VisibleInputs[k];
-                    e.Graphics.DrawShadowString(i.Input.ToString(MultipleSources), Font, cs.TextBrush, cs.ShadowTextBrush, i.TextRect);
+                    e.Graphics.DrawShadowString(i.Input.ToString(MultipleSources), Font, Frozen? cs.FrozenBrush : cs.TextBrush, cs.ShadowTextBrush, i.TextRect);
 
-                    bar.Y = (float)(u.Chart.Y + k * u.YUnit + 1);
+                    bar.Y = (float)(Math.Floor(u.Chart.Y + k * u.YUnit + 1) - 0.5);
                     LinearGradientBrush brush = new LinearGradientBrush(bar, Color.Transparent, Color.Transparent, LinearGradientMode.Vertical);
 
                     var color = Color.FromArgb(250, i.Color);
@@ -759,6 +797,7 @@ namespace Keyboard_Inspector {
                     brush.InterpolationColors = blend;
 
                     var events = i.Events;
+                    if (!events.Any()) continue;
 
                     int left = BinarySearch(events, u.Min, 1);
                     int right = BinarySearch(events, u.Max, 0) + 1;
@@ -771,6 +810,20 @@ namespace Keyboard_Inspector {
 
                         bar.X = (float)(u.Chart.X + (start - u.Min) * u.XUnit);
                         bar.Width = (float)((end - start) * u.XUnit);
+
+                        if (bar.Width > 2) {
+                            float rx = (float)(Math.Floor(bar.X) - 0.5);
+                            float rw = (float)Math.Round(bar.Width);
+                            float amount = (bar.Width - 2) / 3;
+
+                            if (amount >= 1) {
+                                bar.X = rx;
+                                bar.Width = rw;
+                            } else {
+                                bar.X = rx * amount + bar.X * (1 - amount);
+                                bar.Width = rw * amount + bar.Width * (1 - amount);
+                            }
+                        }
 
                         e.Graphics.FillRectangle(brush, bar);
                     }
@@ -788,8 +841,6 @@ namespace Keyboard_Inspector {
                         );
                     }
                 }
-
-                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             }
 
             /* Highlight */

@@ -54,5 +54,19 @@ namespace Keyboard_Inspector {
             rect.Offset(-1, -1);
             g.DrawString(text, font, textBrush, rect, format);
         }
+
+        public static void AutoSeparators(this ToolStripItemCollection items) {
+            bool has = false;
+
+            foreach (ToolStripItem item in items) {
+                if (item is ToolStripMenuItem) {
+                    has |= item.Available;
+                
+                } else if (item is ToolStripSeparator) {
+                    item.Available = has;
+                    has = false;
+                }
+            }
+        }
     }
 }
