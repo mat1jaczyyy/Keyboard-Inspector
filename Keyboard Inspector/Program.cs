@@ -37,6 +37,12 @@ namespace Keyboard_Inspector {
                 i.ToBinary(bw);
         }
 
+        public static double Blend(this double val, double backVal, double amount) {
+            if (amount <= 0) return backVal;
+            if (amount >= 1) return val;
+            return val * amount + backVal * (1 - amount);
+        }
+
         public static Color Blend(this Color color, Color backColor, double amount) {
             byte r = (byte)(color.R * amount + backColor.R * (1 - amount));
             byte g = (byte)(color.G * amount + backColor.G * (1 - amount));

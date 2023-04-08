@@ -471,11 +471,19 @@ namespace Keyboard_Inspector {
         protected override void OnMouseDown(MouseEventArgs e) {
             base.OnMouseDown(e);
 
-            if (!HasHistory) return;
+            if (!HasData) return;
             if (e.Button != MouseButtons.Left) return;
 
-            if (IntersectForDrag(e.Location, out int k))
+            if (HasHistory && IntersectForDrag(e.Location, out int k)) {
                 DoDragDrop(k, DragDropEffects.Move);
+                return;
+            }
+            
+            Units u = GetUnits();
+
+            if (u.Chart.Contains(e.Location) || u.XAxis.Contains(e.Location)) {
+                Capture = true;
+            }
         }
 
         bool ValidateDrag(DragEventArgs e, out int result) {
@@ -702,7 +710,7 @@ namespace Keyboard_Inspector {
                 for (float s = GetS(); s <= u.Chart.Width + 0.5; posCeil++, s = GetS()) {
                     s = (float)Math.Round(s + u.XAxis.X);
 
-                    e.Graphics.DrawLine(cs.XPen, s, u.Chart.Y, s, u.XAxis.Y + 4);
+                    e.Graphics.DrawLine(cs.XPen, s, u.Chart.Y - 0.5f, s, u.XAxis.Y + 4.5f);
                     textRect.X = s - textRect.Width / 2;
                     e.Graphics.DrawShadowString($"{interval * posCeil:0.###}", Font, cs.TextBrush, cs.ShadowTextBrush, textRect, true);
                 }
@@ -780,13 +788,18 @@ namespace Keyboard_Inspector {
                 var blend = new ColorBlend();
                 blend.Positions = new float[] { 0f, 0.1f, 0.3f, 1 };
 
-                RectangleF bar = new RectangleF(u.Chart.X, 0, u.Chart.Width, (float)Math.Round(u.YUnit - 2));
+                var height = u.YUnit - 2;
+                RectangleF bar = new RectangleF(u.Chart.X, 0, u.Chart.Width, 0);
 
                 for (int k = 0; k < VisibleInputs.Count; k++) {
                     var i = VisibleInputs[k];
                     e.Graphics.DrawShadowString(i.Input.ToString(MultipleSources), Font, Frozen? cs.FrozenBrush : cs.TextBrush, cs.ShadowTextBrush, i.TextRect);
 
-                    bar.Y = (float)(Math.Floor(u.Chart.Y + k * u.YUnit + 1) - 0.5);
+                    double y = u.Chart.Y + k * u.YUnit;
+
+                    bar.Height = (float)(Math.Floor(y + height) - (y = Math.Floor(y)));
+                    bar.Y = (float)(y + 0.5);
+
                     LinearGradientBrush brush = new LinearGradientBrush(bar, Color.Transparent, Color.Transparent, LinearGradientMode.Vertical);
 
                     var color = Color.FromArgb(250, i.Color);
@@ -802,43 +815,50 @@ namespace Keyboard_Inspector {
                     int left = BinarySearch(events, u.Min, 1);
                     int right = BinarySearch(events, u.Max, 0) + 1;
 
-                    void drawBar(double start, double end) {
+                    var points = new List<double>() { double.NegativeInfinity };
+                    var rounded = new List<double>();
+
+                    void makePoint(double start, double end) {
                         if (start <= u.Min) start = u.Min;
                         if (start >= u.Max) return;
                         if (end <= u.Min) return;
                         if (end >= u.Max) end = u.Max;
 
-                        bar.X = (float)(u.Chart.X + (start - u.Min) * u.XUnit);
-                        bar.Width = (float)((end - start) * u.XUnit);
+                        start = u.Chart.X + (start - u.Min) * u.XUnit;
+                        end = u.Chart.X + (end - u.Min) * u.XUnit;
 
-                        if (bar.Width > 2) {
-                            float rx = (float)(Math.Floor(bar.X) - 0.5);
-                            float rw = (float)Math.Round(bar.Width);
-                            float amount = (bar.Width - 2) / 3;
+                        points.Add(start);
+                        points.Add(end);
 
-                            if (amount >= 1) {
-                                bar.X = rx;
-                                bar.Width = rw;
-                            } else {
-                                bar.X = rx * amount + bar.X * (1 - amount);
-                                bar.Width = rw * amount + bar.Width * (1 - amount);
-                            }
-                        }
-
-                        e.Graphics.FillRectangle(brush, bar);
+                        rounded.Add(Math.Floor(start) + 0.5);
+                        rounded.Add(Math.Floor(end) + 0.5);
                     }
 
                     int ev = left;
                     if (!events[ev].Pressed) {
-                        drawBar(0, events[ev].Time);
+                        makePoint(0, events[ev].Time);
                         ev++;
                     }
 
                     for (; ev < right; ev += 2) {
-                        drawBar(
+                        makePoint(
                             events[ev].Time,
                             ev + 1 < right? events[ev + 1].Time : KeyHistory.Time
                         );
+                    }
+
+                    points.Add(double.PositiveInfinity);
+
+                    for (int p = 1; p < points.Count - 1; p++) {
+                        double dist = Math.Min(points[p] - points[p - 1], points[p + 1] - points[p]);
+                        points[p] = rounded[p - 1].Blend(points[p], (dist - 2) / 3);
+
+                        if (p % 2 == 0) {
+                            bar.X = (float)points[p - 1];
+                            bar.Width = (float)(points[p] - points[p - 1]);
+
+                            e.Graphics.FillRectangle(brush, bar);
+                        }
                     }
                 }
             }
