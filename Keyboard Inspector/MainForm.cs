@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Windows.Forms;
 
-using DarkUI.Controls;
 using DarkUI.Forms;
 
 using FFTW.NET;
@@ -30,8 +27,6 @@ namespace Keyboard_Inspector {
             Instance = this;
 
             InitializeComponent();
-
-            InitFileFormats();
 
             allCharts = tlpCharts.Controls.OfType<Chart>().ToList();
             timeCharts = allCharts.Where(i => tlpCharts.GetRow(i) == 0).ToList();
@@ -415,97 +410,25 @@ namespace Keyboard_Inspector {
             screen.Area.IntervalGenerator = ScreenInterval;
         }
 
-        // TODO Move this out to FileFormat.cs
-        FileFormat[] fileFormats;
-        OpenFileDialog ofd;
-        SaveFileDialog sfd;
-
-        void InitFileFormats() {
-            fileFormats = new FileFormat[] {
-                new FileFormat("Keyboard Inspector Files", new string[] { "kbi" },
-                    path => {
-                        using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(path))) {
-                            using (BinaryReader br = new BinaryReader(ms)) {
-                                return Result.FromBinary(br);
-                            }
-                        }
-                    },
-                    (result, path) => {
-                        using (MemoryStream ms = new MemoryStream()) {
-                            using (BinaryWriter bw = new BinaryWriter(ms)) {
-                                result.ToBinary(bw);
-                                File.WriteAllBytes(path, ms.ToArray());
-                            }
-                        }
-                    }
-                ),
-                new FileFormat("TETR.IO Replay Files", new string[] { "ttr", "ttrm" },
-                    path => {
-                        result = TetrioReplay.ConvertToResult(path);
-
-                        if (result != null) {
-                            silentAnalysis = true;
-                            tbPrecision.Text = "600";
-                            silentAnalysis = false;
-                        }
-
-                        return result;
-                    },
-                    disclaimer:
-                    "You are analyzing a TETR.IO replay file.\n\nTETR.IO downsamples input data to 600 Hz to fit it onto the subframe grid which " +
-                    "you will notice as a peak at 600 Hz in the frequency domain. This adds another \"sampling rate\" (in addition to the usual " +
-                    "USB poll rate and matrix scan rate) to the process.\n\nThis is unlike a regular Keyboard Inspector recording which tries to " +
-                    "get the most accurate real-time timestamp it can without any additional downsampling.\n\nYou may still analyze the recording, " +
-                    "but be vary of the limitations of the TETR.IO replay format."
-                ),
-            };
-
-            ofd = new OpenFileDialog() {
-                Filter = FileFormat.GetOpenFilter(fileFormats),
-                Title = "Open Recording"
-            };
-
-            sfd = new SaveFileDialog() {
-                Filter = FileFormat.GetSaveFilter(fileFormats),
-                Title = "Save Recording"
-            };
-        }
-
         void LoadFile(string filename) {
-            try {
-                result = fileFormats.First(i => i.Match(filename)).Read(filename);
+            if (FileSystem.Open(filename, out Result loaded, out string error)) {
+                result = loaded;
                 resultLoaded();
-
-            } catch {
-                status.Text = "Couldn't parse file, it is likely corrupt or in an unsupported format.";
-                
-                #if DEBUG
-                    throw;
-                #endif
             }
-        }
 
-        void SaveFile(string filename) {
-            try {
-                fileFormats.First(i => i.Match(filename)).Write(result, filename);
-
-            } catch {
-                status.Text = "Couldn't save file, try saving it to a different location or with a different file name.";
-
-                #if DEBUG
-                    throw;
-                #endif
-            }
-        }
+            status.Text = error;
+        } 
 
         void open_Click(object sender, EventArgs e) {
-            if (ofd.ShowDialog() == DialogResult.OK)
-                LoadFile(ofd.FileName);
+            if (FileSystem.OpenDialog(out string filename))
+                LoadFile(filename);
         }
 
         void save_Click(object sender, EventArgs e) {
-            if (!Result.IsEmpty(result) && sfd.ShowDialog() == DialogResult.OK)
-                SaveFile(sfd.FileName);
+            if (Result.IsEmpty(result)) return;
+
+            FileSystem.Save(result, out string error);
+            status.Text = error;
         }
 
         bool ValidateFileDrag(DragEventArgs e, out string result) {
@@ -516,7 +439,7 @@ namespace Keyboard_Inspector {
             if (arr.Length != 1) return false;
 
             result = arr[0];
-            return fileFormats.Any(i => i.Match(arr[0]));
+            return FileSystem.SupportsFormat(arr[0]);
         }
 
         private void MainForm_DragOver(object sender, DragEventArgs e) {

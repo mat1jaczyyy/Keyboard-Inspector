@@ -65,6 +65,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Analysis.cs" />
     <Compile Include="Benchmark.cs" />
     <Compile Include="Chart\Chart.cs">
       <SubType>UserControl</SubType>
@@ -76,7 +77,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Event.cs" />
-    <Compile Include="FileFormat.cs" />
+    <Compile Include="FileSystem.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="IBinary.cs" />
     <Compile Include="Keyboard\KeyInput.cs" />
