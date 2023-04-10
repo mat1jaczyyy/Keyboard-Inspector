@@ -6,7 +6,7 @@ namespace Keyboard_Inspector {
     partial class Chart: UserControl {
         public Chart() {
             InitializeComponent();
-            Area.Scope.ScrollBar = ScrollBar;
+            Area.ScrollBar = ScrollBar;
         }
 
         [Category("Appearance")]

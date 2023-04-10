@@ -31,12 +31,10 @@ namespace Keyboard_Inspector {
 
             InitializeComponent();
 
-            key.DropDown.Closing += (s, e) => e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked;
-
-            // TODO REFACTOR ALL BELOW THIS
             InitFileFormats();
 
             allCharts = tlpCharts.Controls.OfType<Chart>().ToList();
+            timeCharts = allCharts.Where(i => tlpCharts.GetRow(i) == 0).ToList();
             freqCharts = allCharts.Where(i => tlpCharts.GetRow(i) == 1).ToList();
 
             InitCharts();
@@ -45,24 +43,11 @@ namespace Keyboard_Inspector {
         int elapsed;
         Result result = null;
 
-        static double ScreenInterval(int i) {
-            if (i <= 3) return Math.Pow(2, i) / 1000;
-            if (i <= 12) {
-                double ret = Math.Pow(10, (i / 3) - 3);
-                if (i % 3 == 1) ret *= 2;
-                if (i % 3 == 2) ret *= 5;
-                return ret;
-            }
-            if (i <= 15) return Math.Pow(2, i - 14) * 60;
-            if (i <= 17) return Math.Pow(2, i - 16) * 300;
-            return Math.Pow(2, i - 18) * 1800;
-        }
-
         void resultLoaded() {
             string title = Result.IsEmpty(result)? "" : result.GetTitle();
             Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
 
-            key.Enabled = recording.Enabled = open.Enabled = !Recorder.IsRecording;
+            recording.Enabled = open.Enabled = !Recorder.IsRecording;
             save.Enabled = split.Visible = !Result.IsEmpty(result);
 
             labelN.Text = Result.IsEmpty(result)? "" : result.Events.Count.ToString();
@@ -324,7 +309,7 @@ namespace Keyboard_Inspector {
 
         int hpsIterations => (int)hps.Value;
 
-        List<Chart> allCharts, freqCharts;
+        List<Chart> allCharts, timeCharts, freqCharts;
 
         void RunChartsSuspendedAction(IEnumerable<Chart> charts, Action action) {
             try {
@@ -378,54 +363,59 @@ namespace Keyboard_Inspector {
             "frequency domain"
         };
 
-        Action<Scope>[] ScopeDefaults = new Action<Scope>[] {
-            i => i.SetBetween(0, 100, (i.Control as ChartArea).XMaxFactored),
-            i => i.Reset()
-        };
+        static double ScreenInterval(int i) {
+            if (i <= 3) return Math.Pow(2, i) / 1000;
+            if (i <= 12) {
+                double ret = Math.Pow(10, (i / 3) - 3);
+                if (i % 3 == 1) ret *= 2;
+                if (i % 3 == 2) ret *= 5;
+                return ret;
+            }
+            if (i <= 15) return Math.Pow(2, i - 14) * 60;
+            if (i <= 17) return Math.Pow(2, i - 16) * 300;
+            return Math.Pow(2, i - 18) * 1800;
+        }
 
         void InitCharts() {
-            var TimeInterval = (Func<int, double>)(i => ScreenInterval(i) * 1000);
-            var FreqInterval = (Func<int, double>)(i => {
-                if (i < 2) return (i + 1) * 5;
-                if (i < 4) return (i - 1) * 25;
-                return Math.Pow(2, i - 4) * 125;
-            });
-
             foreach (var chart in allCharts) {
-                int row = tlpCharts.GetRow(chart);
-                int col = tlpCharts.GetColumn(chart);
+                chart.Area.Spotlight += (_, __) => {
+                    if (chart.Parent == tlpCharts) {
+                        chart.SuspendLayout();
 
-                chart.Area.Scope.IntervalGenerator = row == 0? TimeInterval : FreqInterval;
-                chart.Area.Scope.Default = ScopeDefaults[row];
+                        tlpCharts.Controls.Remove(chart);
+                        split.Panel1.Controls.Add(chart);
+                        split.Panel1.Controls.SetChildIndex(chart, 0);
 
-                chart.Area.Spotlight += chart_Spotlight;
+                        chart.ResumeLayout();
+
+                    } else if (chart.Parent == split.Panel1) {
+                        chart.SuspendLayout();
+
+                        split.Panel1.Controls.Remove(chart);
+                        tlpCharts.Controls.Add(chart);
+
+                        chart.ResumeLayout();
+                    }
+                };
             }
 
-            screen.Area.Scope.IntervalGenerator = ScreenInterval;
-        }
-
-        void chart_Spotlight(object sender, EventArgs e) {
-            var chart = sender as Chart;
-
-            if (chart.Parent == tlpCharts) {
-                chart.SuspendLayout();
-
-                tlpCharts.Controls.Remove(chart);
-                split.Panel1.Controls.Add(chart);
-                split.Panel1.Controls.SetChildIndex(chart, 0);
-
-                chart.ResumeLayout();
-
-            } else if (chart.Parent == split.Panel1) {
-                chart.SuspendLayout();
-
-                split.Panel1.Controls.Remove(chart);
-                tlpCharts.Controls.Add(chart);
-
-                chart.ResumeLayout();
+            foreach (var chart in timeCharts) {
+                chart.Area.ScopeDefaultX = 100;
+                chart.Area.IntervalGenerator = i => ScreenInterval(i) * 1000;
             }
+
+            foreach (var chart in freqCharts) {
+                chart.Area.IntervalGenerator = i => {
+                    if (i < 2) return (i + 1) * 5;
+                    if (i < 4) return (i - 1) * 25;
+                    return Math.Pow(2, i - 4) * 125;
+                };
+            }
+
+            screen.Area.IntervalGenerator = ScreenInterval;
         }
 
+        // TODO Move this out to FileFormat.cs
         FileFormat[] fileFormats;
         OpenFileDialog ofd;
         SaveFileDialog sfd;

@@ -19,8 +19,6 @@ namespace Keyboard_Inspector {
 
             ForeColor = Color.FromArgb(65, 140, 240);
 
-            Scope = new Scope(this, null);
-
             KeyMenu = new DarkContextMenu();
             KeyMenu.SuspendLayout();
 
@@ -118,6 +116,61 @@ namespace Keyboard_Inspector {
             Suspended = false;
             Invalidate();
         }
+        
+        public double Zoom { get; private set; } = 1;
+        public double Viewport { get; private set; } = 0;
+        public Func<int, double> IntervalGenerator = i => Math.Pow(2, i - 10);
+        public double? ScopeDefaultX = null;
+
+        DarkScrollBar _scroll;
+        public DarkScrollBar ScrollBar {
+            get => _scroll;
+            set {
+                if (_scroll != null)
+                    _scroll.ValueChanged -= Scrolled;
+
+                _scroll = value;
+
+                if (_scroll != null)
+                    _scroll.ValueChanged += Scrolled;
+
+                UpdateScroll();
+            }
+        }
+
+        void Scrolled(object sender, EventArgs e) {
+            if (updatingScroll) return;
+
+            Viewport = (double)ScrollBar.Value / ScrollBar.Maximum;
+            Invalidate();
+        }
+
+        bool updatingScroll = false;
+
+        void UpdateScroll() {
+            if (ScrollBar == null) return;
+
+            try {
+                updatingScroll = true;
+                ScrollBar.ViewSize = (int)(ScrollBar.Maximum / Zoom);
+
+                if (ScrollBar.ViewSize == ScrollBar.Maximum)
+                    ScrollBar.ViewSize--;
+
+                ScrollBar.Value = (int)(ScrollBar.Maximum * Viewport);
+
+            } finally {
+                updatingScroll = false;
+            }
+        }
+
+        void ScopeReset() {
+            Zoom = ScopeDefaultX == null? 1 : (XMaxFactored / ScopeDefaultX.Value);
+            Viewport = 0;
+
+            Invalidate();
+            UpdateScroll();
+        }
 
         string _title = "";
         [Category("Appearance")]
@@ -162,7 +215,7 @@ namespace Keyboard_Inspector {
                 _xfactor = xfactor;
 
                 YMaxValue = Math.Max(1, LineData.Max());
-                Scope.SetToDefault();
+                ScopeReset();
 
             } else {
                 kind = Kind.None;
@@ -243,7 +296,7 @@ namespace Keyboard_Inspector {
                     Inputs[InputIndexes[e.Input]].Events.Add(e);
                 }
 
-                Scope.SetToDefault();
+                ScopeReset();
 
             } else {
                 kind = Kind.None;
@@ -330,16 +383,43 @@ namespace Keyboard_Inspector {
             return -1;
         }
 
-        public readonly Scope Scope;
-
         protected override void OnMouseWheel(MouseEventArgs e) {
             base.OnMouseWheel(e);
 
             if (!HasAny) return;
 
             Units u = GetUnits();
+            var x = (e.X - u.Chart.X) / u.Chart.Width;
 
-            if (!Scope.ApplyWheel(e.Delta, (e.X - u.Chart.X) / u.Chart.Width)) return;
+            if (x < 0 || 1 <= x) return;
+
+            double s = 1 / Zoom;
+
+            double change = Math.Pow(1.05, e.Delta / 120.0);
+            Zoom *= change;
+
+            if (Zoom <= 1) {
+                Zoom = 1;
+                Viewport = 0;
+
+            } else {
+                if (Zoom > 200000) {
+                    Zoom = 200000;
+                    change = Zoom * s;
+                }
+
+                double v = x * (1 - 1 / change);
+                Viewport += v * s;
+
+                if (Viewport < 0) Viewport = 0;
+                else {
+                    double t = 1 / Zoom;
+                    if (Viewport + t > 1) Viewport = 1 - t;
+                }
+            }
+
+            Invalidate();
+            UpdateScroll();
 
             HandleMouseMove(e, true);
         }
@@ -482,7 +562,7 @@ namespace Keyboard_Inspector {
             Units u = GetUnits();
 
             if (u.Chart.Contains(e.Location) || u.XAxis.Contains(e.Location)) {
-                Capture = true;
+                Capture = true; // TODO Figure out capture
             }
         }
 
@@ -569,11 +649,11 @@ namespace Keyboard_Inspector {
                     u.YAxis.Height
                 );
 
-                u.Space = XMax / Scope.Zoom;
+                u.Space = XMax / Zoom;
                 u.XUnit = u.Chart.Width / u.Space;
                 u.YUnit = u.Chart.Height / YMaxValue;
 
-                u.Min = Scope.Viewport * XMax;
+                u.Min = Viewport * XMax;
                 u.Max = Math.Min(XMax, u.Space + u.Min);
 
                 if (kind == Kind.KeyHistory) {
@@ -699,20 +779,29 @@ namespace Keyboard_Inspector {
 
             /* XAxis */
             {
-                double interval = Scope.GetInterval(XMaxFactored, u.Chart.Width, kind == Kind.Line? 30 : 40, out double px, out double pos);
-                double offset = (float)Math.Round(pos * px);
-                int posCeil = (int)Math.Ceiling(pos);
+                int incIndex = 0;
+                double factorToPx = u.Chart.Width * Zoom / XMaxFactored;
+                double lowest = (kind == Kind.Line? 30 : 40) / factorToPx;
+                double interval;
+
+                do {
+                    interval = IntervalGenerator(incIndex++);
+                } while (interval < lowest);
+
+                double px = interval * factorToPx;
+                double offset = (float)Math.Round(Viewport * u.Chart.Width * Zoom);
+                int pos = (int)Math.Ceiling(Viewport * XMaxFactored / interval);
 
                 var textRect = new RectangleF(0, u.XAxis.Y + 7, (float)px, (float)u.TextHeight);
 
-                float GetS() => (float)(Math.Round(posCeil * px) - offset);
+                float GetS() => (float)(Math.Round(pos * px) - offset);
 
-                for (float s = GetS(); s <= u.Chart.Width + 0.5; posCeil++, s = GetS()) {
+                for (float s = GetS(); s <= u.Chart.Width + 0.5; pos++, s = GetS()) {
                     s = (float)Math.Round(s + u.XAxis.X);
 
                     e.Graphics.DrawLine(cs.XPen, s, u.Chart.Y - 0.5f, s, u.XAxis.Y + 4.5f);
                     textRect.X = s - textRect.Width / 2;
-                    e.Graphics.DrawShadowString($"{interval * posCeil:0.###}", Font, cs.TextBrush, cs.ShadowTextBrush, textRect, true);
+                    e.Graphics.DrawShadowString($"{interval * pos:0.###}", Font, cs.TextBrush, cs.ShadowTextBrush, textRect, true);
                 }
             }
 

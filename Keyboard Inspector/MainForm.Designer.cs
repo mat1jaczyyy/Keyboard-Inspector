@@ -54,9 +54,6 @@ namespace Keyboard_Inspector {
             this.recording = new System.Windows.Forms.ToolStripMenuItem();
             this.open = new System.Windows.Forms.ToolStripMenuItem();
             this.save = new System.Windows.Forms.ToolStripMenuItem();
-            this.key = new System.Windows.Forms.ToolStripMenuItem();
-            this.freeze = new System.Windows.Forms.ToolStripMenuItem();
-            this.unhide = new System.Windows.Forms.ToolStripMenuItem();
             this.mainmenu = new DarkUI.Controls.DarkMenuStrip();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
@@ -390,7 +387,7 @@ namespace Keyboard_Inspector {
             this.open.Name = "open";
             this.open.ShortcutKeyDisplayString = "";
             this.open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.open.Size = new System.Drawing.Size(163, 22);
+            this.open.Size = new System.Drawing.Size(180, 22);
             this.open.Text = "&Open...";
             this.open.Click += new System.EventHandler(this.open_Click);
             // 
@@ -401,45 +398,16 @@ namespace Keyboard_Inspector {
             this.save.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(153)))), ((int)(((byte)(153)))));
             this.save.Name = "save";
             this.save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.save.Size = new System.Drawing.Size(163, 22);
+            this.save.Size = new System.Drawing.Size(180, 22);
             this.save.Text = "&Save As...";
             this.save.Click += new System.EventHandler(this.save_Click);
-            // 
-            // key
-            // 
-            this.key.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.key.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.freeze,
-            this.unhide});
-            this.key.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.key.Name = "key";
-            this.key.Size = new System.Drawing.Size(43, 20);
-            this.key.Text = "&Keys";
-            // 
-            // freeze
-            // 
-            this.freeze.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.freeze.CheckOnClick = true;
-            this.freeze.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.freeze.Name = "freeze";
-            this.freeze.Size = new System.Drawing.Size(134, 22);
-            this.freeze.Text = "&Freeze Keys";
-            // 
-            // unhide
-            // 
-            this.unhide.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.unhide.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.unhide.Name = "unhide";
-            this.unhide.Size = new System.Drawing.Size(134, 22);
-            this.unhide.Text = "&Unhide All";
             // 
             // mainmenu
             // 
             this.mainmenu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.mainmenu.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.mainmenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.recording,
-            this.key});
+            this.recording});
             this.mainmenu.Location = new System.Drawing.Point(0, 0);
             this.mainmenu.Name = "mainmenu";
             this.mainmenu.Padding = new System.Windows.Forms.Padding(3, 2, 0, 2);
@@ -502,9 +470,6 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.ToolStripMenuItem recording;
         private System.Windows.Forms.ToolStripMenuItem open;
         private System.Windows.Forms.ToolStripMenuItem save;
-        private System.Windows.Forms.ToolStripMenuItem key;
-        private System.Windows.Forms.ToolStripMenuItem freeze;
-        private System.Windows.Forms.ToolStripMenuItem unhide;
         private DarkUI.Controls.DarkMenuStrip mainmenu;
         private System.Windows.Forms.TableLayoutPanel tlpMain;
         private DarkUI.Controls.DarkCheckBox lowCut;

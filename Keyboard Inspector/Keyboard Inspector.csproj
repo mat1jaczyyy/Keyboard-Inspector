@@ -103,7 +103,6 @@
     <Compile Include="Wiitar\WiitarInput.cs" />
     <Compile Include="Wiitar\WiitarListener.cs" />
     <Compile Include="Wiitar\Win32 RawInput.cs" />
-    <Compile Include="Scope.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
