@@ -39,6 +39,7 @@ namespace Keyboard_Inspector {
             }
 
             Analysis = analysis?? new Analysis();
+            Analysis.Result = this;
         }
 
         public void ToBinary(BinaryWriter bw) {

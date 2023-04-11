@@ -8,8 +8,6 @@ using System.Windows.Forms;
 
 using DarkUI.Forms;
 
-using FFTW.NET;
-
 namespace Keyboard_Inspector {
     partial class MainForm: DarkForm {
         public static MainForm Instance { get; private set; }
@@ -27,39 +25,31 @@ namespace Keyboard_Inspector {
             Instance = this;
 
             InitializeComponent();
-
-            allCharts = tlpCharts.Controls.OfType<Chart>().ToList();
-            timeCharts = allCharts.Where(i => tlpCharts.GetRow(i) == 0).ToList();
-            freqCharts = allCharts.Where(i => tlpCharts.GetRow(i) == 1).ToList();
-
-            InitCharts();
+            InitializeCharts();
         }
 
         int elapsed;
-        Result result = null;
+        public Result Result { get; private set; } = null;
 
         void resultLoaded() {
-            string title = Result.IsEmpty(result)? "" : result.GetTitle();
+            string title = Result.IsEmpty(Result)? "" : Result.GetTitle();
             Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
 
             recording.Enabled = open.Enabled = !Recorder.IsRecording;
-            save.Enabled = split.Visible = !Result.IsEmpty(result);
+            save.Enabled = split.Visible = !Result.IsEmpty(Result);
 
-            labelN.Text = Result.IsEmpty(result)? "" : result.Events.Count.ToString();
+            labelN.Text = Result.IsEmpty(Result)? "" : Result.Events.Count.ToString();
 
-            screen.Area.LoadData(result);
+            screen.Area.LoadData(Result);
 
-            if (!Result.IsEmpty(result)) {
+            if (!Result.IsEmpty(Result)) {
                 SetPrecisionSilently();
                 SetHPSSilently();
                 SetLowCutSilently();
-
-                CalcDiffs();
-                CalcCompound();
-                CalcCircular();
             }
 
-            CreateCharts();
+            Result.Analysis.CreateCache();
+            Result.Analysis.Analyze();
         }
 
         void rec_Click(object sender, EventArgs e) {
@@ -70,7 +60,7 @@ namespace Keyboard_Inspector {
                 status.Text = "Recording... 00:00:00";
                 split.Enabled = false; 
 
-                result = null;
+                Result = null;
 
                 Recorder.StartRecording();
 
@@ -83,7 +73,7 @@ namespace Keyboard_Inspector {
                 status.Text = "";
                 split.Enabled = true;
 
-                result = Recorder.StopRecording();
+                Result = Recorder.StopRecording();
 
                 t.Enabled = false;
             }
@@ -96,187 +86,23 @@ namespace Keyboard_Inspector {
             status.Text = $"Recording... {TimeSpan.FromSeconds(++elapsed):hh\\:mm\\:ss}";
         }
 
-        bool EstimatePeak(double[] data, out int result) {
-            double max = double.MaxValue;
-            result = -1;
-
-            int i = 0;
-            for (; i < data.Length; i++) {
-                double v = data[i];
-                bool brk = v > max;
-                max = v;
-                if (brk) break;
-            }
-            for (; i < data.Length; i++) {
-                double v = data[i];
-                if (v >= max) {
-                    max = v;
-                    result = i;
-                }
-            }
-            
-            return result != -1;
-        }
-
-        List<double> cacheDiffs;
-        void CalcDiffs() {
-            cacheDiffs = new List<double>(result.Events.Count);
-
-            for (int i = 1; i < result.Events.Count; i++)
-                cacheDiffs.Add(result.Events[i].Time - result.Events[i - 1].Time);
-        }
-
-        List<double> cacheCompound;
-        void CalcCompound() {
-            cacheCompound = new List<double>(result.Events.Count * result.Events.Count / 2);
-
-            for (int i = 0; i < result.Events.Count - 1; i++) {
-                for (int j = i + 1; j < result.Events.Count; j++) {
-                    double diff = result.Events[j].Time - result.Events[i].Time;
-
-                    if (j > i + 1 && diff >= 1)
-                        break;
-
-                    cacheCompound.Add(diff);
-                }
-            }
-        }
-        
-        List<double> cacheCircular;
-        void CalcCircular() {
-            cacheCircular = new List<double>(result.Events.Count);
-
-            for (int i = 0; i < result.Events.Count; i++)
-                cacheCircular.Add(result.Events[i].Time % 1);
-        }
-
-        IEnumerable<double> CircularRotationFix(AlignedArrayDouble arr) {
-            double max = double.MinValue;
-            int rot = -1;
-
-            for (int i = 0; i < arr.Length; i++) {
-                if (arr[i] > max) {
-                    max = arr[i];
-                    rot = i;
-                }
-                i++;
-            }
-
-            for (int i = 0; i < arr.Length; i++) {
-                yield return arr[(i + rot) % arr.Length];
-            }
-        }
-        
-        IEnumerable<double> DefaultTimeTransform(AlignedArrayDouble arr) {
-            for (int i = 0; i < arr.Length; i++)
-                yield return arr[i];
-        }
-
-        void LowCut(double[] data) {
-            if (!result.Analysis.LowCut) return;
-
-            // https://www.desmos.com/calculator/yukhgjz5g9
-            for (int i = 0; i < Math.Min(70, data.Length); i++)
-                data[i] /= 1 + Math.Pow(Math.E, -(i - 25) / 4.0);
-        }
-
-        void HarmonicProduct(double[] data, double[] copy) {
-            if (result.Analysis.HPS <= 0) return;
-
-            if (copy == null) copy = data.ToArray();
-
-            for (int i = 0; i < data.Length; i++) {
-                for (var j = 0; j < result.Analysis.HPS; j++) {
-                    data[i] *= copy[(int)((double)i * (j + 1) / (result.Analysis.HPS + 1))];
-                }
-            }
-        }
-
-        void Normalize(double[] data) {
-            double max = Math.Max(1, data.Max());
-
-            for (int i = 0; i < data.Length; i++)
-                data[i] /= max;
-        }
-
-        void DrawGraph(Chart chart, IEnumerable<double> data, double xFactor = 1, string estimate = "") {
-            chart.Area.LoadData(data, xFactor);
-
-            int row = tlpCharts.GetRow(chart);
-            int col = tlpCharts.GetColumn(chart);
-
-            chart.Area.Title = $"{BaseTitles[col]} ({SecondaryTitles[row]}{estimate})";
-        }
-
-        Dictionary<Chart, double[]> beforeLowCut = new Dictionary<Chart, double[]>();
-        Dictionary<Chart, double[]> beforeHPS = new Dictionary<Chart, double[]>();
-
-        void RunGraphJob(List<double> source, Chart timeChart, Chart freqChart, Func<AlignedArrayDouble, IEnumerable<double>> timeTransform = null) {
-            timeTransform = timeTransform?? DefaultTimeTransform;
-            
-            AlignedArrayDouble data = new AlignedArrayDouble(64, result.Analysis.Precision);
-            for (int i = 0; i < source.Count; i++) {
-                double v = source[i];
-                if (0 <= v && v < 1)
-                    data[(int)Math.Round(v * result.Analysis.Precision)] += 1;
-            }
-
-            DrawGraph(timeChart, timeTransform(data), 1000.0 / result.Analysis.Precision);
-
-            AlignedArrayComplex input = new AlignedArrayComplex(64, result.Analysis.Precision / 2 + 1);
-            DFT.FFT(data, input, PlannerFlags.Estimate, Environment.ProcessorCount);
-
-            double[] freq = new double[input.Length];
-            for (int i = 0; i < freq.Length; i++)
-                freq[i] = Math.Sqrt(input[i].Real * input[i].Real + input[i].Imaginary * input[i].Imaginary);
-
-            beforeLowCut[freqChart] = freq;
-            RunFromLowCut(freqChart);
-        }
-
-        void RunFromLowCut(Chart chart) {
-            double[] data = beforeLowCut[chart].ToArray();
-
-            LowCut(data);
-
-            beforeHPS[chart] = data;
-
-            RunFromHPS(chart);
-        }
-
-        void RunFromHPS(Chart chart) {
-            double[] data = beforeHPS[chart].ToArray();
-
-            HarmonicProduct(data, beforeHPS[chart]);
-
-            Normalize(data);
-
-            double hpsFactor = 1.0 / (result.Analysis.HPS + 1);
-
-            string estimate = "";
-            if (EstimatePeak(data, out int peak))
-                estimate = $" - peak at {(int)Math.Round(peak * hpsFactor)} Hz";
-
-            DrawGraph(chart, data, hpsFactor, estimate);
-        }
-
         bool silent;
 
         void SetPrecisionSilently() {
             silent = true;
-            tbPrecision.Text = result.Analysis.Precision.ToString();
+            tbPrecision.Text = Result.Analysis.Precision.ToString();
             silent = false;
         }
 
         void SetHPSSilently() {
             silent = true;
-            hps.Value = result.Analysis.HPS;
+            hps.Value = Result.Analysis.HPS;
             silent = false;
         }
 
         void SetLowCutSilently() {
             silent = true;
-            lowCut.Checked = result.Analysis.LowCut;
+            lowCut.Checked = Result.Analysis.LowCut;
             silent = false;
         }
 
@@ -284,78 +110,48 @@ namespace Keyboard_Inspector {
             if (silent) return;
 
             if (!int.TryParse(tbPrecision.Text, out int precision)) return;
-            result.Analysis.Precision = precision;
+            Result.Analysis.Precision = precision;
 
             SetPrecisionSilently();
             tbPrecision.Refresh();
 
-            CreateCharts();
+            Result.Analysis.Analyze();
+        }
+
+        private void precisionDouble_Click(object sender, EventArgs e) {
+            Result.Analysis.Precision *= 2;
+            tbPrecision.Text = Result.Analysis.Precision.ToString();
+        }
+
+        private void precisionHalf_Click(object sender, EventArgs e) {
+            Result.Analysis.Precision /= 2;
+            tbPrecision.Text = Result.Analysis.Precision.ToString();
         }
 
         private void lowCut_CheckedChanged(object sender, EventArgs e) {
             if (silent) return;
 
-            result.Analysis.LowCut = lowCut.Checked;
-
-            RunChartsSuspendedAction(freqCharts, () => {
-                RunFromLowCut(chartDiffsFreq);
-                RunFromLowCut(chartCompoundFreq);
-                RunFromLowCut(chartCircularFreq);
-            });
+            Result.Analysis.LowCut = lowCut.Checked;
+            Result.Analysis.ReanalyzeFromLowCut();
         }
 
         private void hps_ValueChanged(object sender, EventArgs e) {
             if (silent) return;
 
-            result.Analysis.HPS = (int)hps.Value;
-
-            RunChartsSuspendedAction(freqCharts, () => {
-                RunFromHPS(chartDiffsFreq);
-                RunFromHPS(chartCompoundFreq);
-                RunFromHPS(chartCircularFreq);
-            });
+            Result.Analysis.HPS = (int)hps.Value;
+            Result.Analysis.ReanalyzeFromHPS();
         }
 
-        List<Chart> allCharts, timeCharts, freqCharts;
+        public List<Chart> Charts { get; private set; }
+        public List<Chart> tCharts { get; private set; }
+        public List<Chart> fCharts { get; private set; }
 
-        void RunChartsSuspendedAction(IEnumerable<Chart> charts, Action action) {
-            try {
-                foreach (var chart in charts)
-                    chart.Area.SuspendPaint();
-
-                action();
-
-            } finally {
-                foreach (var chart in charts)
-                    chart.Area.ResumePaint();
-            }
+        public class ChartTitles {
+            public string Primary;
+            public string Secondary;
         }
 
-        void CreateCharts() {
-            if (Result.IsEmpty(result)) return;
-
-            if (!result.Analysis.PrecisionValid) return;
-
-            RunChartsSuspendedAction(allCharts, () => {
-                RunGraphJob(cacheDiffs, chartDiffs, chartDiffsFreq);
-                RunGraphJob(cacheCompound, chartCompound, chartCompoundFreq);
-                RunGraphJob(cacheCircular, chartCircular, chartCircularFreq, CircularRotationFix);
-            });
-
-            DFT.Wisdom.Export(Program.WisdomFile);
-        }
-
-        private void precisionDouble_Click(object sender, EventArgs e) {
-            result.Analysis.Precision *= 2;
-            tbPrecision.Text = result.Analysis.Precision.ToString();
-        }
-
-        private void precisionHalf_Click(object sender, EventArgs e) {
-            result.Analysis.Precision /= 2;
-            tbPrecision.Text = result.Analysis.Precision.ToString();
-        }
-
-        string[] BaseTitles = new string[] {
+        string[] PrimaryTitles = new string[] {
             "Differences between consecutive events",
             "Differences between all events",
             "Events wrapped around a second"
@@ -379,8 +175,12 @@ namespace Keyboard_Inspector {
             return Math.Pow(2, i - 18) * 1800;
         }
 
-        void InitCharts() {
-            foreach (var chart in allCharts) {
+        void InitializeCharts() {
+            Charts = tlpCharts.Controls.OfType<Chart>().ToList();
+            tCharts = Charts.Where(i => tlpCharts.GetRow(i) == 0).ToList();
+            fCharts = Charts.Where(i => tlpCharts.GetRow(i) == 1).ToList();
+
+            foreach (var chart in Charts) {
                 chart.Area.Spotlight += (_, __) => {
                     if (chart.Parent == tlpCharts) {
                         chart.SuspendLayout();
@@ -400,14 +200,19 @@ namespace Keyboard_Inspector {
                         chart.ResumeLayout();
                     }
                 };
+
+                chart.Tag = new ChartTitles() { 
+                    Primary = PrimaryTitles[tlpCharts.GetColumn(chart)],
+                    Secondary = SecondaryTitles[tlpCharts.GetRow(chart)],
+                };
             }
 
-            foreach (var chart in timeCharts) {
+            foreach (var chart in tCharts) {
                 chart.Area.ScopeDefaultX = 100;
                 chart.Area.IntervalGenerator = i => ScreenInterval(i) * 1000;
             }
 
-            foreach (var chart in freqCharts) {
+            foreach (var chart in fCharts) {
                 chart.Area.IntervalGenerator = i => {
                     if (i < 2) return (i + 1) * 5;
                     if (i < 4) return (i - 1) * 25;
@@ -420,7 +225,7 @@ namespace Keyboard_Inspector {
 
         void LoadFile(string filename) {
             if (FileSystem.Open(filename, out Result loaded, out string error)) {
-                result = loaded;
+                Result = loaded;
                 resultLoaded();
             }
 
@@ -433,9 +238,9 @@ namespace Keyboard_Inspector {
         }
 
         void save_Click(object sender, EventArgs e) {
-            if (Result.IsEmpty(result)) return;
+            if (Result.IsEmpty(Result)) return;
 
-            FileSystem.Save(result, out string error);
+            FileSystem.Save(Result, out string error);
             status.Text = error;
         }
 

@@ -31,12 +31,12 @@ namespace Keyboard_Inspector {
             this.status = new DarkUI.Controls.DarkLabel();
             this.split = new System.Windows.Forms.SplitContainer();
             this.tlpCharts = new System.Windows.Forms.TableLayoutPanel();
-            this.chartDiffs = new Keyboard_Inspector.Chart();
-            this.chartCompound = new Keyboard_Inspector.Chart();
-            this.chartCircular = new Keyboard_Inspector.Chart();
-            this.chartDiffsFreq = new Keyboard_Inspector.Chart();
-            this.chartCompoundFreq = new Keyboard_Inspector.Chart();
-            this.chartCircularFreq = new Keyboard_Inspector.Chart();
+            this.tDiffs = new Keyboard_Inspector.Chart();
+            this.tCompound = new Keyboard_Inspector.Chart();
+            this.tCircular = new Keyboard_Inspector.Chart();
+            this.fDiffs = new Keyboard_Inspector.Chart();
+            this.fCompound = new Keyboard_Inspector.Chart();
+            this.fCircular = new Keyboard_Inspector.Chart();
             this.tlpMain = new System.Windows.Forms.TableLayoutPanel();
             this.precisionPanel = new System.Windows.Forms.Panel();
             this.lowCut = new DarkUI.Controls.DarkCheckBox();
@@ -123,12 +123,12 @@ namespace Keyboard_Inspector {
             this.tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlpCharts.Controls.Add(this.chartDiffs, 0, 0);
-            this.tlpCharts.Controls.Add(this.chartCompound, 1, 0);
-            this.tlpCharts.Controls.Add(this.chartCircular, 2, 0);
-            this.tlpCharts.Controls.Add(this.chartDiffsFreq, 0, 1);
-            this.tlpCharts.Controls.Add(this.chartCompoundFreq, 1, 1);
-            this.tlpCharts.Controls.Add(this.chartCircularFreq, 2, 1);
+            this.tlpCharts.Controls.Add(this.tDiffs, 0, 0);
+            this.tlpCharts.Controls.Add(this.tCompound, 1, 0);
+            this.tlpCharts.Controls.Add(this.tCircular, 2, 0);
+            this.tlpCharts.Controls.Add(this.fDiffs, 0, 1);
+            this.tlpCharts.Controls.Add(this.fCompound, 1, 1);
+            this.tlpCharts.Controls.Add(this.fCircular, 2, 1);
             this.tlpCharts.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tlpCharts.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
             this.tlpCharts.Location = new System.Drawing.Point(0, 0);
@@ -139,56 +139,56 @@ namespace Keyboard_Inspector {
             this.tlpCharts.Size = new System.Drawing.Size(1294, 486);
             this.tlpCharts.TabIndex = 0;
             // 
-            // chartDiffs
+            // tDiffs
             // 
-            this.chartDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartDiffs.Location = new System.Drawing.Point(3, 3);
-            this.chartDiffs.Name = "chartDiffs";
-            this.chartDiffs.Size = new System.Drawing.Size(425, 237);
-            this.chartDiffs.TabIndex = 0;
+            this.tDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tDiffs.Location = new System.Drawing.Point(3, 3);
+            this.tDiffs.Name = "tDiffs";
+            this.tDiffs.Size = new System.Drawing.Size(425, 237);
+            this.tDiffs.TabIndex = 0;
             // 
-            // chartCompound
+            // tCompound
             // 
-            this.chartCompound.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartCompound.Location = new System.Drawing.Point(434, 3);
-            this.chartCompound.Name = "chartCompound";
-            this.chartCompound.Size = new System.Drawing.Size(425, 237);
-            this.chartCompound.TabIndex = 1;
+            this.tCompound.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tCompound.Location = new System.Drawing.Point(434, 3);
+            this.tCompound.Name = "tCompound";
+            this.tCompound.Size = new System.Drawing.Size(425, 237);
+            this.tCompound.TabIndex = 1;
             // 
-            // chartCircular
+            // tCircular
             // 
-            this.chartCircular.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartCircular.Location = new System.Drawing.Point(865, 3);
-            this.chartCircular.Name = "chartCircular";
-            this.chartCircular.Size = new System.Drawing.Size(426, 237);
-            this.chartCircular.TabIndex = 2;
+            this.tCircular.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tCircular.Location = new System.Drawing.Point(865, 3);
+            this.tCircular.Name = "tCircular";
+            this.tCircular.Size = new System.Drawing.Size(426, 237);
+            this.tCircular.TabIndex = 2;
             // 
-            // chartDiffsFreq
+            // fDiffs
             // 
-            this.chartDiffsFreq.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartDiffsFreq.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
-            this.chartDiffsFreq.Location = new System.Drawing.Point(3, 246);
-            this.chartDiffsFreq.Name = "chartDiffsFreq";
-            this.chartDiffsFreq.Size = new System.Drawing.Size(425, 237);
-            this.chartDiffsFreq.TabIndex = 3;
+            this.fDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fDiffs.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
+            this.fDiffs.Location = new System.Drawing.Point(3, 246);
+            this.fDiffs.Name = "fDiffs";
+            this.fDiffs.Size = new System.Drawing.Size(425, 237);
+            this.fDiffs.TabIndex = 3;
             // 
-            // chartCompoundFreq
+            // fCompound
             // 
-            this.chartCompoundFreq.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartCompoundFreq.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
-            this.chartCompoundFreq.Location = new System.Drawing.Point(434, 246);
-            this.chartCompoundFreq.Name = "chartCompoundFreq";
-            this.chartCompoundFreq.Size = new System.Drawing.Size(425, 237);
-            this.chartCompoundFreq.TabIndex = 4;
+            this.fCompound.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fCompound.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
+            this.fCompound.Location = new System.Drawing.Point(434, 246);
+            this.fCompound.Name = "fCompound";
+            this.fCompound.Size = new System.Drawing.Size(425, 237);
+            this.fCompound.TabIndex = 4;
             // 
-            // chartCircularFreq
+            // fCircular
             // 
-            this.chartCircularFreq.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartCircularFreq.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
-            this.chartCircularFreq.Location = new System.Drawing.Point(865, 246);
-            this.chartCircularFreq.Name = "chartCircularFreq";
-            this.chartCircularFreq.Size = new System.Drawing.Size(426, 237);
-            this.chartCircularFreq.TabIndex = 5;
+            this.fCircular.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fCircular.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
+            this.fCircular.Location = new System.Drawing.Point(865, 246);
+            this.fCircular.Name = "fCircular";
+            this.fCircular.Size = new System.Drawing.Size(426, 237);
+            this.fCircular.TabIndex = 5;
             // 
             // tlpMain
             // 
@@ -473,12 +473,12 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.TableLayoutPanel tlpMain;
         private DarkUI.Controls.DarkCheckBox lowCut;
         private System.Windows.Forms.ToolTip toolTip1;
-        private Chart chartDiffs;
-        private Chart chartCompound;
-        private Chart chartCircular;
-        private Chart chartDiffsFreq;
-        private Chart chartCompoundFreq;
-        private Chart chartCircularFreq;
         private Chart screen;
+        public Chart tDiffs;
+        public Chart tCompound;
+        public Chart tCircular;
+        public Chart fDiffs;
+        public Chart fCompound;
+        public Chart fCircular;
     }
 }
