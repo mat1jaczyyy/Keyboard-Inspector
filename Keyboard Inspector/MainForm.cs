@@ -49,13 +49,11 @@ namespace Keyboard_Inspector {
 
             screen.Area.LoadData(result);
 
-            if (!PrecisionValid) {
-                silentAnalysis = true;
-                tbPrecision.Text = "4000";
-                silentAnalysis = false;
-            }
-
             if (!Result.IsEmpty(result)) {
+                SetPrecisionSilently();
+                SetHPSSilently();
+                SetLowCutSilently();
+
                 CalcDiffs();
                 CalcCompound();
                 CalcCircular();
@@ -175,7 +173,7 @@ namespace Keyboard_Inspector {
         }
 
         void LowCut(double[] data) {
-            if (!lowCut.Checked) return;
+            if (!result.Analysis.LowCut) return;
 
             // https://www.desmos.com/calculator/yukhgjz5g9
             for (int i = 0; i < Math.Min(70, data.Length); i++)
@@ -183,13 +181,13 @@ namespace Keyboard_Inspector {
         }
 
         void HarmonicProduct(double[] data, double[] copy) {
-            if (hpsIterations <= 0) return;
+            if (result.Analysis.HPS <= 0) return;
 
             if (copy == null) copy = data.ToArray();
 
             for (int i = 0; i < data.Length; i++) {
-                for (var j = 0; j < hpsIterations; j++) {
-                    data[i] *= copy[(int)((double)i * (j + 1) / (hpsIterations + 1))];
+                for (var j = 0; j < result.Analysis.HPS; j++) {
+                    data[i] *= copy[(int)((double)i * (j + 1) / (result.Analysis.HPS + 1))];
                 }
             }
         }
@@ -216,16 +214,16 @@ namespace Keyboard_Inspector {
         void RunGraphJob(List<double> source, Chart timeChart, Chart freqChart, Func<AlignedArrayDouble, IEnumerable<double>> timeTransform = null) {
             timeTransform = timeTransform?? DefaultTimeTransform;
             
-            AlignedArrayDouble data = new AlignedArrayDouble(64, precision);
+            AlignedArrayDouble data = new AlignedArrayDouble(64, result.Analysis.Precision);
             for (int i = 0; i < source.Count; i++) {
                 double v = source[i];
                 if (0 <= v && v < 1)
-                    data[(int)Math.Round(v * precision)] += 1;
+                    data[(int)Math.Round(v * result.Analysis.Precision)] += 1;
             }
 
-            DrawGraph(timeChart, timeTransform(data), 1000.0 / precision);
+            DrawGraph(timeChart, timeTransform(data), 1000.0 / result.Analysis.Precision);
 
-            AlignedArrayComplex input = new AlignedArrayComplex(64, precision / 2 + 1);
+            AlignedArrayComplex input = new AlignedArrayComplex(64, result.Analysis.Precision / 2 + 1);
             DFT.FFT(data, input, PlannerFlags.Estimate, Environment.ProcessorCount);
 
             double[] freq = new double[input.Length];
@@ -253,34 +251,51 @@ namespace Keyboard_Inspector {
 
             Normalize(data);
 
-            double hpsFactor = 1.0 / (hpsIterations + 1);
+            double hpsFactor = 1.0 / (result.Analysis.HPS + 1);
 
             string estimate = "";
-            if (EstimatePeak(data, out int result))
-                estimate = $" - peak at {(int)Math.Round(result * hpsFactor)} Hz";
+            if (EstimatePeak(data, out int peak))
+                estimate = $" - peak at {(int)Math.Round(peak * hpsFactor)} Hz";
 
             DrawGraph(chart, data, hpsFactor, estimate);
         }
 
-        bool silentAnalysis = false;
+        bool silent;
 
-        const int precisionLimit = 128000;
+        void SetPrecisionSilently() {
+            silent = true;
+            tbPrecision.Text = result.Analysis.Precision.ToString();
+            silent = false;
+        }
+
+        void SetHPSSilently() {
+            silent = true;
+            hps.Value = result.Analysis.HPS;
+            silent = false;
+        }
+
+        void SetLowCutSilently() {
+            silent = true;
+            lowCut.Checked = result.Analysis.LowCut;
+            silent = false;
+        }
+
         void tbPrecision_TextChanged(object sender, EventArgs e) {
-            if (silentAnalysis) return;
+            if (silent) return;
 
-            int.TryParse(tbPrecision.Text, out precision);
+            if (!int.TryParse(tbPrecision.Text, out int precision)) return;
+            result.Analysis.Precision = precision;
 
-            if (precision > precisionLimit) {
-                silentAnalysis = true;
-                tbPrecision.Text = (precision = precisionLimit).ToString();
-                silentAnalysis = false;
-            }
+            SetPrecisionSilently();
+            tbPrecision.Refresh();
 
             CreateCharts();
         }
 
         private void lowCut_CheckedChanged(object sender, EventArgs e) {
-            if (silentAnalysis) return;
+            if (silent) return;
+
+            result.Analysis.LowCut = lowCut.Checked;
 
             RunChartsSuspendedAction(freqCharts, () => {
                 RunFromLowCut(chartDiffsFreq);
@@ -290,7 +305,9 @@ namespace Keyboard_Inspector {
         }
 
         private void hps_ValueChanged(object sender, EventArgs e) {
-            if (silentAnalysis) return;
+            if (silent) return;
+
+            result.Analysis.HPS = (int)hps.Value;
 
             RunChartsSuspendedAction(freqCharts, () => {
                 RunFromHPS(chartDiffsFreq);
@@ -298,11 +315,6 @@ namespace Keyboard_Inspector {
                 RunFromHPS(chartCircularFreq);
             });
         }
-
-        int precision = 4000;
-        bool PrecisionValid => precision >= 20;
-
-        int hpsIterations => (int)hps.Value;
 
         List<Chart> allCharts, timeCharts, freqCharts;
 
@@ -322,9 +334,7 @@ namespace Keyboard_Inspector {
         void CreateCharts() {
             if (Result.IsEmpty(result)) return;
 
-            int.TryParse(tbPrecision.Text, out precision);
-
-            if (!PrecisionValid) return;
+            if (!result.Analysis.PrecisionValid) return;
 
             RunChartsSuspendedAction(allCharts, () => {
                 RunGraphJob(cacheDiffs, chartDiffs, chartDiffsFreq);
@@ -336,15 +346,13 @@ namespace Keyboard_Inspector {
         }
 
         private void precisionDouble_Click(object sender, EventArgs e) {
-            if (precision <= 0) return;
-            precision *= 2;
-            tbPrecision.Text = precision.ToString();
+            result.Analysis.Precision *= 2;
+            tbPrecision.Text = result.Analysis.Precision.ToString();
         }
 
         private void precisionHalf_Click(object sender, EventArgs e) {
-            if (precision <= 0) return;
-            precision /= 2;
-            tbPrecision.Text = precision.ToString();
+            result.Analysis.Precision /= 2;
+            tbPrecision.Text = result.Analysis.Precision.ToString();
         }
 
         string[] BaseTitles = new string[] {

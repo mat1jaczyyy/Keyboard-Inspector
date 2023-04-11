@@ -57,13 +57,7 @@ namespace Keyboard_Inspector {
 
         static Format[] formats = new Format[] {
             new Format("Keyboard Inspector Files", new string[] { "kbi" },
-                path => {
-                    using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(path))) {
-                        using (BinaryReader br = new BinaryReader(ms)) {
-                            return Result.FromBinary(br);
-                        }
-                    }
-                },
+                Result.FromPath,
                 (result, path) => {
                     using (MemoryStream ms = new MemoryStream()) {
                         using (BinaryWriter bw = new BinaryWriter(ms)) {
@@ -74,17 +68,7 @@ namespace Keyboard_Inspector {
                 }
             ),
             new Format("TETR.IO Replay Files", new string[] { "ttr", "ttrm" },
-                path => {
-                    var result = TetrioReplay.ConvertToResult(path);
-
-                    if (result != null) {
-                        silentAnalysis = true;
-                        tbPrecision.Text = "600";
-                        silentAnalysis = false;
-                    }
-
-                    return result;
-                },
+                TetrioReplay.ConvertToResult,
                 disclaimer:
                 "You are analyzing a TETR.IO replay file.\n\nTETR.IO downsamples input data to 600 Hz to fit it onto the subframe grid which " +
                 "you will notice as a peak at 600 Hz in the frequency domain. This adds another \"sampling rate\" (in addition to the usual " +

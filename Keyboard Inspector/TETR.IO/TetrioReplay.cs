@@ -69,7 +69,7 @@ namespace Keyboard_Inspector {
                 ));
             }
 
-            return new Result(title, ts, data.frames / 60.0, events);
+            return new Result(title, ts, data.frames / 60.0, events, new Analysis() { Precision = 600 });
         }
     }
 }

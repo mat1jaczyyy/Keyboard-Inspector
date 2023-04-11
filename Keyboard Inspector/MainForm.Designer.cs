@@ -330,11 +330,10 @@ namespace Keyboard_Inspector {
             this.tbPrecision.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.tbPrecision.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.tbPrecision.Location = new System.Drawing.Point(162, 26);
-            this.tbPrecision.MaxLength = 6;
+            this.tbPrecision.MaxLength = 7;
             this.tbPrecision.Name = "tbPrecision";
             this.tbPrecision.Size = new System.Drawing.Size(56, 20);
             this.tbPrecision.TabIndex = 7;
-            this.tbPrecision.Text = "4000";
             this.tbPrecision.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.tbPrecision.TextChanged += new System.EventHandler(this.tbPrecision_TextChanged);
             // 
@@ -387,7 +386,7 @@ namespace Keyboard_Inspector {
             this.open.Name = "open";
             this.open.ShortcutKeyDisplayString = "";
             this.open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.open.Size = new System.Drawing.Size(180, 22);
+            this.open.Size = new System.Drawing.Size(163, 22);
             this.open.Text = "&Open...";
             this.open.Click += new System.EventHandler(this.open_Click);
             // 
@@ -398,7 +397,7 @@ namespace Keyboard_Inspector {
             this.save.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(153)))), ((int)(((byte)(153)))));
             this.save.Name = "save";
             this.save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.save.Size = new System.Drawing.Size(180, 22);
+            this.save.Size = new System.Drawing.Size(163, 22);
             this.save.Text = "&Save As...";
             this.save.Click += new System.EventHandler(this.save_Click);
             // 

@@ -17,7 +17,9 @@ namespace Keyboard_Inspector {
         public double Time;
         public List<Event> Events;
 
-        public Result(string title, DateTime recorded, double time, List<Event> events) {
+        public Analysis Analysis;
+
+        public Result(string title, DateTime recorded, double time, List<Event> events, Analysis analysis = null) {
             Title = title?? "";
             Recorded = recorded;
             Time = time;
@@ -35,6 +37,8 @@ namespace Keyboard_Inspector {
                 last[e.Input] = e.Pressed;
                 Events.Add(e);
             }
+
+            Analysis = analysis?? new Analysis();
         }
 
         public void ToBinary(BinaryWriter bw) {
@@ -42,12 +46,12 @@ namespace Keyboard_Inspector {
             bw.Write(FileVersion);
 
             bw.Write(Title);
-            bw.Write()
-
             bw.Write(Recorded.ToBinary());
 
             bw.Write(Time);
             Events.ToBinary(bw);
+
+            Analysis.ToBinary(bw);
         }
 
         public static Result FromBinary(BinaryReader br) {
@@ -60,8 +64,17 @@ namespace Keyboard_Inspector {
                 br.ReadString(),
                 DateTime.FromBinary(br.ReadInt64()),
                 br.ReadDouble(),
-                Event.ListFromBinary(br, fileVersion)
+                Event.ListFromBinary(br, fileVersion),
+                Analysis.FromBinary(br, fileVersion)
             );
+        }
+
+        public static Result FromPath(string path) {
+            using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(path))) {
+                using (BinaryReader br = new BinaryReader(ms)) {
+                    return FromBinary(br);
+                }
+            }
         }
 
         public static bool IsEmpty(Result result) => result?.Events.Any() != true;

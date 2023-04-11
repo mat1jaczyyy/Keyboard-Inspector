@@ -886,7 +886,7 @@ namespace Keyboard_Inspector {
 
                     double y = u.Chart.Y + k * u.YUnit;
 
-                    bar.Height = (float)(Math.Floor(y + height) - (y = Math.Floor(y)));
+                    bar.Height = Math.Max(1, (float)(Math.Floor(y + height) - (y = Math.Floor(y))));
                     bar.Y = (float)(y + 0.5);
 
                     LinearGradientBrush brush = new LinearGradientBrush(bar, Color.Transparent, Color.Transparent, LinearGradientMode.Vertical);
