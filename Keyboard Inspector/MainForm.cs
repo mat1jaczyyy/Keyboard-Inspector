@@ -42,11 +42,11 @@ namespace Keyboard_Inspector {
 
             screen.Area.LoadData(Result);
 
-            if (!Result.IsEmpty(Result)) {
-                SetPrecisionSilently();
-                SetHPSSilently();
-                SetLowCutSilently();
-            }
+            if (Result.IsEmpty(Result)) return;
+
+            SetPrecisionSilently();
+            SetHPSSilently();
+            SetLowCutSilently();
 
             Result.Analysis.CreateCache();
             Result.Analysis.Analyze();
