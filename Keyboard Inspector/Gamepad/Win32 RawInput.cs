@@ -424,6 +424,70 @@ namespace Keyboard_Inspector {
             public UInt16 DataIndexMax;
         }
 
+        [StructLayout(LayoutKind.Sequential)]
+        struct HIDP_VALUE_CAPS {
+            [MarshalAs(UnmanagedType.U2)]
+            public HIDUsagePage UsagePage;
+            [MarshalAs(UnmanagedType.U1)]
+            public byte ReportID;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool IsAlias;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 BitField;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 LinkCollection;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 LinkUsage;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 LinkUsagePage;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool IsRange;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool IsStringRange;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool IsDesignatorRange;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool IsAbsolute;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool HasNull;
+            [MarshalAs(UnmanagedType.U1)]
+            byte Reserved;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 BitSize;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 ReportCount;
+            [MarshalAs(UnmanagedType.ByValArray, ArraySubType = UnmanagedType.LPArray, SizeConst = 5)]
+            UInt16[] Reserved2;
+            [MarshalAs(UnmanagedType.U4)]
+            public UInt32 UnitsExp;
+            [MarshalAs(UnmanagedType.U4)]
+            public UInt32 Units;
+            [MarshalAs(UnmanagedType.U4)]
+            public Int32 LogicalMin;
+            [MarshalAs(UnmanagedType.U4)]
+            public Int32 LogicalMax;
+            [MarshalAs(UnmanagedType.U4)]
+            public Int32 PhysicalMin;
+            [MarshalAs(UnmanagedType.U4)]
+            public Int32 PhysicalMax;
+            [MarshalAs(UnmanagedType.U2)]
+            public HIDUsage UsageMin;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 UsageMax;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 StringMin;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 StringMax;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 DesignatorMin;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 DesignatorMax;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 DataIndexMin;
+            [MarshalAs(UnmanagedType.U2)]
+            public UInt16 DataIndexMax;
+        }
+
         enum NTSTATUS: uint {
             HIDP_STATUS_SUCCESS = 0x00110000,
             HIDP_INVALID_REPORT_LENGTH = 0xC0110003,
@@ -455,12 +519,32 @@ namespace Keyboard_Inspector {
         );
 
         [DllImport("hid.dll", SetLastError = true)]
+        static extern NTSTATUS HidP_GetValueCaps(
+            HIDP_REPORT_TYPE ReportType,
+            [In, Out] HIDP_VALUE_CAPS[] ValueCaps,
+            ref ushort ValueCapsLength,
+            byte[] PreparsedData
+        );
+
+        [DllImport("hid.dll", SetLastError = true)]
         static extern NTSTATUS HidP_GetUsages(
             HIDP_REPORT_TYPE ReportType,
             HIDUsagePage UsagePage,
             ushort LinkCollection,
             [In, Out] ushort[] UsageList,
             ref uint UsageLength,
+            byte[] PreparsedData,
+            byte[] Report,
+            uint ReportLength
+        );
+
+        [DllImport("hid.dll", SetLastError = true)]
+        static extern NTSTATUS HidP_GetUsageValue(
+            HIDP_REPORT_TYPE ReportType,
+            HIDUsagePage UsagePage,
+            ushort LinkCollection,
+            HIDUsage Usage,
+            out int UsageValue,
             byte[] PreparsedData,
             byte[] Report,
             uint ReportLength
