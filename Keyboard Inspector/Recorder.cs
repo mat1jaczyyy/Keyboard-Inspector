@@ -27,14 +27,14 @@ namespace Keyboard_Inspector {
             IsRecording = true;
 
             KeyListener.Start();
-            WiitarListener.Start();
+            GamepadListener.Start();
         }
 
         public static Result StopRecording() {
             if (!IsRecording) return null;
 
             KeyListener.Stop();
-            WiitarListener.Stop();
+            GamepadListener.Stop();
 
             time.Stop();
 

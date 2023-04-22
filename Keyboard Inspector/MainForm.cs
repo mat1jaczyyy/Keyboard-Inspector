@@ -12,10 +12,10 @@ namespace Keyboard_Inspector {
     partial class MainForm: DarkForm {
         public static MainForm Instance { get; private set; }
 
-        // WiitarListener needs to grab WM_INPUT from Form...
+        // GamepadListener needs to grab WM_INPUT from Form...
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
         protected override void WndProc(ref Message m) {
-            if (WiitarListener.Process(ref m)) return;
+            if (GamepadListener.Process(ref m)) return;
 
             base.WndProc(ref m);
         }

@@ -103,9 +103,9 @@
     </Compile>
     <Compile Include="TETR.IO\TetrioInput.cs" />
     <Compile Include="TETR.IO\TetrioReplay.cs" />
-    <Compile Include="Wiitar\WiitarInput.cs" />
-    <Compile Include="Wiitar\WiitarListener.cs" />
-    <Compile Include="Wiitar\Win32 RawInput.cs" />
+    <Compile Include="Gamepad\GamepadInput.cs" />
+    <Compile Include="Gamepad\GamepadListener.cs" />
+    <Compile Include="Gamepad\Win32 RawInput.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 
 namespace Keyboard_Inspector {
-    enum WiitarKeys {
+    enum GamepadKeys {
         Button1,
         Button2,
         Button3,
@@ -38,8 +39,8 @@ namespace Keyboard_Inspector {
         Button32
     }
 
-    class WiitarInput: Input<WiitarKeys> {
-        public WiitarInput(WiitarKeys k): base(k) {}
+    class GamepadInput: Input<GamepadKeys> {
+        public GamepadInput(GamepadKeys k): base(k) {}
 
         public override string Source => "Gamepad";
 
@@ -47,8 +48,8 @@ namespace Keyboard_Inspector {
 
         protected override char BinaryID => 'g';
 
-        public static WiitarInput FromBinaryDerived(BinaryReader br, uint fileVersion) {
-            return new WiitarInput((WiitarKeys)br.ReadInt32());
+        public static GamepadInput FromBinaryDerived(BinaryReader br, uint fileVersion) {
+            return new GamepadInput((GamepadKeys)br.ReadInt32());
         }
     }
 }

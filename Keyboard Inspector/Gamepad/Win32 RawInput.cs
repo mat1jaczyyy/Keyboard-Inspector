@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 using System.Security.Policy;
 
 namespace Keyboard_Inspector {
-    static partial class WiitarListener {
+    static partial class GamepadListener {
         /// <summary>
         /// Enumeration containing HID usage page flags.
         /// </summary>
@@ -424,8 +424,18 @@ namespace Keyboard_Inspector {
             public UInt16 DataIndexMax;
         }
 
+        enum NTSTATUS: uint {
+            HIDP_STATUS_SUCCESS = 0x00110000,
+            HIDP_INVALID_REPORT_LENGTH = 0xC0110003,
+            HIDP_INVALID_REPORT_TYPE = 0xC0110002,
+            HIDP_STATUS_BUFFER_TOO_SMALL = 0xC0110007,
+            HIDP_STATUS_INCOMPATIBLE_REPORT_ID = 0xC011000A,
+            HIDP_STATUS_INVALID_PREPARSED_DATA = 0xC0110001,
+            HIDP_STATUS_USAGE_NOT_FOUND = 0xC0110004
+        }
+
         [DllImport("hid.dll", SetLastError = true)]
-        static extern int HidP_GetCaps(
+        static extern NTSTATUS HidP_GetCaps(
             byte[] PreparsedData,
             out HIDP_CAPS Capabilities
         );
@@ -437,7 +447,7 @@ namespace Keyboard_Inspector {
         }
 
         [DllImport("hid.dll", SetLastError = true)]
-        static extern int HidP_GetButtonCaps(
+        static extern NTSTATUS HidP_GetButtonCaps(
             HIDP_REPORT_TYPE ReportType,
             [In, Out] HIDP_BUTTON_CAPS[] ButtonCaps,
             ref ushort ButtonCapsLength,
@@ -445,7 +455,7 @@ namespace Keyboard_Inspector {
         );
 
         [DllImport("hid.dll", SetLastError = true)]
-        static extern int HidP_GetUsages(
+        static extern NTSTATUS HidP_GetUsages(
             HIDP_REPORT_TYPE ReportType,
             HIDUsagePage UsagePage,
             ushort LinkCollection,
@@ -457,7 +467,7 @@ namespace Keyboard_Inspector {
         );
 
         [DllImport("hid.dll", SetLastError = true)]
-        static extern int HidD_FreePreparsedData(byte[] PreparsedData);
+        static extern bool HidD_FreePreparsedData(byte[] PreparsedData);
 
         const int WM_INPUT = 0x00FF;
     }
