@@ -22,25 +22,34 @@ namespace Keyboard_Inspector {
 		public static bool Process(ref Message m) {
 			if (m.Msg != WM_INPUT) return false;
 
-			GetRawInputData(m.LParam, RawInputCommand.Input, null, out int size, Marshal.SizeOf(typeof(RawInputHeader)));
-			byte[] input = new byte[size];
+			if (GetRawInputData(m.LParam, out RawInput input)) {
+				GetRawInputDeviceInfo(input.Header.Device, RawInputCommand.PreparsedData, out byte[] ppd);
 
-			if (GetRawInputData(m.LParam, RawInputCommand.Input, input, out size, Marshal.SizeOf(typeof(RawInputHeader)))) {
-				uint inputs = 0;
+				HidP_GetCaps(ppd, out HIDP_CAPS caps);
+                var buttoncaps = new HIDP_BUTTON_CAPS[caps.NumberInputButtonCaps];
+                HidP_GetButtonCaps(HIDP_REPORT_TYPE.HidP_Input, buttoncaps, ref caps.NumberInputButtonCaps, ppd);
 
-				if (input.Length == 35) // Xplorer
-					inputs = SwapBits(SwapBits(input[31], 2, 3), 6, 7) & 0b011011111u | (input[33] == 5? 0b000100000u : (input[33] == 1? 0b100000000u : 0u));
+                if (buttoncaps[0].UsagePage == HIDUsagePage.Button) {
+                    uint buttons = (uint)(buttoncaps[0].UsageMax - buttoncaps[0].UsageMin + 1);
+					ushort[] list = new ushort[buttons];
 
-				else if (input.Length == 39) // Wiitar
-					inputs = BitConverter.ToUInt16(input, 37);
+					HidP_GetUsages(HIDP_REPORT_TYPE.HidP_Input, buttoncaps[0].UsagePage, 0, list, ref buttons, ppd, input.HID.bRawData, input.HID.dwSizeHid);
 
-				for (uint i1 = last, i2 = inputs, n = 0; n < Enum.GetNames(typeof(WiitarKeys)).Length; i1 >>= 1, i2 >>= 1, n++) {
-					if ((i1 & 1) != (i2 & 1))
-						Recorder.RecordInput((i2 & 1) == 1, new WiitarInput((WiitarKeys)n));
-				}
+                    uint inputs = 0;
 
-				last = inputs;
-			}
+					for (int i = 0; i < buttons; i++)
+						inputs |= 1U << (list[i] - buttoncaps[0].UsageMin);
+
+                    for (uint i1 = last, i2 = inputs, n = 0; n < Enum.GetNames(typeof(WiitarKeys)).Length; i1 >>= 1, i2 >>= 1, n++) {
+                        if ((i1 & 1) != (i2 & 1))
+                            Recorder.RecordInput((i2 & 1) == 1, new WiitarInput((WiitarKeys)n));
+                    }
+
+                    last = inputs;
+                }
+
+                HidD_FreePreparsedData(ppd);
+            }
 
 			return true;
 		}
@@ -57,7 +66,7 @@ namespace Keyboard_Inspector {
 
 		static WiitarListener() {
 			deviceList[0].UsagePage = HIDUsagePage.Generic;
-			deviceList[0].Usage = HIDUsage.Gamepad;
+			deviceList[0].Usage = HIDUsage.Joystick;
 			deviceList[0].WindowHandle = MainForm.Instance.Handle;
 		}
     }

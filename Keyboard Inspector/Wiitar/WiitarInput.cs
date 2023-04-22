@@ -4,37 +4,48 @@ using System.IO;
 
 namespace Keyboard_Inspector {
     enum WiitarKeys {
-        Green = 0,
-        Red = 1,
-        Yellow = 2,
-        Blue = 3,
-        Orange = 4,
-        Downstrum = 5,
-        Start = 6,
-        Select = 7,
-        Upstrum = 8
+        Button1,
+        Button2,
+        Button3,
+        Button4,
+        Button5,
+        Button6,
+        Button7,
+        Button8,
+        Button9,
+        Button10,
+        Button11,
+        Button12,
+        Button13,
+        Button14,
+        Button15,
+        Button16,
+        Button17,
+        Button18,
+        Button19,
+        Button20,
+        Button21,
+        Button22,
+        Button23,
+        Button24,
+        Button25,
+        Button26,
+        Button27,
+        Button28,
+        Button29,
+        Button30,
+        Button31,
+        Button32
     }
 
     class WiitarInput: Input<WiitarKeys> {
-        static readonly Dictionary<WiitarKeys, Color> colors = new Dictionary<WiitarKeys, Color>() {
-            {WiitarKeys.Green, Color.FromArgb(0, 142, 0)},
-            {WiitarKeys.Red, Color.FromArgb(176, 0, 0)},
-            {WiitarKeys.Yellow, Color.Gold},
-            {WiitarKeys.Blue, Color.FromArgb(25, 90, 196)},
-            {WiitarKeys.Orange, Color.Orange},
-            {WiitarKeys.Downstrum, Color.FromArgb(15, 15, 15)},
-            {WiitarKeys.Start, Color.DarkGray},
-            {WiitarKeys.Select, Color.DarkGray},
-            {WiitarKeys.Upstrum, Color.FromArgb(15, 15, 15)}
-        };
-
         public WiitarInput(WiitarKeys k): base(k) {}
 
-        public override string Source => "Wiitar";
+        public override string Source => "Gamepad";
 
-        public override Color DefaultColor => colors[Key];
+        public override Color DefaultColor => Color.DarkGray;
 
-        protected override char BinaryID => 'w';
+        protected override char BinaryID => 'g';
 
         public static WiitarInput FromBinaryDerived(BinaryReader br, uint fileVersion) {
             return new WiitarInput((WiitarKeys)br.ReadInt32());
