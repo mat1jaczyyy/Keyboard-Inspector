@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 using System.Security.Policy;
 
 namespace Keyboard_Inspector {
-    static partial class GamepadListener {
+    static class Native {
         /// <summary>
         /// Enumeration containing HID usage page flags.
         /// </summary>
-        enum HIDUsagePage: ushort {
+        public enum HIDUsagePage: ushort {
             /// <summary>Unknown usage page.</summary>
             Undefined = 0x00,
             /// <summary>Generic desktop controls.</summary>
@@ -70,7 +70,7 @@ namespace Keyboard_Inspector {
         /// <summary>
         /// Enumeration containing the HID usage values.
         /// </summary>
-        enum HIDUsage: ushort {
+        public enum HIDUsage: ushort {
             Pointer = 0x01,
             Mouse = 0x02,
             Joystick = 0x04,
@@ -224,7 +224,7 @@ namespace Keyboard_Inspector {
 
         /// <summary>Enumeration containing flags for a raw input device.</summary>
         [Flags()]
-        enum RawInputDeviceFlags {
+        public enum RawInputDeviceFlags {
             /// <summary>No flags.</summary>
             None = 0,
             /// <summary>If set, this removes the top level collection from the inclusion list. This tells the operating system to stop reading from a device which matches the top level collection.</summary>
@@ -247,7 +247,7 @@ namespace Keyboard_Inspector {
 
         /// <summary>Value type for raw input devices.</summary>
         [StructLayout(LayoutKind.Sequential)]
-        struct RAWINPUTDEVICE {
+        public struct RAWINPUTDEVICE {
             /// <summary>Top level collection Usage page for the raw input device.</summary>
             public HIDUsagePage UsagePage;
             /// <summary>Top level collection Usage for the raw input device. </summary>
@@ -264,12 +264,12 @@ namespace Keyboard_Inspector {
         /// <param name="cbSize">Size of the RAWINPUTDEVICE structure.</param>
         /// <returns>TRUE if successful, FALSE if not.</returns>
         [DllImport("user32.dll")]
-        static extern bool RegisterRawInputDevices([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)] RAWINPUTDEVICE[] pRawInputDevices, int uiNumDevices, int cbSize);
+        public static extern bool RegisterRawInputDevices([MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0)] RAWINPUTDEVICE[] pRawInputDevices, int uiNumDevices, int cbSize);
 
         /// <summary>
         /// Enumeration contanining the command types to issue.
         /// </summary>
-        enum RawInputCommand {
+        public enum RawInputCommand {
             /// <summary>
             /// Get input data.
             /// </summary>
@@ -283,13 +283,19 @@ namespace Keyboard_Inspector {
             DeviceInfo = 0x2000000b
         }
 
+        public enum RawInputType : int {
+            RIM_TYPE_MOUSE,
+            RIM_TYPE_KEYBOARD,
+            RIM_TYPE_HID
+        }
+
         /// <summary>
         /// Value type for a raw input header.
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        struct RawInputHeader {
+        public struct RawInputHeader {
             /// <summary>Type of device the input is coming from.</summary>
-            public int Type;
+            public RawInputType Type;
             /// <summary>Size of the packet of data.</summary>
             public int Size;
             /// <summary>Handle to the device sending the data.</summary>
@@ -299,17 +305,35 @@ namespace Keyboard_Inspector {
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct RawHID {
+        public struct RawKeyboard {
+            public RawInputHeader Header;
+            public ushort MakeCode;
+            public ushort Flags;
+            ushort Reserved;
+            public ushort VKey;
+            public uint Message;
+            public uint ExtraInformation;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RawHID {
+            public RawInputHeader Header;
             public uint dwSizeHid;
             public uint dwCount;
-            [MarshalAs(UnmanagedType.ByValArray, ArraySubType=UnmanagedType.LPArray, SizeConst=250)]
+            [MarshalAs(UnmanagedType.ByValArray, ArraySubType=UnmanagedType.LPArray, SizeConst=256)]
             public byte[] bRawData;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct RawInput {
+        public struct RawMouse {
             public RawInputHeader Header;
-            public RawHID HID;
+            public ushort Flags;
+            public ushort ButtonData;
+            public ushort ButtonFlags;
+            public uint RawButtons;
+            public int LastX;
+            public int LastY;
+            public uint ExtraInformation;
         }
 
         /// <summary>
@@ -322,26 +346,39 @@ namespace Keyboard_Inspector {
         /// <param name="cbSizeHeader">Size of the header.</param>
         /// <returns>0 if successful if pData is null, otherwise number of bytes if pData is not null.</returns>
         [DllImport("user32.dll")]
-        static extern bool GetRawInputData(IntPtr hRawInput, RawInputCommand uiCommand, out RawInput pData, out int pcbSize, int cbSizeHeader);
-
-        static unsafe bool GetRawInputData(IntPtr hRawInput, out RawInput pData) {
-			GetRawInputData(hRawInput, RawInputCommand.Input, out _, out _, Marshal.SizeOf(typeof(RawInputHeader)));
-            return GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)));
-        }
+        static extern bool GetRawInputData(IntPtr hRawInput, RawInputCommand uiCommand, out RawKeyboard pData, out int pcbSize, int cbSizeHeader);
 
         [DllImport("user32.dll")]
-        static extern bool GetRawInputDeviceInfo(IntPtr hDevice, RawInputCommand uiCommand, byte[] pData, out int pcbSize);
+        static extern bool GetRawInputData(IntPtr hRawInput, RawInputCommand uiCommand, out RawHID pData, out int pcbSize, int cbSizeHeader);
 
-        static bool GetRawInputDeviceInfo(IntPtr hDevice, RawInputCommand uiCommand, out byte[] pData) {
-            GetRawInputDeviceInfo(hDevice, uiCommand, null, out int size);
+        [DllImport("user32.dll")]
+        static extern bool GetRawInputData(IntPtr hRawInput, RawInputCommand uiCommand, out RawMouse pData, out int pcbSize, int cbSizeHeader);
 
+        public static bool GetRawInputData(IntPtr hRawInput, out RawKeyboard pData)
+            => GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)))
+                && GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)));
+
+        public static bool GetRawInputData(IntPtr hRawInput, out RawHID pData)
+            => GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)))
+                && GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)));
+
+        public static bool GetRawInputData(IntPtr hRawInput, out RawMouse pData)
+            => GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)))
+                && GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)));
+
+        [DllImport("user32.dll")]
+        static extern int GetRawInputDeviceInfo(IntPtr hDevice, RawInputCommand uiCommand, byte[] pData, out int pcbSize);
+
+        public static bool GetRawInputDeviceInfo(IntPtr hDevice, RawInputCommand uiCommand, out byte[] pData) {
+            pData = null;
+            if (GetRawInputDeviceInfo(hDevice, uiCommand, null, out int size) != 0) return false;
+            
             pData = new byte[size];
-
-            return GetRawInputDeviceInfo(hDevice, uiCommand, pData, out size);
+            return GetRawInputDeviceInfo(hDevice, uiCommand, pData, out size) > 0;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct HIDP_CAPS {
+        public struct HIDP_CAPS {
             [MarshalAs(UnmanagedType.U2)]
             public HIDUsage Usage;
             [MarshalAs(UnmanagedType.U2)]
@@ -377,7 +414,7 @@ namespace Keyboard_Inspector {
         };
 
         [StructLayout(LayoutKind.Sequential)]
-        struct HIDP_BUTTON_CAPS {
+        public struct HIDP_BUTTON_CAPS {
             [MarshalAs(UnmanagedType.U2)]
             public HIDUsagePage UsagePage;
             [MarshalAs(UnmanagedType.U1)]
@@ -425,7 +462,7 @@ namespace Keyboard_Inspector {
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct HIDP_VALUE_CAPS {
+        public struct HIDP_VALUE_CAPS {
             [MarshalAs(UnmanagedType.U2)]
             public HIDUsagePage UsagePage;
             [MarshalAs(UnmanagedType.U1)]
@@ -488,7 +525,7 @@ namespace Keyboard_Inspector {
             public UInt16 DataIndexMax;
         }
 
-        enum NTSTATUS: uint {
+        public enum NTSTATUS: uint {
             HIDP_STATUS_SUCCESS = 0x00110000,
             HIDP_INVALID_REPORT_LENGTH = 0xC0110003,
             HIDP_INVALID_REPORT_TYPE = 0xC0110002,
@@ -499,19 +536,19 @@ namespace Keyboard_Inspector {
         }
 
         [DllImport("hid.dll", SetLastError = true)]
-        static extern NTSTATUS HidP_GetCaps(
+        public static extern NTSTATUS HidP_GetCaps(
             byte[] PreparsedData,
             out HIDP_CAPS Capabilities
         );
 
-        enum HIDP_REPORT_TYPE {
+        public enum HIDP_REPORT_TYPE {
             HidP_Input,
             HidP_Output,
             HidP_Feature
         }
 
         [DllImport("hid.dll", SetLastError = true)]
-        static extern NTSTATUS HidP_GetButtonCaps(
+        public static extern NTSTATUS HidP_GetButtonCaps(
             HIDP_REPORT_TYPE ReportType,
             [In, Out] HIDP_BUTTON_CAPS[] ButtonCaps,
             ref ushort ButtonCapsLength,
@@ -519,7 +556,7 @@ namespace Keyboard_Inspector {
         );
 
         [DllImport("hid.dll", SetLastError = true)]
-        static extern NTSTATUS HidP_GetValueCaps(
+        public static extern NTSTATUS HidP_GetValueCaps(
             HIDP_REPORT_TYPE ReportType,
             [In, Out] HIDP_VALUE_CAPS[] ValueCaps,
             ref ushort ValueCapsLength,
@@ -527,7 +564,7 @@ namespace Keyboard_Inspector {
         );
 
         [DllImport("hid.dll", SetLastError = true)]
-        static extern NTSTATUS HidP_GetUsages(
+        public static extern NTSTATUS HidP_GetUsages(
             HIDP_REPORT_TYPE ReportType,
             HIDUsagePage UsagePage,
             ushort LinkCollection,
@@ -539,7 +576,7 @@ namespace Keyboard_Inspector {
         );
 
         [DllImport("hid.dll", SetLastError = true)]
-        static extern NTSTATUS HidP_GetUsageValue(
+        public static extern NTSTATUS HidP_GetUsageValue(
             HIDP_REPORT_TYPE ReportType,
             HIDUsagePage UsagePage,
             ushort LinkCollection,
@@ -551,8 +588,6 @@ namespace Keyboard_Inspector {
         );
 
         [DllImport("hid.dll", SetLastError = true)]
-        static extern bool HidD_FreePreparsedData(byte[] PreparsedData);
-
-        const int WM_INPUT = 0x00FF;
+        public static extern bool HidD_FreePreparsedData(byte[] PreparsedData);
     }
 }

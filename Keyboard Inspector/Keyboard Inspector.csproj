@@ -68,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Analysis.cs" />
+    <Compile Include="Result\Analysis.cs" />
     <Compile Include="Benchmark.cs" />
     <Compile Include="Chart\Chart.cs">
       <SubType>UserControl</SubType>
@@ -78,13 +79,10 @@
     <Compile Include="Chart\ChartArea.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Event.cs" />
+    <Compile Include="Result\Event.cs" />
     <Compile Include="FileSystem.cs" />
-    <Compile Include="Input.cs" />
-    <Compile Include="IBinary.cs" />
-    <Compile Include="Keyboard\KeyInput.cs" />
-    <Compile Include="Keyboard\KeyListener.cs" />
-    <Compile Include="Keyboard\Win32 Hook.cs" />
+    <Compile Include="Result\InputBase.cs" />
+    <Compile Include="Result\IBinary.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -93,8 +91,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Recorder.cs" />
-    <Compile Include="Result.cs" />
+    <Compile Include="Recording\Recorder.cs" />
+    <Compile Include="Result\Result.cs" />
     <Compile Include="TETR.IO\TTRMPickerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -103,9 +101,9 @@
     </Compile>
     <Compile Include="TETR.IO\TetrioInput.cs" />
     <Compile Include="TETR.IO\TetrioReplay.cs" />
-    <Compile Include="Gamepad\GamepadInput.cs" />
-    <Compile Include="Gamepad\GamepadListener.cs" />
-    <Compile Include="Gamepad\Win32 RawInput.cs" />
+    <Compile Include="Recording\Input.cs" />
+    <Compile Include="Recording\Listener.cs" />
+    <Compile Include="Recording\Native.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -12,14 +12,6 @@ namespace Keyboard_Inspector {
     partial class MainForm: DarkForm {
         public static MainForm Instance { get; private set; }
 
-        // GamepadListener needs to grab WM_INPUT from Form...
-        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
-        protected override void WndProc(ref Message m) {
-            if (GamepadListener.Process(ref m)) return;
-
-            base.WndProc(ref m);
-        }
-
         public MainForm() {
             if (Instance != null) throw new Exception("Can't have more than one MainForm");
             Instance = this;

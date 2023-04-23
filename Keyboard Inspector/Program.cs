@@ -15,6 +15,19 @@ namespace Keyboard_Inspector {
 
         public static string[] Args = null;
 
+        class InputMessageFilter: IMessageFilter {
+            const int WM_INPUT = 0x00FF;
+
+            public bool PreFilterMessage(ref Message m) {
+                if (m.Msg == WM_INPUT) {
+                    Listener.Process(ref m);
+                    return true;
+                }
+
+                return false;
+            }
+        }
+
         [STAThread]
         static void Main(string[] args) {
             Args = args;
@@ -26,7 +39,10 @@ namespace Keyboard_Inspector {
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            Application.AddMessageFilter(new InputMessageFilter());
             Application.AddMessageFilter(new ControlScrollFilter());
+
             Application.Run(new MainForm());
         }
 

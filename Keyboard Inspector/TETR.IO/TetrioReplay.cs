@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using DynaJson;
 
 namespace Keyboard_Inspector {
-    class TetrioReplay {
+    static class TetrioReplay {
         static Dictionary<string, string> gametypes = new Dictionary<string, string>() {
             {"league", "TETRA LEAGUE"},
             {"40l", "40 LINES"},

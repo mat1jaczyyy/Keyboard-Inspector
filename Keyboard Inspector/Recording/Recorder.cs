@@ -9,7 +9,7 @@ namespace Keyboard_Inspector {
         static Stopwatch time;
         static List<Event> events;
 
-        static double ElapsedPrecise(this Stopwatch sw) => (double)sw.ElapsedTicks / Stopwatch.Frequency;
+        public static double ElapsedPrecise => (double)time.ElapsedTicks / Stopwatch.Frequency;
 
         public static bool IsRecording { get; private set; }
 
@@ -26,24 +26,25 @@ namespace Keyboard_Inspector {
 
             IsRecording = true;
 
-            KeyListener.Start();
-            GamepadListener.Start();
+            Listener.Start();
         }
 
         public static Result StopRecording() {
             if (!IsRecording) return null;
 
-            KeyListener.Stop();
-            GamepadListener.Stop();
+            Listener.Stop();
 
             time.Stop();
 
             IsRecording = false;
 
-            return new Result("", DateTime.Now, time.ElapsedPrecise(), events);
+            return new Result("", DateTime.Now, ElapsedPrecise, events);
         }
 
         public static void RecordInput(bool pressed, Input input)
-            => events.Add(new Event(time.ElapsedPrecise(), pressed, input));
+            => events.Add(new Event(ElapsedPrecise, pressed, input));
+
+        public static void RecordInput(double precise, bool pressed, Input input)
+            => events.Add(new Event(precise, pressed, input));
     }
 }
