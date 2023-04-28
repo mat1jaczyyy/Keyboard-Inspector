@@ -40,4 +40,22 @@ namespace Keyboard_Inspector {
             return new GamepadInput((GamepadKeys)br.ReadInt32());
         }
     }
+
+    enum MouseKeys {
+        LeftClick, RightClick, MiddleClick, MouseBack, MouseForward
+    }
+
+    class MouseInput: Input<MouseKeys> {
+        public MouseInput(MouseKeys k): base(k) {}
+
+        public override string Source => "Mouse";
+
+        public override Color DefaultColor => Color.DarkGray;
+
+        protected override char BinaryID => 'm';
+
+        public static MouseInput FromBinaryDerived(BinaryReader br, uint fileVersion) {
+            return new MouseInput((MouseKeys)br.ReadInt32());
+        }
+    }
 }

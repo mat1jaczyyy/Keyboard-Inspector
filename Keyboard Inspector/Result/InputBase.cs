@@ -42,6 +42,9 @@ namespace Keyboard_Inspector {
             if (id == 'g' || (fileVersion == 0 && id == 'w'))
                 return GamepadInput.FromBinaryDerived(br, fileVersion);
 
+            if (id == 'm')
+                return MouseInput.FromBinaryDerived(br, fileVersion);
+
             if (id == 't')
                 return TetrioInput.FromBinaryDerived(br, fileVersion);
 

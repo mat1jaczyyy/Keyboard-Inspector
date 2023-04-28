@@ -12,12 +12,17 @@ namespace Keyboard_Inspector {
         static double precise;
 
         static void HandleKeyboard(Native.RawKeyboard input) {
+            // todo fix vkey right shift?
             Recorder.RecordInput(precise, (input.Flags & 1) == 0, new KeyInput((Keys)input.VKey));
         }
 
         static void HandleMouse(Native.RawMouse input) {
             if (input.ButtonFlags == 0) return;
-            int a = 123;
+
+            for (int i = 0; i < 10; i++) {
+                if (((input.ButtonFlags >> i) & 1) == 1)
+                    Recorder.RecordInput(precise, (i & 1) == 0, new MouseInput((MouseKeys)(i >> 1)));
+            }
         }
 
         static void HandleHID(Native.RawHID input) {
