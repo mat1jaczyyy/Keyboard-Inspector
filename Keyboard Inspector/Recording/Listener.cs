@@ -54,10 +54,13 @@ namespace Keyboard_Inspector {
                         if (Native.HidP_GetUsageValue(Native.HIDP_REPORT_TYPE.HidP_Input, i.UsagePage, 0, i.UsageMin, out int hat, ppd, input.bRawData, input.dwSizeHid) != Native.NTSTATUS.HIDP_STATUS_SUCCESS) return;                        
                         
                         if (i.LogicalMin <= hat && hat <= i.LogicalMax) {
-                            if (i.LogicalMax == 3) { // 4-way hat
+                            int size = i.LogicalMax - i.LogicalMin + 1;
+                            hat -= i.LogicalMin;
+
+                            if (size == 4) { // 4-way hat
                                 inputs |= 1UL << (hat + 32);
 
-                            } else if (i.LogicalMax == 7) { // 8-way hat
+                            } else if (size == 8) { // 8-way hat
                                 inputs |= hat_bm[hat] << 32;
                             }
                         }
