@@ -55,6 +55,10 @@ namespace Keyboard_Inspector {
             this.open = new System.Windows.Forms.ToolStripMenuItem();
             this.save = new System.Windows.Forms.ToolStripMenuItem();
             this.mainmenu = new DarkUI.Controls.DarkMenuStrip();
+            this.capture = new System.Windows.Forms.ToolStripMenuItem();
+            this.captureKeyboard = new System.Windows.Forms.ToolStripMenuItem();
+            this.captureGamepad = new System.Windows.Forms.ToolStripMenuItem();
+            this.captureMouse = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
             this.split.Panel1.SuspendLayout();
@@ -88,11 +92,11 @@ namespace Keyboard_Inspector {
             this.status.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.status.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.status.Location = new System.Drawing.Point(249, 5);
+            this.status.Location = new System.Drawing.Point(324, 5);
             this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(916, 17);
+            this.status.Size = new System.Drawing.Size(646, 17);
             this.status.TabIndex = 1;
-            this.status.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.status.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // split
             // 
@@ -406,13 +410,60 @@ namespace Keyboard_Inspector {
             this.mainmenu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.mainmenu.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.mainmenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.recording});
+            this.recording,
+            this.capture});
             this.mainmenu.Location = new System.Drawing.Point(0, 0);
             this.mainmenu.Name = "mainmenu";
             this.mainmenu.Padding = new System.Windows.Forms.Padding(3, 2, 0, 2);
             this.mainmenu.Size = new System.Drawing.Size(1294, 24);
             this.mainmenu.TabIndex = 7;
             this.mainmenu.Text = "menuStrip1";
+            // 
+            // capture
+            // 
+            this.capture.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.capture.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.capture.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.captureKeyboard,
+            this.captureGamepad,
+            this.captureMouse});
+            this.capture.DropDown.Closing += new System.Windows.Forms.ToolStripDropDownClosingEventHandler(this.captureDontClose);
+            this.capture.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.capture.Margin = new System.Windows.Forms.Padding(0, 0, 125, 0);
+            this.capture.Name = "capture";
+            this.capture.Size = new System.Drawing.Size(61, 20);
+            this.capture.Text = "Capture";
+            // 
+            // captureKeyboard
+            // 
+            this.captureKeyboard.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.captureKeyboard.Checked = true;
+            this.captureKeyboard.CheckOnClick = true;
+            this.captureKeyboard.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.captureKeyboard.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.captureKeyboard.Name = "captureKeyboard";
+            this.captureKeyboard.Size = new System.Drawing.Size(180, 22);
+            this.captureKeyboard.Text = "Keyboard";
+            // 
+            // captureGamepad
+            // 
+            this.captureGamepad.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.captureGamepad.Checked = true;
+            this.captureGamepad.CheckOnClick = true;
+            this.captureGamepad.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.captureGamepad.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.captureGamepad.Name = "captureGamepad";
+            this.captureGamepad.Size = new System.Drawing.Size(180, 22);
+            this.captureGamepad.Text = "Gamepad/Joystick";
+            // 
+            // captureMouse
+            // 
+            this.captureMouse.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.captureMouse.CheckOnClick = true;
+            this.captureMouse.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.captureMouse.Name = "captureMouse";
+            this.captureMouse.Size = new System.Drawing.Size(180, 22);
+            this.captureMouse.Text = "Mouse";
             // 
             // MainForm
             // 
@@ -480,5 +531,9 @@ namespace Keyboard_Inspector {
         public Chart fDiffs;
         public Chart fCompound;
         public Chart fCircular;
+        private System.Windows.Forms.ToolStripMenuItem capture;
+        public System.Windows.Forms.ToolStripMenuItem captureKeyboard;
+        public System.Windows.Forms.ToolStripMenuItem captureGamepad;
+        public System.Windows.Forms.ToolStripMenuItem captureMouse;
     }
 }

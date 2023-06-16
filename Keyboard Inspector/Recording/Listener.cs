@@ -119,11 +119,30 @@ namespace Keyboard_Inspector {
         static Native.RAWINPUTDEVICE[] deviceList;
 
 	    static void Register(bool enable) {
-            for (int i = 0; i < deviceList.Length; i++) {
+            int n = 0;
+
+            if (enable) {
+                if (MainForm.Instance.captureKeyboard.Checked) {
+                    deviceList[n++].Usage = Native.HIDUsage.Keyboard;
+                }
+
+                if (MainForm.Instance.captureGamepad.Checked) {
+                    deviceList[n++].Usage = Native.HIDUsage.Gamepad;
+                    deviceList[n++].Usage = Native.HIDUsage.Joystick;
+                }
+
+                if (MainForm.Instance.captureMouse.Checked) {
+                    deviceList[n++].Usage = Native.HIDUsage.Mouse;
+                }
+
+            } else n = deviceList.Length;
+
+            for (int i = 0; i < n; i++) {
                 deviceList[i].Flags = enable? Native.RawInputDeviceFlags.InputSink : Native.RawInputDeviceFlags.None;
                 deviceList[i].WindowHandle = enable? MainForm.Instance.Handle : IntPtr.Zero;
             }
-            Native.RegisterRawInputDevices(deviceList, deviceList.Length, Marshal.SizeOf(typeof(Native.RAWINPUTDEVICE)));
+
+            Native.RegisterRawInputDevices(deviceList, n, Marshal.SizeOf(typeof(Native.RAWINPUTDEVICE)));
 	    }
 
 		public static void Start() {
@@ -137,11 +156,6 @@ namespace Keyboard_Inspector {
 
             for (int i = 0; i < deviceList.Length; i++)
                 deviceList[i].UsagePage = Native.HIDUsagePage.Generic;
-
-            deviceList[0].Usage = Native.HIDUsage.Keyboard;
-            deviceList[1].Usage = Native.HIDUsage.Mouse;
-            deviceList[2].Usage = Native.HIDUsage.Joystick;
-            deviceList[3].Usage = Native.HIDUsage.Gamepad;
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Keyboard_Inspector {
             string title = Result.IsEmpty(Result)? "" : Result.GetTitle();
             Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
 
-            recording.Enabled = open.Enabled = !Recorder.IsRecording;
+            mainmenu.Enabled = open.Enabled = !Recorder.IsRecording;
             save.Enabled = split.Visible = !Result.IsEmpty(Result);
 
             labelN.Text = Result.IsEmpty(Result)? "" : Result.Events.Count.ToString();
@@ -45,8 +45,6 @@ namespace Keyboard_Inspector {
         }
 
         void rec_Click(object sender, EventArgs e) {
-            status.TextAlign = ContentAlignment.TopRight;
-
             if (!Recorder.IsRecording) {
                 rec.Text = "Stop Recording";
                 status.Text = "Recording... 00:00:00";
@@ -73,10 +71,8 @@ namespace Keyboard_Inspector {
             resultLoaded();
         }
 
-        void t_Tick(object sender, EventArgs e) {
-            status.TextAlign = ContentAlignment.TopRight;
-            status.Text = $"Recording... {TimeSpan.FromSeconds(++elapsed):hh\\:mm\\:ss}";
-        }
+        void t_Tick(object sender, EventArgs e)
+            => status.Text = $"Recording... {TimeSpan.FromSeconds(++elapsed):hh\\:mm\\:ss}";
 
         bool silent;
 
@@ -271,6 +267,11 @@ namespace Keyboard_Inspector {
                 e.Cancel = true;
                 return;
             }
+        }
+
+        private void captureDontClose(object sender, ToolStripDropDownClosingEventArgs e) {
+            if (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked)
+                e.Cancel = true;
         }
     }
 }
