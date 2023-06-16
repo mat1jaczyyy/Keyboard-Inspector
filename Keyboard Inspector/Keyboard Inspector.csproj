@@ -78,9 +78,10 @@
     <Compile Include="Chart\ChartArea.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Result\Source.cs" />
     <Compile Include="Result\Event.cs" />
     <Compile Include="FileSystem.cs" />
-    <Compile Include="Result\InputBase.cs" />
+    <Compile Include="Result\Input.cs" />
     <Compile Include="Result\IBinary.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -98,9 +99,7 @@
     <Compile Include="TETR.IO\TTRMPickerForm.Designer.cs">
       <DependentUpon>TTRMPickerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="TETR.IO\TetrioInput.cs" />
     <Compile Include="TETR.IO\TetrioReplay.cs" />
-    <Compile Include="Recording\Input.cs" />
     <Compile Include="Recording\Listener.cs" />
     <Compile Include="Recording\Native.cs" />
   </ItemGroup>

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Policy;
+using System.Text;
 
 namespace Keyboard_Inspector {
     static class Native {
@@ -589,5 +591,22 @@ namespace Keyboard_Inspector {
 
         [DllImport("hid.dll", SetLastError = true)]
         public static extern bool HidD_FreePreparsedData(byte[] PreparsedData);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern IntPtr CreateFile(
+            string lpFileName,
+            uint dwDesiredAccess,
+            uint dwShareMode,
+            IntPtr lpSecurityAttributes,
+            uint dwCreationDisposition,
+            uint dwFlagsAndAttributes,
+            IntPtr hTemplateFile
+        );
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool CloseHandle(IntPtr hObject);
+
+        [DllImport("hid.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern bool HidD_GetProductString(IntPtr hFile, StringBuilder buffer, int bufferLength);
     }
 }

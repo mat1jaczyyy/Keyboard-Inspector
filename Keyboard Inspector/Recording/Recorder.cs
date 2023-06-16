@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Keyboard_Inspector {
     static class Recorder {
@@ -8,6 +9,7 @@ namespace Keyboard_Inspector {
 
         static Stopwatch time;
         static List<Event> events;
+        static Dictionary<long, int> sources;
 
         public static double ElapsedPrecise => (double)time.ElapsedTicks / Stopwatch.Frequency;
 
@@ -17,8 +19,9 @@ namespace Keyboard_Inspector {
             if (IsRecording)
                 StopRecording();
 
-            // TODO maybe increase capacity?
+            // TODO maybe increase initial capacity?
             events = new List<Event>();
+            sources = new Dictionary<long, int>();
 
             time?.Stop();
             time = new Stopwatch();
@@ -38,13 +41,19 @@ namespace Keyboard_Inspector {
 
             IsRecording = false;
 
-            return new Result("", DateTime.Now, ElapsedPrecise, events);
+            return new Result("", DateTime.Now, ElapsedPrecise, events, sources.Keys.ToDictionary(i => i, i => Source.FromHandle(i, sources[i])));
         }
 
         public static void RecordInput(bool pressed, Input input)
-            => events.Add(new Event(ElapsedPrecise, pressed, input));
+            => RecordInput(ElapsedPrecise, pressed, input);
 
-        public static void RecordInput(double precise, bool pressed, Input input)
-            => events.Add(new Event(precise, pressed, input));
+        public static void RecordInput(double precise, bool pressed, Input input) {
+            events.Add(new Event(precise, pressed, input));
+
+            if (!sources.ContainsKey(input.Source))
+                sources[input.Source] = 0;
+
+            sources[input.Source]++;
+        }
     }
 }

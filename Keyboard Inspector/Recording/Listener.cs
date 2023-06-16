@@ -1,10 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
 namespace Keyboard_Inspector {
+    enum GamepadKeys {
+        Button1, Button2, Button3, Button4, Button5, Button6, Button7, Button8,
+        Button9, Button10, Button11, Button12, Button13, Button14, Button15, Button16,
+        Button17, Button18, Button19, Button20, Button21, Button22, Button23, Button24,
+        Button25, Button26, Button27, Button28, Button29, Button30, Button31, Button32,
+        HatN, HatE, HatS, HatW
+    }
+
+    enum MouseKeys {
+        LeftClick, RightClick, MiddleClick, MouseBack, MouseForward
+    }
+
     static partial class Listener {
         static readonly ulong[] hat_bm = new ulong[] { 0b0001, 0b0011, 0b0010, 0b0110, 0b0100, 0b1100, 0b1000, 0b1001 };
 
@@ -13,7 +26,7 @@ namespace Keyboard_Inspector {
 
         static void HandleKeyboard(Native.RawKeyboard input) {
             // todo fix vkey right shift?
-            Recorder.RecordInput(precise, (input.Flags & 1) == 0, new KeyInput((Keys)input.VKey));
+            Recorder.RecordInput(precise, (input.Flags & 1) == 0, new Input(((Keys)input.VKey).ToString(), input.Header.Device));
         }
 
         static void HandleMouse(Native.RawMouse input) {
@@ -21,7 +34,7 @@ namespace Keyboard_Inspector {
 
             for (int i = 0; i < 10; i++) {
                 if (((input.ButtonFlags >> i) & 1) == 1)
-                    Recorder.RecordInput(precise, (i & 1) == 0, new MouseInput((MouseKeys)(i >> 1)));
+                    Recorder.RecordInput(precise, (i & 1) == 0, new Input(((MouseKeys)(i >> 1)).ToString(), input.Header.Device));
             }
         }
 
@@ -72,7 +85,7 @@ namespace Keyboard_Inspector {
                     for (int n = 0; n < 36; n++) {
                         ulong i = (inputs >> n) & 1;
                         if (i != ((last >> n) & 1))
-                            Recorder.RecordInput(precise, i == 1, new GamepadInput((GamepadKeys)n));
+                            Recorder.RecordInput(precise, i == 1, new Input(((GamepadKeys)n).ToString(), input.Header.Device));
                     }
 
                     last = inputs;
@@ -102,7 +115,8 @@ namespace Keyboard_Inspector {
             }
         }
 
-		static Native.RAWINPUTDEVICE[] deviceList;
+
+        static Native.RAWINPUTDEVICE[] deviceList;
 
 	    static void Register(bool enable) {
             for (int i = 0; i < deviceList.Length; i++) {

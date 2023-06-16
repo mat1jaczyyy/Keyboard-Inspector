@@ -53,6 +53,15 @@ namespace Keyboard_Inspector {
                 i.ToBinary(bw);
         }
 
+        public static void ToBinary<T>(this Dictionary<long, T> d, BinaryWriter bw) where T: IBinary {
+            bw.Write(d.Count);
+
+            foreach (var i in d) {
+                bw.Write(i.Key);
+                i.Value.ToBinary(bw);
+            }
+        }
+
         public static double Blend(this double val, double backVal, double amount) {
             if (amount <= 0) return backVal;
             if (amount >= 1) return val;

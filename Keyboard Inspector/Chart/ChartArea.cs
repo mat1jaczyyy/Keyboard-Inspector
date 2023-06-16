@@ -54,7 +54,7 @@ namespace Keyboard_Inspector {
 
                 KeyMenu.Tag = null;
 
-                Inputs[k].Color = Inputs[k].Input.DefaultColor;
+                Inputs[k].Color = Input.DefaultColor;
                 Invalidate();
             };
 
@@ -234,10 +234,13 @@ namespace Keyboard_Inspector {
 
             public InputHolder(Input input) {
                 Input = input;
-                Color = input.DefaultColor;
+                Color = Input.DefaultColor;
                 Visible = true;
             }
         }
+
+        string InputAsString(Input i, bool includeSource)
+            => $"{(includeSource? $"[{KeyHistory.Sources[i.Source]}] " : "")}{i}";
 
         Result KeyHistory;
         bool HasHistory => !Result.IsEmpty(KeyHistory);
@@ -279,7 +282,18 @@ namespace Keyboard_Inspector {
 
                 } else {
                     Inputs = newInputs;
-                    YMaxValue = Inputs.Count;
+
+                    Source best = KeyHistory.GetBestSource(0.8);
+                    if (best != null) {
+                        foreach (var i in Inputs) {
+                            i.Visible = KeyHistory.Sources[i.Input.Source] == best;
+                        }
+                        YMaxValue = Inputs.Count(i => i.Visible);
+
+                    } else {
+                        YMaxValue = Inputs.Count;
+                    }
+
                 }
 
                 RefreshVisibleInputs();
@@ -534,7 +548,7 @@ namespace Keyboard_Inspector {
             if (intersects) KeyMenu.Tag = k;
 
             KeyMenu.Items[0].Available = intersects;
-            KeyMenu.Items[1].Available = intersects && Inputs[k].Color != Inputs[k].Input.DefaultColor;
+            KeyMenu.Items[1].Available = intersects && Inputs[k].Color != Input.DefaultColor;
 
             KeyMenu.Items[3].Available = intersects && VisibleInputs.Count > 1;
             KeyMenu.Items[4].Available = Inputs.Any(i => !i.Visible);
@@ -631,7 +645,7 @@ namespace Keyboard_Inspector {
             
                 if (kind == Kind.KeyHistory) {
                     foreach (var i in VisibleInputs)
-                        i.TextRect.Size = gfx.MeasureString(i.Input.ToString(MultipleSources), Font);
+                        i.TextRect.Size = gfx.MeasureString(InputAsString(i.Input, MultipleSources), Font);
 
                     u.YAxis.Width = (float)Math.Ceiling(VisibleInputs.Max(i => i.TextRect.Width));
                 }
@@ -882,7 +896,7 @@ namespace Keyboard_Inspector {
 
                 for (int k = 0; k < VisibleInputs.Count; k++) {
                     var i = VisibleInputs[k];
-                    e.Graphics.DrawShadowString(i.Input.ToString(MultipleSources), Font, Frozen? cs.FrozenBrush : cs.TextBrush, cs.ShadowTextBrush, i.TextRect);
+                    e.Graphics.DrawShadowString(InputAsString(i.Input, MultipleSources), Font, Frozen? cs.FrozenBrush : cs.TextBrush, cs.ShadowTextBrush, i.TextRect);
 
                     double y = u.Chart.Y + k * u.YUnit;
 

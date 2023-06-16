@@ -7,6 +7,17 @@ using System.Windows.Forms;
 using DynaJson;
 
 namespace Keyboard_Inspector {
+    enum TetrioKeys {
+        moveLeft = 0,
+        moveRight = 1,
+        softDrop = 2,
+        hardDrop = 3,
+        rotateCCW = 4,
+        rotateCW = 5,
+        rotate180 = 6,
+        hold = 7
+    };
+
     static class TetrioReplay {
         static Dictionary<string, string> gametypes = new Dictionary<string, string>() {
             {"league", "TETRA LEAGUE"},
@@ -65,11 +76,18 @@ namespace Keyboard_Inspector {
                 events.Add(new Event(
                     Math.Round((double)(v.frame + v.data.subframe), 1) / 60.0,
                     v.type == "keydown",
-                    new TetrioInput(Enum.TryParse<TetrioKeys>(v.data.key, out TetrioKeys key)? key : throw new Exception("Unknown TETR.IO key"))
+                    new Input(v.data.key, 0)
                 ));
             }
 
-            return new Result(title, ts, data.frames / 60.0, events, new Analysis() { Precision = 600 });
+            return new Result(
+                title,
+                ts,
+                data.frames / 60.0,
+                events,
+                new Dictionary<long, Source>() {{0, new Source(events.Count, "TETR.IO Replay")}},
+                new Analysis() { Precision = 600 }
+            );
         }
     }
 }
