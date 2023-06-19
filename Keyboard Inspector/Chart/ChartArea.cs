@@ -551,7 +551,7 @@ namespace Keyboard_Inspector {
         protected override void OnMouseDown(MouseEventArgs e) {
             base.OnMouseDown(e);
 
-            if (!HasData) return;
+            if (!HasAny) return;
             if (e.Button != MouseButtons.Left) return;
 
             if (HasHistory && IntersectForDrag(e.Location, out int k)) {
