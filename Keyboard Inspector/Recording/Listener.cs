@@ -25,8 +25,23 @@ namespace Keyboard_Inspector {
         static double precise;
 
         static void HandleKeyboard(Native.RawKeyboard input) {
-            // todo fix vkey right shift?
-            Recorder.RecordInput(precise, (input.Flags & 1) == 0, new Input(((Keys)input.VKey).ToString(), input.Header.Device));
+            // https://stackoverflow.com/a/71885051
+            if (input.MakeCode == Native.KEYBOARD_OVERRUN_MAKE_CODE) return;
+            if (input.VKey >= 0xFF) return;
+
+            ushort scanCode = input.MakeCode;
+            Keys vkCode = (Keys)input.VKey;
+
+            if (input.Flags.HasFlag(Native.RawKeyboardFlags.RI_KEY_E0))
+                scanCode |= 0xE000;
+
+            if (input.Flags.HasFlag(Native.RawKeyboardFlags.RI_KEY_E1))
+                scanCode |= 0xE100;
+
+            if (vkCode == Keys.ShiftKey || vkCode == Keys.ControlKey || vkCode == Keys.Menu)
+                vkCode = (Keys)(ushort)Native.MapVirtualKey(scanCode, Native.MAPVK_VSC_TO_VK_EX);
+
+            Recorder.RecordInput(precise, !input.Flags.HasFlag(Native.RawKeyboardFlags.RI_KEY_BREAK), new Input(vkCode.ToString(), input.Header.Device));
         }
 
         static void HandleMouse(Native.RawMouse input) {

@@ -310,7 +310,7 @@ namespace Keyboard_Inspector {
         public struct RawKeyboard {
             public RawInputHeader Header;
             public ushort MakeCode;
-            public ushort Flags;
+            public RawKeyboardFlags Flags;
             ushort Reserved;
             public ushort VKey;
             public uint Message;
@@ -378,6 +378,21 @@ namespace Keyboard_Inspector {
             pData = new byte[size];
             return GetRawInputDeviceInfo(hDevice, uiCommand, pData, out size) > 0;
         }
+
+        public static readonly ushort KEYBOARD_OVERRUN_MAKE_CODE = 0xFF;
+
+        [Flags()]
+        public enum RawKeyboardFlags: ushort {
+            RI_KEY_MAKE = 0,
+            RI_KEY_BREAK = 1,
+            RI_KEY_E0 = 2,
+            RI_KEY_E1 = 4
+        }
+
+        [DllImport("user32.dll")]
+        public static extern uint MapVirtualKey(uint uCode, uint uMapType);
+
+        public static readonly uint MAPVK_VSC_TO_VK_EX = 3;
 
         [StructLayout(LayoutKind.Sequential)]
         public struct HIDP_CAPS {
