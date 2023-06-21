@@ -67,6 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FileSystem\Format.cs" />
     <Compile Include="Result\Analysis.cs" />
     <Compile Include="Benchmark.cs" />
     <Compile Include="Chart\Chart.cs">
@@ -80,7 +81,7 @@
     </Compile>
     <Compile Include="Result\Source.cs" />
     <Compile Include="Result\Event.cs" />
-    <Compile Include="FileSystem.cs" />
+    <Compile Include="FileSystem\FileSystem.cs" />
     <Compile Include="Result\Input.cs" />
     <Compile Include="Result\IBinary.cs" />
     <Compile Include="MainForm.cs">
@@ -102,10 +103,10 @@
     <Compile Include="TETR.IO\TetrioReplay.cs" />
     <Compile Include="Recording\Listener.cs" />
     <Compile Include="Recording\Native.cs" />
-    <Compile Include="ImportFileDialog.cs">
+    <Compile Include="FileSystem\ImportFileDialog.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ImportFileDialog.Designer.cs">
+    <Compile Include="FileSystem\ImportFileDialog.Designer.cs">
       <DependentUpon>ImportFileDialog.cs</DependentUpon>
     </Compile>
   </ItemGroup>
@@ -123,7 +124,7 @@
     <EmbeddedResource Include="TETR.IO\TTRMPickerForm.resx">
       <DependentUpon>TTRMPickerForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ImportFileDialog.resx">
+    <EmbeddedResource Include="FileSystem\ImportFileDialog.resx">
       <DependentUpon>ImportFileDialog.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

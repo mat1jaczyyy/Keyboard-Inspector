@@ -10,13 +10,11 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-using DarkUI.Forms;
-
 namespace Keyboard_Inspector {
     static class FileSystem {
         static readonly HttpClient HttpClient = new HttpClient();
 
-        static readonly string[] AllowedSchemes = new string[] {
+        public static readonly string[] AllowedSchemes = new string[] {
             Uri.UriSchemeHttp, Uri.UriSchemeHttps
         };
 
@@ -34,67 +32,8 @@ namespace Keyboard_Inspector {
             );
         }
 
-        public class Format {
-            public string Name { get; private set; }
-            string[] Extensions;
-            public FileOptions FileOptions { get; private set; }
-            
-            Func<Stream, Result> Reader;
-            Action<Result, string> Writer;
-            public bool CanWrite => Writer != null;
-
-            Func<string, Uri> CustomURLFilter;
-
-            string Disclaimer;
-            bool DisclaimerShown;
-
-            public IEnumerable<string> Asterisk => Extensions.Select(i => $"*{i}");
-            public string Filter => $"{Name} ({string.Join(", ", Asterisk)})|{string.Join(";", Asterisk)}";
-
-            public bool Match(string path)
-                => Extensions.Any(path.EndsWith);
-
-            public Result Read(Stream stream) {
-                var result = Reader(stream);
-
-                if (result != null && Disclaimer != null && !DisclaimerShown) {
-                    new DarkMessageBox(Disclaimer, "Disclaimer", DarkMessageBoxIcon.Information) {
-                        StartPosition = FormStartPosition.CenterParent,
-                        MaximumWidth = 600
-                    }.ShowDialog();
-
-                    DisclaimerShown = true;
-                }
-
-                return result;
-            }
-
-            public void Write(Result result, string path)
-                => Writer(result, path);
-
-            Uri DefaultURLFilter(string url) {
-                if (!Uri.TryCreate(url, UriKind.Absolute, out Uri result)) return null;
-                if (!FileSystem.AllowedSchemes.Contains(result.Scheme)) return null;
-                if (!Extensions.Any(Path.GetExtension(result.AbsolutePath).EndsWith)) return null;
-                return result;
-            }
-
-            public Uri FilterURL(string url)
-                => DefaultURLFilter(url)?? CustomURLFilter?.Invoke(url);
-
-            public Format(string name, string[] extensions, Func<Stream, Result> reader, Action<Result, string> writer = null, Func<string, Uri> urlFilter = null, string disclaimer = null, FileOptions fileOptions = FileOptions.None) {
-                Name = name;
-                Extensions = extensions.Select(i => i.StartsWith(".")? i : $".{i}").ToArray();
-                Reader = reader;
-                Writer = writer;
-                CustomURLFilter = urlFilter;
-                Disclaimer = disclaimer;
-                FileOptions = fileOptions;
-            }
-        }
-
-        public static Format[] Formats { get; private set; } = new Format[] {
-            new Format("Keyboard Inspector File", new string[] { "kbi" },
+        public static FileFormat[] Formats { get; private set; } = new FileFormat[] {
+            new FileFormat("Keyboard Inspector File", new string[] { "kbi" },
                 Result.FromStream,
                 (result, path) => {
                     using (MemoryStream ms = new MemoryStream()) {
@@ -106,7 +45,7 @@ namespace Keyboard_Inspector {
                 },
                 fileOptions: FileOptions.SequentialScan
             ),
-            new Format("TETR.IO Replay File", new string[] { "ttr", "ttrm" },
+            new FileFormat("TETR.IO Replay File", new string[] { "ttr", "ttrm" },
                 TetrioReplay.StreamToResult,
                 urlFilter: url => {
                     url = url.Replace("https://tetr.io/#", "").Replace("tetrio://", "");
@@ -126,15 +65,15 @@ namespace Keyboard_Inspector {
 
         static readonly string AllFiles = "All Files (*.*)|*.*";
 
-        static string GetEachFilter(IEnumerable<Format> formats)
+        static string GetEachFilter(IEnumerable<FileFormat> formats)
             => string.Join("|", formats.Select(i => i.Filter));
 
-        static string GetOpenFilter(IEnumerable<Format> formats) {
+        static string GetOpenFilter(IEnumerable<FileFormat> formats) {
             var all = formats.SelectMany(i => i.Asterisk);
             return $"All Supported Files ({string.Join(", ", all)})|{string.Join(";", all)}|{GetEachFilter(formats)}|{AllFiles}";
         }
 
-        static string GetSaveFilter(IEnumerable<Format> formats)
+        static string GetSaveFilter(IEnumerable<FileFormat> formats)
             => $"{GetEachFilter(formats.Where(i => i.CanWrite))}|{AllFiles}";
 
         static OpenFileDialog ofd = new OpenFileDialog() {
@@ -147,10 +86,10 @@ namespace Keyboard_Inspector {
             Title = "Save Recording"
         };
 
-        static Format FindFormat(string filename)
+        static FileFormat FindFormat(string filename)
             => Formats.FirstOrDefault(i => i.Match(filename));
 
-        public static Format FindFormat(string url, out Uri filtered) {
+        public static FileFormat FindFormat(string url, out Uri filtered) {
             filtered = null;
 
             foreach (var format in Formats) {
@@ -166,7 +105,7 @@ namespace Keyboard_Inspector {
         public static bool SupportsFormat(string filename)
             => FindFormat(filename) != null;
 
-        public static bool OpenDialog(out string filename, out Format format) {
+        public static bool OpenDialog(out string filename, out FileFormat format) {
             filename = null;
             format = null;
 
@@ -179,7 +118,7 @@ namespace Keyboard_Inspector {
             return false;
         }
 
-        public static bool ImportDialog(out Uri url, out Format format) {
+        public static bool ImportDialog(out Uri url, out FileFormat format) {
             url = null;
             format = null;
 
@@ -200,7 +139,7 @@ namespace Keyboard_Inspector {
             public FileResult(string error) => Error = error;
         }
 
-        static FileResult Load(Stream stream, Format format) {
+        static FileResult Load(Stream stream, FileFormat format) {
             try {
                 return new FileResult(format.Read(stream));
 
@@ -209,7 +148,7 @@ namespace Keyboard_Inspector {
             }
         }
 
-        public static FileResult Open(string filename, Format format) {
+        public static FileResult Open(string filename, FileFormat format) {
             try {
                 format = format?? FindFormat(filename);
 
@@ -221,7 +160,7 @@ namespace Keyboard_Inspector {
             }
         }
 
-        public static async Task<FileResult> Import(Uri url, Format format) {
+        public static async Task<FileResult> Import(Uri url, FileFormat format) {
             try {
                 var res = await HttpClient.GetAsync(url);
 

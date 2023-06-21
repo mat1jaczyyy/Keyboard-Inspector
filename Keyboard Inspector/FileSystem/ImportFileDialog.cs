@@ -6,7 +6,7 @@ using DarkUI.Forms;
 namespace Keyboard_Inspector {
     partial class ImportFileDialog: DarkForm {
         public Uri URL { get; private set; } = null;
-        public FileSystem.Format Format { get; private set; } = null;
+        public FileFormat Format { get; private set; } = null;
 
         bool HasURL => URL != null && Format != null;
 

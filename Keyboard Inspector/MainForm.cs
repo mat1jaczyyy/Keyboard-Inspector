@@ -221,7 +221,7 @@ namespace Keyboard_Inspector {
             ResultLoaded();
         }
 
-        void LoadFile(string filename, FileSystem.Format format = null) {
+        void LoadFile(string filename, FileFormat format = null) {
             var load = FileSystem.Open(filename, format);
 
             if (load.Error == null) {
@@ -234,7 +234,7 @@ namespace Keyboard_Inspector {
 
         bool IsLoadingURL = false;
 
-        async Task LoadURL(Uri url, FileSystem.Format format) {
+        async Task LoadURL(Uri url, FileFormat format) {
             IsLoadingURL = true;
             status.Text = "Downloading...";
             UpdateEnabledState();
@@ -257,7 +257,7 @@ namespace Keyboard_Inspector {
         }
 
         void open_Click(object sender, EventArgs e) {
-            if (FileSystem.OpenDialog(out string filename, out FileSystem.Format format)) {
+            if (FileSystem.OpenDialog(out string filename, out FileFormat format)) {
                 CloseFile();
                 LoadFile(filename, format);
             }
@@ -270,7 +270,7 @@ namespace Keyboard_Inspector {
         }
 
         async void import_Click(object sender, EventArgs e) {
-            if (FileSystem.ImportDialog(out Uri url, out FileSystem.Format format)) {
+            if (FileSystem.ImportDialog(out Uri url, out FileFormat format)) {
                 CloseFile();
                 await LoadURL(url, format);
             }
