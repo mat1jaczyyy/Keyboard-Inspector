@@ -12,8 +12,8 @@ namespace Keyboard_Inspector {
 
         public Source(int count, string name, string device_interface = "") {
             Count = count;
-            Name = name;
-            DeviceInterface = device_interface;
+            Name = name?.Trim();
+            DeviceInterface = device_interface?.Trim();
         }
 
         static bool CfgMgrName(string interface_name, out string name, out string instance_name) {
