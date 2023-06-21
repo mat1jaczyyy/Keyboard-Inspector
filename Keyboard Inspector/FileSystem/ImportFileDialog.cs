@@ -15,9 +15,17 @@ namespace Keyboard_Inspector {
             input.TextChanged += URLChanged;
         }
 
+        void CaretToEnd() {
+            input.Select(input.Text.Length, 0);
+            input.Focus();
+        }
+
         void FormShown(object sender, EventArgs e) {
-            if (!ClipboardCheck())
-                URLChanged(sender, e);
+            if (ClipboardCheck()) return;
+            
+            URLChanged(sender, e);
+            input.Select(input.Text.Length, 0);
+            CaretToEnd();
         }
 
         bool ClipboardCheck() {
@@ -28,6 +36,7 @@ namespace Keyboard_Inspector {
 
             input.TextChanged -= URLChanged;
             input.Text = url;
+            CaretToEnd();
             input.TextChanged += URLChanged;
 
             return true;

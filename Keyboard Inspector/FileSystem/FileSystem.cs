@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -160,17 +161,20 @@ namespace Keyboard_Inspector {
             }
         }
 
-        public static async Task<FileResult> Import(Uri url, FileFormat format) {
+        public static async Task<FileResult> Import(Uri url, FileFormat format, CancellationToken ct) {
             try {
-                var res = await HttpClient.GetAsync(url);
+                var res = await HttpClient.GetAsync(url, ct);
 
                 if (res.StatusCode != HttpStatusCode.OK)
                     return new FileResult($"Unable to download the file. Received status code {(int)res.StatusCode} ({res.StatusCode}).");
 
                 using (var stream = await res.Content.ReadAsStreamAsync()) {
-                    MainForm.Instance.ClearStatus();
+                    MainForm.Instance.DownloadFinished();
                     return Load(stream, format);
                 }
+
+            } catch (TaskCanceledException) when (ct.IsCancellationRequested) {
+                return new FileResult("");
 
             } catch {
                 return new FileResult("Unable to connect to the server. Check your network connection.");

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -19,21 +20,43 @@ namespace Keyboard_Inspector {
             InitializeCharts();
         }
 
-        public void ClearStatus() => status.Text = null;
+        enum UIState {
+            None, Recording, Downloading
+        }
 
-        void UpdateEnabledState() {
-            mainmenu.Enabled = open.Enabled = import.Enabled = !Recorder.IsRecording && !IsLoadingURL;
-            save.Enabled = split.Visible = !Result.IsEmpty(Result);
+        void UpdateState(UIState state) {
+            mainmenu.Enabled = state == UIState.None;
+
+            if (state == UIState.Recording) {
+                rec.Text = "Stop Recording";
+                status.Text = "Recording...";
+                split.Enabled = false;
+
+            } else if (state == UIState.Downloading) {
+                rec.Text = "Cancel";
+                status.Text = "Downloading...";
+                split.Enabled = false;
+
+            } else {
+                rec.Text = "Start Recording";
+                status.Text = null;
+                split.Enabled = true;
+            }
+
+            status.Refresh();
+            rec.Refresh();
         }
 
         int elapsed;
         public Result Result { get; private set; } = null;
 
         void ResultLoaded() {
+            UpdateState(Recorder.IsRecording? UIState.Recording : UIState.None);
+
             string title = Result.IsEmpty(Result)? "" : Result.GetTitle();
             Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
 
-            UpdateEnabledState();
+            save.Enabled = split.Visible = !Result.IsEmpty(Result);
 
             labelN.Text = Result.IsEmpty(Result)? "" : Result.Events.Count.ToString();
 
@@ -50,34 +73,19 @@ namespace Keyboard_Inspector {
         }
 
         void rec_Click(object sender, EventArgs e) {
-            if (!Recorder.IsRecording) {
-                rec.Text = "Stop Recording";
-                status.Text = "Recording... 00:00:00";
-                split.Enabled = false; 
+            if (ctsLoadURL != null) {
+                ctsLoadURL.Cancel();
 
+            } else if (!Recorder.IsRecording) {
                 Result = null;
-
                 Recorder.StartRecording();
 
-                elapsed = -1;
-                t_Tick(sender, e);
-                t.Enabled = true;
-
             } else {
-                rec.Text = "Start Recording";
-                status.Text = null;
-                split.Enabled = true;
-
                 Result = Recorder.StopRecording();
-
-                t.Enabled = false;
             }
 
             ResultLoaded();
         }
-
-        void t_Tick(object sender, EventArgs e)
-            => status.Text = $"Recording... {TimeSpan.FromSeconds(++elapsed):hh\\:mm\\:ss}";
 
         bool silent;
 
@@ -232,28 +240,29 @@ namespace Keyboard_Inspector {
             status.Text = load.Error;
         }
 
-        bool IsLoadingURL = false;
+        CancellationTokenSource ctsLoadURL = null;
 
         async Task LoadURL(Uri url, FileFormat format) {
-            IsLoadingURL = true;
-            status.Text = "Downloading...";
-            UpdateEnabledState();
+            UpdateState(UIState.Downloading);
+            ctsLoadURL = new CancellationTokenSource();
 
-            try {
-                var load = await FileSystem.Import(url, format);
+            var load = await FileSystem.Import(url, format, ctsLoadURL.Token);
 
-                if (load.Error == null) {
-                    IsLoadingURL = false;
-                    Result = load.Result;
-                    ResultLoaded();
-                }
-
-                status.Text = load.Error;
-
-            } finally {
-                IsLoadingURL = false;
-                UpdateEnabledState();
+            if (load.Error == null) {
+                Result = load.Result;
+                ResultLoaded();
             }
+
+            UpdateState(UIState.None);
+            status.Text = load.Error;
+            ctsLoadURL = null;
+        }
+
+        public void DownloadFinished() {
+            if (ctsLoadURL == null) return;
+
+            ctsLoadURL = null;
+            UpdateState(UIState.None);
         }
 
         void open_Click(object sender, EventArgs e) {

@@ -27,7 +27,6 @@ namespace Keyboard_Inspector {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.rec = new DarkUI.Controls.DarkButton();
-            this.t = new System.Windows.Forms.Timer(this.components);
             this.status = new DarkUI.Controls.DarkLabel();
             this.split = new System.Windows.Forms.SplitContainer();
             this.tlpCharts = new System.Windows.Forms.TableLayoutPanel();
@@ -54,13 +53,13 @@ namespace Keyboard_Inspector {
             this.recording = new System.Windows.Forms.ToolStripMenuItem();
             this.open = new System.Windows.Forms.ToolStripMenuItem();
             this.save = new System.Windows.Forms.ToolStripMenuItem();
+            this.import = new System.Windows.Forms.ToolStripMenuItem();
             this.mainmenu = new DarkUI.Controls.DarkMenuStrip();
             this.capture = new System.Windows.Forms.ToolStripMenuItem();
             this.captureKeyboard = new System.Windows.Forms.ToolStripMenuItem();
             this.captureGamepad = new System.Windows.Forms.ToolStripMenuItem();
             this.captureMouse = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.import = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
             this.split.Panel1.SuspendLayout();
             this.split.Panel2.SuspendLayout();
@@ -82,11 +81,6 @@ namespace Keyboard_Inspector {
             this.rec.TabIndex = 0;
             this.rec.Text = "Start Recording";
             this.rec.Click += new System.EventHandler(this.rec_Click);
-            // 
-            // t
-            // 
-            this.t.Interval = 1000;
-            this.t.Tick += new System.EventHandler(this.t_Tick);
             // 
             // status
             // 
@@ -392,7 +386,7 @@ namespace Keyboard_Inspector {
             this.open.Name = "open";
             this.open.ShortcutKeyDisplayString = "";
             this.open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.open.Size = new System.Drawing.Size(180, 22);
+            this.open.Size = new System.Drawing.Size(172, 22);
             this.open.Text = "&Open...";
             this.open.Click += new System.EventHandler(this.open_Click);
             // 
@@ -403,9 +397,18 @@ namespace Keyboard_Inspector {
             this.save.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(153)))), ((int)(((byte)(153)))));
             this.save.Name = "save";
             this.save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.save.Size = new System.Drawing.Size(180, 22);
+            this.save.Size = new System.Drawing.Size(172, 22);
             this.save.Text = "&Save As...";
             this.save.Click += new System.EventHandler(this.save_Click);
+            // 
+            // import
+            // 
+            this.import.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.import.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.import.Name = "import";
+            this.import.Size = new System.Drawing.Size(172, 22);
+            this.import.Text = "Import from URL...";
+            this.import.Click += new System.EventHandler(this.import_Click);
             // 
             // mainmenu
             // 
@@ -466,15 +469,6 @@ namespace Keyboard_Inspector {
             this.captureMouse.Size = new System.Drawing.Size(171, 22);
             this.captureMouse.Text = "Mouse";
             // 
-            // import
-            // 
-            this.import.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.import.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.import.Name = "import";
-            this.import.Size = new System.Drawing.Size(180, 22);
-            this.import.Text = "Import from URL...";
-            this.import.Click += new System.EventHandler(this.import_Click);
-            // 
             // MainForm
             // 
             this.AllowDrop = true;
@@ -512,7 +506,6 @@ namespace Keyboard_Inspector {
 
         #endregion
         private DarkUI.Controls.DarkButton rec;
-        private System.Windows.Forms.Timer t;
         private DarkUI.Controls.DarkLabel status;
         private System.Windows.Forms.SplitContainer split;
         private System.Windows.Forms.TableLayoutPanel tlpCharts;
