@@ -60,6 +60,7 @@ namespace Keyboard_Inspector {
             this.captureGamepad = new System.Windows.Forms.ToolStripMenuItem();
             this.captureMouse = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.import = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
             this.split.Panel1.SuspendLayout();
             this.split.Panel2.SuspendLayout();
@@ -377,7 +378,8 @@ namespace Keyboard_Inspector {
             this.recording.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.recording.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.open,
-            this.save});
+            this.save,
+            this.import});
             this.recording.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.recording.Name = "recording";
             this.recording.Size = new System.Drawing.Size(37, 20);
@@ -390,7 +392,7 @@ namespace Keyboard_Inspector {
             this.open.Name = "open";
             this.open.ShortcutKeyDisplayString = "";
             this.open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.open.Size = new System.Drawing.Size(163, 22);
+            this.open.Size = new System.Drawing.Size(180, 22);
             this.open.Text = "&Open...";
             this.open.Click += new System.EventHandler(this.open_Click);
             // 
@@ -401,7 +403,7 @@ namespace Keyboard_Inspector {
             this.save.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(153)))), ((int)(((byte)(153)))));
             this.save.Name = "save";
             this.save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.save.Size = new System.Drawing.Size(163, 22);
+            this.save.Size = new System.Drawing.Size(180, 22);
             this.save.Text = "&Save As...";
             this.save.Click += new System.EventHandler(this.save_Click);
             // 
@@ -427,7 +429,6 @@ namespace Keyboard_Inspector {
             this.captureKeyboard,
             this.captureGamepad,
             this.captureMouse});
-            this.capture.DropDown.Closing += new System.Windows.Forms.ToolStripDropDownClosingEventHandler(this.captureDontClose);
             this.capture.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.capture.Margin = new System.Windows.Forms.Padding(0, 0, 125, 0);
             this.capture.Name = "capture";
@@ -442,7 +443,7 @@ namespace Keyboard_Inspector {
             this.captureKeyboard.CheckState = System.Windows.Forms.CheckState.Checked;
             this.captureKeyboard.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.captureKeyboard.Name = "captureKeyboard";
-            this.captureKeyboard.Size = new System.Drawing.Size(180, 22);
+            this.captureKeyboard.Size = new System.Drawing.Size(171, 22);
             this.captureKeyboard.Text = "Keyboard";
             // 
             // captureGamepad
@@ -453,7 +454,7 @@ namespace Keyboard_Inspector {
             this.captureGamepad.CheckState = System.Windows.Forms.CheckState.Checked;
             this.captureGamepad.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.captureGamepad.Name = "captureGamepad";
-            this.captureGamepad.Size = new System.Drawing.Size(180, 22);
+            this.captureGamepad.Size = new System.Drawing.Size(171, 22);
             this.captureGamepad.Text = "Gamepad/Joystick";
             // 
             // captureMouse
@@ -462,8 +463,17 @@ namespace Keyboard_Inspector {
             this.captureMouse.CheckOnClick = true;
             this.captureMouse.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.captureMouse.Name = "captureMouse";
-            this.captureMouse.Size = new System.Drawing.Size(180, 22);
+            this.captureMouse.Size = new System.Drawing.Size(171, 22);
             this.captureMouse.Text = "Mouse";
+            // 
+            // import
+            // 
+            this.import.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.import.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.import.Name = "import";
+            this.import.Size = new System.Drawing.Size(180, 22);
+            this.import.Text = "Import from URL...";
+            this.import.Click += new System.EventHandler(this.import_Click);
             // 
             // MainForm
             // 
@@ -535,5 +545,6 @@ namespace Keyboard_Inspector {
         public System.Windows.Forms.ToolStripMenuItem captureKeyboard;
         public System.Windows.Forms.ToolStripMenuItem captureGamepad;
         public System.Windows.Forms.ToolStripMenuItem captureMouse;
+        private System.Windows.Forms.ToolStripMenuItem import;
     }
 }

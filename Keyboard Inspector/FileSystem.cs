@@ -2,19 +2,48 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Reflection;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using DarkUI.Forms;
 
 namespace Keyboard_Inspector {
-    class FileSystem {
+    static class FileSystem {
+        static readonly HttpClient HttpClient = new HttpClient();
+
+        static readonly string[] AllowedSchemes = new string[] {
+            Uri.UriSchemeHttp, Uri.UriSchemeHttps
+        };
+
+        static FileSystem() {
+            HttpClient.DefaultRequestHeaders.UserAgent.Add(
+                new ProductInfoHeaderValue(
+                    "KeyboardInspector",
+                    Assembly.GetEntryAssembly().GetName().Version.ToString(3)
+                )
+            );
+            HttpClient.DefaultRequestHeaders.UserAgent.Add(
+                new ProductInfoHeaderValue(
+                    "(+https://github.com/mat1jaczyyy/Keyboard-Inspector)"
+                )
+            );
+        }
+
         public class Format {
-            string Name;
+            public string Name { get; private set; }
             string[] Extensions;
+            public FileOptions FileOptions { get; private set; }
             
-            Func<string, Result> Reader;
+            Func<Stream, Result> Reader;
             Action<Result, string> Writer;
             public bool CanWrite => Writer != null;
+
+            Func<string, Uri> CustomURLFilter;
 
             string Disclaimer;
             bool DisclaimerShown;
@@ -25,8 +54,8 @@ namespace Keyboard_Inspector {
             public bool Match(string path)
                 => Extensions.Any(path.EndsWith);
 
-            public Result Read(string path) {
-                var result = Reader(path);
+            public Result Read(Stream stream) {
+                var result = Reader(stream);
 
                 if (result != null && Disclaimer != null && !DisclaimerShown) {
                     new DarkMessageBox(Disclaimer, "Disclaimer", DarkMessageBoxIcon.Information) {
@@ -43,21 +72,30 @@ namespace Keyboard_Inspector {
             public void Write(Result result, string path)
                 => Writer(result, path);
 
-            public Format(string name, string[] extensions, Func<string, Result> reader, Action<Result, string> writer = null, string disclaimer = null) {
+            Uri DefaultURLFilter(string url) {
+                if (!Uri.TryCreate(url, UriKind.Absolute, out Uri result)) return null;
+                if (!FileSystem.AllowedSchemes.Contains(result.Scheme)) return null;
+                if (!Extensions.Any(Path.GetExtension(result.AbsolutePath).EndsWith)) return null;
+                return result;
+            }
+
+            public Uri FilterURL(string url)
+                => DefaultURLFilter(url)?? CustomURLFilter?.Invoke(url);
+
+            public Format(string name, string[] extensions, Func<Stream, Result> reader, Action<Result, string> writer = null, Func<string, Uri> urlFilter = null, string disclaimer = null, FileOptions fileOptions = FileOptions.None) {
                 Name = name;
-                Extensions = extensions.Select(i => i.StartsWith(".") ? i : $".{i}").ToArray();
+                Extensions = extensions.Select(i => i.StartsWith(".")? i : $".{i}").ToArray();
                 Reader = reader;
                 Writer = writer;
+                CustomURLFilter = urlFilter;
                 Disclaimer = disclaimer;
+                FileOptions = fileOptions;
             }
         }
 
-        static string GetSaveFilter(IEnumerable<Format> formats)
-            => $"{GetEachFilter(formats.Where(i => i.CanWrite))}|{AllFiles}";
-
-        static Format[] formats = new Format[] {
-            new Format("Keyboard Inspector Files", new string[] { "kbi" },
-                Result.FromPath,
+        public static Format[] Formats { get; private set; } = new Format[] {
+            new Format("Keyboard Inspector File", new string[] { "kbi" },
+                Result.FromStream,
                 (result, path) => {
                     using (MemoryStream ms = new MemoryStream()) {
                         using (BinaryWriter bw = new BinaryWriter(ms)) {
@@ -65,10 +103,18 @@ namespace Keyboard_Inspector {
                             File.WriteAllBytes(path, ms.ToArray());
                         }
                     }
-                }
+                },
+                fileOptions: FileOptions.SequentialScan
             ),
-            new Format("TETR.IO Replay Files", new string[] { "ttr", "ttrm" },
-                TetrioReplay.ConvertToResult,
+            new Format("TETR.IO Replay File", new string[] { "ttr", "ttrm" },
+                TetrioReplay.StreamToResult,
+                urlFilter: url => {
+                    url = url.Replace("https://tetr.io/#", "").Replace("tetrio://", "");
+                    if (!Regex.IsMatch(url, "(^[Rr]:.+$)")) return null;
+                    url = url.Replace("R:", "").Replace("r:", "").Split('@')[0];
+                    url = $"https://inoue.szy.lol/api/replay/{Uri.EscapeUriString(url)}";
+                    return new Uri(url);
+                },
                 disclaimer:
                 "You are analyzing a TETR.IO replay file.\n\nTETR.IO downsamples input data to 600 Hz to fit it onto the subframe grid which " +
                 "you will notice as a peak at 600 Hz in the frequency domain. This adds another \"sampling rate\" (in addition to the usual " +
@@ -88,58 +134,120 @@ namespace Keyboard_Inspector {
             return $"All Supported Files ({string.Join(", ", all)})|{string.Join(";", all)}|{GetEachFilter(formats)}|{AllFiles}";
         }
 
+        static string GetSaveFilter(IEnumerable<Format> formats)
+            => $"{GetEachFilter(formats.Where(i => i.CanWrite))}|{AllFiles}";
+
         static OpenFileDialog ofd = new OpenFileDialog() {
-            Filter = GetOpenFilter(formats),
+            Filter = GetOpenFilter(Formats),
             Title = "Open Recording"
         };
+        static ImportFileDialog ifd = new ImportFileDialog();
         static SaveFileDialog sfd = new SaveFileDialog() {
-            Filter = GetSaveFilter(formats),
+            Filter = GetSaveFilter(Formats),
             Title = "Save Recording"
         };
 
         static Format FindFormat(string filename)
-            => formats.FirstOrDefault(i => i.Match(filename));
+            => Formats.FirstOrDefault(i => i.Match(filename));
+
+        public static Format FindFormat(string url, out Uri filtered) {
+            filtered = null;
+
+            foreach (var format in Formats) {
+                filtered = format.FilterURL(url);
+
+                if (filtered != null)
+                    return format;
+            }
+
+            return null;
+        }
 
         public static bool SupportsFormat(string filename)
             => FindFormat(filename) != null;
 
-        public static bool OpenDialog(out string filename) {
+        public static bool OpenDialog(out string filename, out Format format) {
             filename = null;
+            format = null;
 
             if (ofd.ShowDialog() == DialogResult.OK) {
                 filename = ofd.FileName;
+                format = FindFormat(filename);
                 return true;
             }
 
             return false;
         }
 
-        public static bool Open(string filename, out Result result, out string error) {
-            result = null;
-            error = null;
+        public static bool ImportDialog(out Uri url, out Format format) {
+            url = null;
+            format = null;
 
-            try {
-                result = FindFormat(filename).Read(filename);
+            if (ifd.ShowDialog() == DialogResult.OK) {
+                url = ifd.URL;
+                format = ifd.Format;
                 return true;
+            }
+
+            return false;
+        }
+
+        public class FileResult {
+            public readonly Result Result = null;
+            public readonly string Error = null;
+
+            public FileResult(Result result) => Result = result;
+            public FileResult(string error) => Error = error;
+        }
+
+        static FileResult Load(Stream stream, Format format) {
+            try {
+                return new FileResult(format.Read(stream));
 
             } catch {
-                error = "Couldn't parse file, it is likely corrupt or in an unsupported format.";
+                return new FileResult("Unable to parse the file. It is likely corrupt, or it is in an unsupported format.");
             }
-
-            return false;
         }
 
-        public static void Save(Result result, out string error) {
-            error = null;
+        public static FileResult Open(string filename, Format format) {
+            try {
+                format = format?? FindFormat(filename);
 
+                using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, format.FileOptions))
+                    return Load(stream, format);
+
+            } catch {
+                return new FileResult("Unable to open the file. It could be in use by another process, or it is in an unsupported format.");
+            }
+        }
+
+        public static async Task<FileResult> Import(Uri url, Format format) {
+            try {
+                var res = await HttpClient.GetAsync(url);
+
+                if (res.StatusCode != HttpStatusCode.OK)
+                    return new FileResult($"Unable to download the file. Received status code {(int)res.StatusCode} ({res.StatusCode}).");
+
+                using (var stream = await res.Content.ReadAsStreamAsync()) {
+                    MainForm.Instance.ClearStatus();
+                    return Load(stream, format);
+                }
+
+            } catch {
+                return new FileResult("Unable to connect to the server. Check your network connection.");
+            }
+        }
+
+        public static string Save(Result result) {
             if (sfd.ShowDialog() == DialogResult.OK) {
                 try {
                     FindFormat(sfd.FileName).Write(result, sfd.FileName);
 
                 } catch {
-                    error = "Couldn't save file, try saving it to a different location or with a different file name.";
+                    return "Unable to save the file. Try saving to a different location or with a different file name.";
                 }
             }
+            return null;
         }
     }
 }

@@ -102,6 +102,12 @@
     <Compile Include="TETR.IO\TetrioReplay.cs" />
     <Compile Include="Recording\Listener.cs" />
     <Compile Include="Recording\Native.cs" />
+    <Compile Include="ImportFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ImportFileDialog.Designer.cs">
+      <DependentUpon>ImportFileDialog.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -116,6 +122,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="TETR.IO\TTRMPickerForm.resx">
       <DependentUpon>TTRMPickerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ImportFileDialog.resx">
+      <DependentUpon>ImportFileDialog.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup />

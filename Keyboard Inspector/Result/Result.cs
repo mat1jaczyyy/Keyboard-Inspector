@@ -111,12 +111,9 @@ namespace Keyboard_Inspector {
             return new Result(title, recorded, time, events, sources, analysis);
         }
 
-        public static Result FromPath(string path) {
-            using (MemoryStream ms = new MemoryStream(File.ReadAllBytes(path))) {
-                using (BinaryReader br = new BinaryReader(ms)) {
-                    return FromBinary(br);
-                }
-            }
+        public static Result FromStream(Stream stream) {
+            using (BinaryReader br = new BinaryReader(stream))
+                return FromBinary(br);
         }
 
         public static bool IsEmpty(Result result) => result?.Events.Any() != true;

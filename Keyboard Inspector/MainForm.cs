@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Security.Permissions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using DarkUI.Forms;
@@ -20,15 +19,21 @@ namespace Keyboard_Inspector {
             InitializeCharts();
         }
 
+        public void ClearStatus() => status.Text = null;
+
+        void UpdateEnabledState() {
+            mainmenu.Enabled = open.Enabled = import.Enabled = !Recorder.IsRecording && !IsLoadingURL;
+            save.Enabled = split.Visible = !Result.IsEmpty(Result);
+        }
+
         int elapsed;
         public Result Result { get; private set; } = null;
 
-        void resultLoaded() {
+        void ResultLoaded() {
             string title = Result.IsEmpty(Result)? "" : Result.GetTitle();
             Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
 
-            mainmenu.Enabled = open.Enabled = !Recorder.IsRecording;
-            save.Enabled = split.Visible = !Result.IsEmpty(Result);
+            UpdateEnabledState();
 
             labelN.Text = Result.IsEmpty(Result)? "" : Result.Events.Count.ToString();
 
@@ -60,7 +65,7 @@ namespace Keyboard_Inspector {
 
             } else {
                 rec.Text = "Start Recording";
-                status.Text = "";
+                status.Text = null;
                 split.Enabled = true;
 
                 Result = Recorder.StopRecording();
@@ -68,7 +73,7 @@ namespace Keyboard_Inspector {
                 t.Enabled = false;
             }
 
-            resultLoaded();
+            ResultLoaded();
         }
 
         void t_Tick(object sender, EventArgs e)
@@ -211,25 +216,64 @@ namespace Keyboard_Inspector {
             screen.Area.IntervalGenerator = ScreenInterval;
         }
 
-        void LoadFile(string filename) {
-            if (FileSystem.Open(filename, out Result loaded, out string error)) {
-                Result = loaded;
-                resultLoaded();
+        void CloseFile() {
+            Result = null;
+            ResultLoaded();
+        }
+
+        void LoadFile(string filename, FileSystem.Format format = null) {
+            var load = FileSystem.Open(filename, format);
+
+            if (load.Error == null) {
+                Result = load.Result;
+                ResultLoaded();
             }
 
-            status.Text = error;
-        } 
+            status.Text = load.Error;
+        }
+
+        bool IsLoadingURL = false;
+
+        async Task LoadURL(Uri url, FileSystem.Format format) {
+            IsLoadingURL = true;
+            status.Text = "Downloading...";
+            UpdateEnabledState();
+
+            try {
+                var load = await FileSystem.Import(url, format);
+
+                if (load.Error == null) {
+                    IsLoadingURL = false;
+                    Result = load.Result;
+                    ResultLoaded();
+                }
+
+                status.Text = load.Error;
+
+            } finally {
+                IsLoadingURL = false;
+                UpdateEnabledState();
+            }
+        }
 
         void open_Click(object sender, EventArgs e) {
-            if (FileSystem.OpenDialog(out string filename))
-                LoadFile(filename);
+            if (FileSystem.OpenDialog(out string filename, out FileSystem.Format format)) {
+                CloseFile();
+                LoadFile(filename, format);
+            }
         }
 
         void save_Click(object sender, EventArgs e) {
             if (Result.IsEmpty(Result)) return;
 
-            FileSystem.Save(Result, out string error);
-            status.Text = error;
+            status.Text = FileSystem.Save(Result);
+        }
+
+        async void import_Click(object sender, EventArgs e) {
+            if (FileSystem.ImportDialog(out Uri url, out FileSystem.Format format)) {
+                CloseFile();
+                await LoadURL(url, format);
+            }
         }
 
         bool ValidateFileDrag(DragEventArgs e, out string result) {

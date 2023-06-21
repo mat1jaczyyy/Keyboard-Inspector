@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Drawing;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Policy;
 using System.Text;
 
 namespace Keyboard_Inspector {

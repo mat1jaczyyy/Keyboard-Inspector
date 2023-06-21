@@ -25,10 +25,8 @@ namespace Keyboard_Inspector {
             {"blitz", "BLITZ"},
         };
 
-        public static Result ConvertToResult(string path) {
-            dynamic ttr;
-            using (var reader = File.OpenRead(path))
-                ttr = JsonObject.Parse(reader);
+        public static Result StreamToResult(Stream stream) {
+            dynamic ttr = JsonObject.Parse(stream);
 
             string title = "";
 
