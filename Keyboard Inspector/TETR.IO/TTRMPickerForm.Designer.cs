@@ -24,34 +24,34 @@
         /// </summary>
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TTRMPickerForm));
-            this.p1 = new DarkUI.Controls.DarkLabel();
-            this.p2 = new DarkUI.Controls.DarkLabel();
+            this.p1lbl = new DarkUI.Controls.DarkLabel();
+            this.p2lbl = new DarkUI.Controls.DarkLabel();
             this.vs = new DarkUI.Controls.DarkLabel();
             this.SuspendLayout();
             // 
-            // p1
+            // p1lbl
             // 
-            this.p1.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.p1.BackColor = System.Drawing.Color.Navy;
-            this.p1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.p1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.p1.Location = new System.Drawing.Point(0, 9);
-            this.p1.Name = "p1";
-            this.p1.Size = new System.Drawing.Size(152, 23);
-            this.p1.TabIndex = 0;
-            this.p1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.p1lbl.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.p1lbl.BackColor = System.Drawing.Color.Navy;
+            this.p1lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.p1lbl.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.p1lbl.Location = new System.Drawing.Point(0, 9);
+            this.p1lbl.Name = "p1lbl";
+            this.p1lbl.Size = new System.Drawing.Size(152, 23);
+            this.p1lbl.TabIndex = 0;
+            this.p1lbl.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // p2
+            // p2lbl
             // 
-            this.p2.Anchor = System.Windows.Forms.AnchorStyles.Top;
-            this.p2.BackColor = System.Drawing.Color.Maroon;
-            this.p2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.p2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.p2.Location = new System.Drawing.Point(206, 9);
-            this.p2.Name = "p2";
-            this.p2.Size = new System.Drawing.Size(152, 23);
-            this.p2.TabIndex = 0;
-            this.p2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.p2lbl.Anchor = System.Windows.Forms.AnchorStyles.Top;
+            this.p2lbl.BackColor = System.Drawing.Color.Maroon;
+            this.p2lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.p2lbl.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.p2lbl.Location = new System.Drawing.Point(206, 9);
+            this.p2lbl.Name = "p2lbl";
+            this.p2lbl.Size = new System.Drawing.Size(152, 23);
+            this.p2lbl.TabIndex = 0;
+            this.p2lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // vs
             // 
@@ -69,8 +69,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(358, 43);
             this.Controls.Add(this.vs);
-            this.Controls.Add(this.p2);
-            this.Controls.Add(this.p1);
+            this.Controls.Add(this.p2lbl);
+            this.Controls.Add(this.p1lbl);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
@@ -84,8 +84,8 @@
 
         #endregion
 
-        private DarkUI.Controls.DarkLabel p1;
-        private DarkUI.Controls.DarkLabel p2;
+        private DarkUI.Controls.DarkLabel p1lbl;
+        private DarkUI.Controls.DarkLabel p2lbl;
         private DarkUI.Controls.DarkLabel vs;
     }
 }

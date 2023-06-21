@@ -47,8 +47,11 @@ namespace Keyboard_Inspector {
                     return null;
                 }
 
-                title += $"{ttr.endcontext[form.SelectedPlayer].user.username.ToUpper()} ({ttr.endcontext[form.SelectedPlayer].wins}) versus ";
-                title += $"({ttr.endcontext[1 - form.SelectedPlayer].wins}) {ttr.endcontext[1 - form.SelectedPlayer].user.username.ToUpper()}, ";
+                int p1 = ttr.endcontext[0].user._id == form.SelectedPlayer? 0 : 1;
+                int p2 = ttr.endcontext[1].user._id == form.OtherPlayer? 1 : 0;
+
+                title += $"{ttr.endcontext[p1].user.username.ToUpper()} ({ttr.endcontext[p1].wins}) versus ";
+                title += $"({ttr.endcontext[p2].wins}) {ttr.endcontext[p2].user.username.ToUpper()}, ";
                 title += $"round {form.SelectedIndex + 1}/{ttr.data.Count}, played ";
 
             } else {
