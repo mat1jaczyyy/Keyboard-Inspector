@@ -47,7 +47,6 @@ namespace Keyboard_Inspector {
             rec.Refresh();
         }
 
-        int elapsed;
         public Result Result { get; private set; } = null;
 
         void ResultLoaded() {

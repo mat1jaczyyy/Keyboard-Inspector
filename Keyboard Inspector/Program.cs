@@ -28,6 +28,21 @@ namespace Keyboard_Inspector {
             }
         }
 
+        static bool _cursorVisible = true;
+        public static bool CursorVisible {
+            get => _cursorVisible;
+            set {
+                if (_cursorVisible == value) return;
+
+                if (value)
+                    Cursor.Show();
+                else
+                    Cursor.Hide();
+
+                _cursorVisible = value;
+            }
+        }
+
         [STAThread]
         static void Main(string[] args) {
             Args = args;

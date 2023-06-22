@@ -118,7 +118,20 @@ namespace Keyboard_Inspector {
         }
         
         public double Zoom { get; private set; } = 1;
-        public double Viewport { get; private set; } = 0;
+
+        double _viewport = 0;
+        public double Viewport {
+            get => _viewport;
+            private set {
+                _viewport = value;
+                if (_viewport < 0) _viewport = 0;
+                else {
+                    double t = 1 / Zoom;
+                    if (_viewport + t > 1) _viewport = 1 - t;
+                }
+            }
+        }
+
         public Func<int, double> IntervalGenerator = i => Math.Pow(2, i - 10);
         public double? ScopeDefaultX = null;
 
@@ -422,20 +435,17 @@ namespace Keyboard_Inspector {
                     change = Zoom * s;
                 }
 
-                double v = x * (1 - 1 / change);
-                Viewport += v * s;
-
-                if (Viewport < 0) Viewport = 0;
-                else {
-                    double t = 1 / Zoom;
-                    if (Viewport + t > 1) Viewport = 1 - t;
-                }
+                Viewport += x * (1 - 1 / change) * s;
             }
 
-            Invalidate();
-            UpdateScroll();
+            if (Capture) {
+                CapturedOffset = 0;
+                CapturedViewport = Viewport;
+            }
 
-            HandleMouseMove(e, true);
+            UpdateScroll();
+            FindHighlightPoint(e.Location);
+            Invalidate();
         }
 
         protected override void OnMouseLeave(EventArgs e) {
@@ -476,7 +486,25 @@ namespace Keyboard_Inspector {
 
             if (!HasAny) return;
 
-            HandleMouseMove(e, false);
+            if (Captured) {
+                Cursor.Position = PointToScreen(CapturedPoint);
+
+                if (e.Location != CapturedPoint) {
+                    Program.CursorVisible = false;
+                    HighlightPoint = -1;
+                }
+
+                if (e.X != CapturedPoint.X) {
+                    CapturedOffset += CapturedPoint.X - e.X;
+                    Units u = GetUnits();
+
+                    Viewport = CapturedViewport + (CapturedOffset / u.Chart.Width / Zoom);
+
+                    UpdateScroll();
+                    Invalidate();
+                }
+            
+            } else FindHighlightPoint(e.Location);
         }
 
         int _highlight = -1;
@@ -490,11 +518,11 @@ namespace Keyboard_Inspector {
         }
         const double hoverRadius = 29;
 
-        void HandleMouseMove(MouseEventArgs e, bool remake) {
+        void FindHighlightPoint(Point p) {
             Units u = GetUnits();
 
-            double x = (e.X - u.Chart.X) / u.XUnit + u.Min;
-            double y = FlipY((e.Y - u.Chart.Y) / u.YUnit);
+            double x = (p.X - u.Chart.X) / u.XUnit + u.Min;
+            double y = FlipY((p.Y - u.Chart.Y) / u.YUnit);
 
             // Get X-axis size of hover radius
             double r = hoverRadius / u.XUnit;
@@ -522,9 +550,6 @@ namespace Keyboard_Inspector {
             }
 
             HighlightPoint = win;
-
-            if (HighlightPoint == win && remake)
-                Invalidate();
         }
 
         public event EventHandler Spotlight;
@@ -562,6 +587,11 @@ namespace Keyboard_Inspector {
             KeyMenu.Show(this, e.Location);
         }
 
+        bool Captured;
+        int CapturedOffset;
+        Point CapturedPoint;
+        double CapturedViewport;
+
         protected override void OnMouseDown(MouseEventArgs e) {
             base.OnMouseDown(e);
 
@@ -576,8 +606,22 @@ namespace Keyboard_Inspector {
             Units u = GetUnits();
 
             if (u.Chart.Contains(e.Location) || u.XAxis.Contains(e.Location)) {
-                Capture = true; // TODO Figure out capture
+                // Mouse Capture is done automatically by WinForms
+                // Just need a flag so we know it's because user is panning
+                Captured = true;
+                CapturedOffset = 0;
+                CapturedPoint = e.Location;
+                CapturedViewport = Viewport;
             }
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e) {
+            base.OnMouseUp(e);
+
+            if (e.Button != MouseButtons.Left) return;
+
+            Program.CursorVisible = true;
+            Captured = false;
         }
 
         bool ValidateDrag(DragEventArgs e, out int result) {
