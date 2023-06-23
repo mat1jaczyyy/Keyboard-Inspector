@@ -916,7 +916,10 @@ namespace Keyboard_Inspector {
                     extraDiff = diff % cutoff;
 
                     if (useYLine) {
-                        e.Graphics.DrawLine(cs.GradientPen, new PointF(prev.X, yMin), new PointF(point.X, yMax));
+                        e.Graphics.DrawLine(cs.GradientPen,
+                            new PointF( prev.X, prev.Y > point.Y? yMax : yMin),
+                            new PointF(point.X, prev.Y > point.Y? yMin : yMax)
+                        );
                         useYLine = false;
 
                     } else {
