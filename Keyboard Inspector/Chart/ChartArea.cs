@@ -848,18 +848,29 @@ namespace Keyboard_Inspector {
 
                 double px = interval * factorToPx;
                 double offset = (float)Math.Round(Viewport * u.Chart.Width * Zoom);
-                int pos = (int)Math.Ceiling(Viewport * XMaxFactored / interval);
+                int pos = (int)Math.Ceiling(Viewport * XMaxFactored / interval) - 1;
 
-                var textRect = new RectangleF(0, u.XAxis.Y + 7, (float)px, (float)u.TextHeight);
+                var textRect = new RectangleF(0, u.XAxis.Y + 7, 0, (float)u.TextHeight);
+                double textLowS = u.XAxis.X - px / 6;
+                double textHighS = u.XAxis.Right + px / 6;
 
-                float GetS() => (float)(Math.Round(pos * px) - offset);
+                float GetS() => (float)(Math.Round(pos * px) - offset) + u.Chart.X;
 
-                for (float s = GetS(); s <= u.Chart.Width + 0.5; pos++, s = GetS()) {
-                    s = (float)Math.Round(s + u.XAxis.X);
+                for (float s = GetS();; pos++, s = GetS()) {
+                    if (s.InRange(u.Chart.X, u.Chart.Right)) {
+                        float sr = (float)Math.Round(s);
+                        e.Graphics.DrawLine(cs.XPen, sr, u.Chart.Y - 0.5f, sr, u.XAxis.Y + 4.5f);
+                    }
+                    
+                    string text = $"{interval * pos:0.###}";
+                    textRect.Width = e.Graphics.MeasureString(text, Font).Width;
 
-                    e.Graphics.DrawLine(cs.XPen, s, u.Chart.Y - 0.5f, s, u.XAxis.Y + 4.5f);
-                    textRect.X = s - textRect.Width / 2;
-                    e.Graphics.DrawShadowString($"{interval * pos:0.###}", Font, cs.TextBrush, cs.ShadowTextBrush, textRect, true);
+                    if (textLowS <= s && s <= textHighS) {
+                        textRect.X = (float)Math.Round(s.Clamp(u.XAxis.X, u.XAxis.Right) - textRect.Width / 2);
+                        e.Graphics.DrawShadowString(text, Font, cs.TextBrush, cs.ShadowTextBrush, textRect, true);
+
+                    } else if (s >= u.XAxis.Right)
+                        break;
                 }
             }
 

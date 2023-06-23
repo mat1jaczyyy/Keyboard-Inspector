@@ -61,6 +61,16 @@ namespace Keyboard_Inspector {
             Application.Run(new MainForm());
         }
 
+        public static bool InRange<T>(this T val, T min, T max) where T : IComparable<T> {
+            return val.CompareTo(min) >= 0 && val.CompareTo(max) <= 0;
+        }
+
+        public static T Clamp<T>(this T val, T min, T max) where T: IComparable<T> {
+            if (val.CompareTo(min) < 0) return min;
+            if (val.CompareTo(max) > 0) return max;
+            return val;
+        }
+
         public static void ToBinary<T>(this List<T> l, BinaryWriter bw) where T: IBinary {
             bw.Write(l.Count);
             
