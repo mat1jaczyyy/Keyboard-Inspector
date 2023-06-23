@@ -61,6 +61,16 @@ namespace Keyboard_Inspector {
             Application.Run(new MainForm());
         }
 
+        public static void InvokeIfRequired(this Form form, Action action) {
+            if (form.InvokeRequired) form.Invoke(action);
+            else action();
+        }
+
+        public static T InvokeIfRequired<T>(this Form form, Func<T> action) {
+            if (form.InvokeRequired) return (T)form.Invoke(action);
+            else return action();
+        }
+
         public static bool InRangeII<T>(this T val, T min, T max) where T: IComparable<T>
             => min.CompareTo(val) <= 0 && val.CompareTo(max) <= 0;
 

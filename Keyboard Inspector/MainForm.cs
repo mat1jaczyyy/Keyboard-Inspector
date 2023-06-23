@@ -21,7 +21,7 @@ namespace Keyboard_Inspector {
         }
 
         enum UIState {
-            None, Recording, Downloading
+            None, Recording, Parsing, Downloading
         }
 
         void UpdateState(UIState state) {
@@ -29,18 +29,27 @@ namespace Keyboard_Inspector {
 
             if (state == UIState.Recording) {
                 rec.Text = "Stop Recording";
-                status.Text = "Recording...";
+                rec.Enabled = true;
                 split.Enabled = false;
+                status.Text = "Recording...";
+
+            } else if (state == UIState.Parsing) {
+                rec.Text = "Start Recording";
+                rec.Enabled = false;
+                split.Enabled = false;
+                status.Text = "Parsing file...";
 
             } else if (state == UIState.Downloading) {
                 rec.Text = "Cancel";
-                status.Text = "Downloading...";
+                rec.Enabled = true;
                 split.Enabled = false;
+                status.Text = "Downloading file...";
 
             } else {
                 rec.Text = "Start Recording";
-                status.Text = null;
+                rec.Enabled = true;
                 split.Enabled = true;
+                status.Text = null;
             }
 
             status.Refresh();
@@ -118,24 +127,24 @@ namespace Keyboard_Inspector {
             Result.Analysis.Analyze();
         }
 
-        private void precisionDouble_Click(object sender, EventArgs e) {
+        void precisionDouble_Click(object sender, EventArgs e) {
             Result.Analysis.Precision *= 2;
             tbPrecision.Text = Result.Analysis.Precision.ToString();
         }
 
-        private void precisionHalf_Click(object sender, EventArgs e) {
+        void precisionHalf_Click(object sender, EventArgs e) {
             Result.Analysis.Precision /= 2;
             tbPrecision.Text = Result.Analysis.Precision.ToString();
         }
 
-        private void lowCut_CheckedChanged(object sender, EventArgs e) {
+        void lowCut_CheckedChanged(object sender, EventArgs e) {
             if (silent) return;
 
             Result.Analysis.LowCut = lowCut.Checked;
             Result.Analysis.ReanalyzeFromLowCut();
         }
 
-        private void hps_ValueChanged(object sender, EventArgs e) {
+        void hps_ValueChanged(object sender, EventArgs e) {
             if (silent) return;
 
             Result.Analysis.HPS = (int)hps.Value;
@@ -228,14 +237,17 @@ namespace Keyboard_Inspector {
             ResultLoaded();
         }
 
-        void LoadFile(string filename, FileFormat format = null) {
-            var load = FileSystem.Open(filename, format);
+        async Task LoadFile(string filename, FileFormat format = null) {
+            UpdateState(UIState.Parsing);
+
+            var load = await FileSystem.Open(filename, format);
 
             if (load.Error == null) {
                 Result = load.Result;
                 ResultLoaded();
             }
 
+            UpdateState(UIState.None);
             status.Text = load.Error;
         }
 
@@ -261,13 +273,13 @@ namespace Keyboard_Inspector {
             if (ctsLoadURL == null) return;
 
             ctsLoadURL = null;
-            UpdateState(UIState.None);
+            UpdateState(UIState.Parsing);
         }
 
-        void open_Click(object sender, EventArgs e) {
+        async void open_Click(object sender, EventArgs e) {
             if (FileSystem.OpenDialog(out string filename, out FileFormat format)) {
                 CloseFile();
-                LoadFile(filename, format);
+                await LoadFile(filename, format);
             }
         }
 
@@ -295,7 +307,7 @@ namespace Keyboard_Inspector {
             return FileSystem.SupportsFormat(arr[0]);
         }
 
-        private void MainForm_DragOver(object sender, DragEventArgs e) {
+        void MainForm_DragOver(object sender, DragEventArgs e) {
             e.Effect = DragDropEffects.None;
 
             if (!ValidateFileDrag(e, out _)) return;
@@ -303,15 +315,15 @@ namespace Keyboard_Inspector {
             e.Effect = DragDropEffects.Move;
         }
 
-        private void MainForm_DragDrop(object sender, DragEventArgs e) {
+        async void MainForm_DragDrop(object sender, DragEventArgs e) {
             if (!ValidateFileDrag(e, out string filename)) return;
 
-            LoadFile(filename);
+            await LoadFile(filename);
         }
 
-        private void MainForm_Shown(object sender, EventArgs e) {
+        async void MainForm_Shown(object sender, EventArgs e) {
             if (Program.Args.Length > 0)
-                LoadFile(Program.Args[0]);
+                await LoadFile(Program.Args[0]);
         }
 
         void MainForm_FormClosing(object sender, FormClosingEventArgs e) {

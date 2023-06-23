@@ -39,7 +39,7 @@ namespace Keyboard_Inspector {
             if (isMulti) {
                 var form = new TTRMPickerForm(ttr);
 
-                if (form.ShowDialog() == DialogResult.OK) {
+                if (MainForm.Instance.InvokeIfRequired(form.ShowDialog) == DialogResult.OK) {
                     data = form.SelectedReplay;
                 } else {
                     return null;

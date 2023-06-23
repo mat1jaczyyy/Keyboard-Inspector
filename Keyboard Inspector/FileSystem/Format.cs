@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using DarkUI.Forms;
@@ -31,11 +32,12 @@ namespace Keyboard_Inspector {
             var result = Reader(stream);
 
             if (result != null && Disclaimer != null && !DisclaimerShown) {
-                new DarkMessageBox(Disclaimer, "Disclaimer", DarkMessageBoxIcon.Information) {
+                var dialog = new DarkMessageBox(Disclaimer, "Disclaimer", DarkMessageBoxIcon.Information) {
                     StartPosition = FormStartPosition.CenterParent,
                     MaximumWidth = 600
-                }.ShowDialog();
+                };
 
+                MainForm.Instance.InvokeIfRequired(dialog.ShowDialog);
                 DisclaimerShown = true;
             }
 

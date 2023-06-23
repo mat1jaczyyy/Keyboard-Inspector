@@ -140,21 +140,21 @@ namespace Keyboard_Inspector {
             public FileResult(string error) => Error = error;
         }
 
-        static FileResult Load(Stream stream, FileFormat format) {
+        static async Task<FileResult> Load(Stream stream, FileFormat format) {
             try {
-                return new FileResult(format.Read(stream));
+                return new FileResult(await Task.Run(() => format.Read(stream)));
 
             } catch {
                 return new FileResult("Unable to parse the file. It is likely corrupt, or it is in an unsupported format.");
             }
         }
 
-        public static FileResult Open(string filename, FileFormat format) {
+        public static async Task<FileResult> Open(string filename, FileFormat format) {
             try {
                 format = format?? FindFormat(filename);
 
                 using (var stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, format.FileOptions))
-                    return Load(stream, format);
+                    return await Load(stream, format);
 
             } catch {
                 return new FileResult("Unable to open the file. It could be in use by another process, or it is in an unsupported format.");
@@ -170,7 +170,7 @@ namespace Keyboard_Inspector {
 
                 using (var stream = await res.Content.ReadAsStreamAsync()) {
                     MainForm.Instance.DownloadFinished();
-                    return Load(stream, format);
+                    return await Load(stream, format);
                 }
 
             } catch (TaskCanceledException) when (ct.IsCancellationRequested) {
