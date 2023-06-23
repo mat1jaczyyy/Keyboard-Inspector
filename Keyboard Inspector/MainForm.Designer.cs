@@ -96,7 +96,6 @@ namespace Keyboard_Inspector {
             // split
             // 
             this.split.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.split.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
             this.split.Location = new System.Drawing.Point(0, 24);
             this.split.Name = "split";
             this.split.Orientation = System.Windows.Forms.Orientation.Horizontal;
