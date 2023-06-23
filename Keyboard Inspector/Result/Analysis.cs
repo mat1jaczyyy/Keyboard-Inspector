@@ -13,14 +13,14 @@ namespace Keyboard_Inspector {
         int _precision = 4000;
         public int Precision {
             get => _precision;
-            set => _precision = Math.Min(pHigh, Math.Max(0, value));
+            set => _precision = value.Clamp(0, pHigh);
         }
         public bool PrecisionValid => Precision >= pLow;
 
         int _hps = 0;
         public int HPS {
             get => _hps;
-            set => _hps = Math.Min(9, Math.Max(0, value));
+            set => _hps = value.Clamp(0, 9);
         }
 
         public bool LowCut = true;
@@ -171,7 +171,7 @@ namespace Keyboard_Inspector {
             AlignedArrayDouble data = new AlignedArrayDouble(64, Result.Analysis.Precision);
             for (int i = 0; i < source.Count; i++) {
                 double v = source[i];
-                if (0 <= v && v < 1)
+                if (v.InRangeIE(0, 1))
                     data[(int)Math.Round(v * Result.Analysis.Precision)] += 1;
             }
 

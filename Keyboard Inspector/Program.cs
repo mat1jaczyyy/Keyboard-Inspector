@@ -61,9 +61,11 @@ namespace Keyboard_Inspector {
             Application.Run(new MainForm());
         }
 
-        public static bool InRange<T>(this T val, T min, T max) where T : IComparable<T> {
-            return val.CompareTo(min) >= 0 && val.CompareTo(max) <= 0;
-        }
+        public static bool InRangeII<T>(this T val, T min, T max) where T: IComparable<T>
+            => min.CompareTo(val) <= 0 && val.CompareTo(max) <= 0;
+
+        public static bool InRangeIE<T>(this T val, T min, T max) where T: IComparable<T>
+            => min.CompareTo(val) <= 0 && val.CompareTo(max) < 0;
 
         public static T Clamp<T>(this T val, T min, T max) where T: IComparable<T> {
             if (val.CompareTo(min) < 0) return min;

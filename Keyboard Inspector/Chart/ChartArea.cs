@@ -418,7 +418,7 @@ namespace Keyboard_Inspector {
             Units u = GetUnits();
             var x = (e.X - u.Chart.X) / u.Chart.Width;
 
-            if (x < 0 || 1 <= x) return;
+            if (!x.InRangeIE(0, 1)) return;
 
             double s = 1 / Zoom;
 
@@ -629,7 +629,7 @@ namespace Keyboard_Inspector {
             if (!e.Data.GetDataPresent("System.Int32")) return false;
 
             result = (int)e.Data.GetData("System.Int32");
-            return 0 <= result && result < Inputs.Count && Inputs[result].Visible;
+            return result.InRangeIE(0, Inputs.Count) && Inputs[result].Visible;
         }
 
         protected override void OnDragOver(DragEventArgs e) {
@@ -673,6 +673,8 @@ namespace Keyboard_Inspector {
                 u.TextHeight = Math.Ceiling(gfx.MeasureString("Text", Font).Height);
 
                 u.Title = new RectangleF();
+                u.Title.X = ClientRectangle.X;
+                u.Title.Y = ClientRectangle.Y;
                 u.Title.Width = ClientRectangle.Width;
 
                 if (!string.IsNullOrWhiteSpace(Title))
@@ -680,11 +682,11 @@ namespace Keyboard_Inspector {
 
                 u.XAxis = new RectangleF();
                 u.XAxis.Height = (float)u.TextHeight + 10;
-                u.XAxis.Y = ClientRectangle.Y + ClientRectangle.Height - u.XAxis.Height;
+                u.XAxis.Y = ClientRectangle.Bottom - u.XAxis.Height;
 
                 u.YAxis = new RectangleF();
-                u.YAxis.X = 20;
-                u.YAxis.Y = ClientRectangle.Y + u.Title.Height;
+                u.YAxis.X = ClientRectangle.X + 20;
+                u.YAxis.Y = u.Title.Bottom;
                 u.YAxis.Height = ClientRectangle.Height - u.Title.Height - u.XAxis.Height;
             
                 if (kind == Kind.KeyHistory) {
@@ -694,7 +696,7 @@ namespace Keyboard_Inspector {
                     u.YAxis.Width = (float)Math.Ceiling(VisibleInputs.Max(i => i.TextRect.Width));
                 }
 
-                u.XAxis.X = u.YAxis.X + u.YAxis.Width;
+                u.XAxis.X = u.YAxis.Right;
                 if (u.YAxis.Width > 0)
                     u.XAxis.X += 4;
 
@@ -736,7 +738,7 @@ namespace Keyboard_Inspector {
                         i.MenuRect = i.DragRect;
                         i.MenuRect.Width += u.Chart.Width;
 
-                        i.TextRect.X = u.YAxis.X + u.YAxis.Width - i.TextRect.Width;
+                        i.TextRect.X = u.YAxis.Right - i.TextRect.Width;
                         i.TextRect.Y = i.MenuRect.Y + (float)((u.YUnit - i.TextRect.Height) / 2);
                     }
                 }
@@ -831,7 +833,7 @@ namespace Keyboard_Inspector {
 
                 for (double i = start; i < cutoff; i++) {
                     float y = (float)Math.Round(u.Chart.Y + u.Chart.Height * i / divisor);
-                    e.Graphics.DrawLine(cs.YPen, u.Chart.X, y, u.Chart.X + u.Chart.Width, y);
+                    e.Graphics.DrawLine(cs.YPen, u.Chart.X, y, u.Chart.Right, y);
                 }
             }
 
@@ -851,13 +853,13 @@ namespace Keyboard_Inspector {
                 int pos = (int)Math.Ceiling(Viewport * XMaxFactored / interval) - 1;
 
                 var textRect = new RectangleF(0, u.XAxis.Y + 7, 0, (float)u.TextHeight);
-                double textLowS = u.XAxis.X - px / 6;
-                double textHighS = u.XAxis.Right + px / 6;
+                float textLowS = (float)(u.XAxis.X - px / 6);
+                float textHighS = (float)(u.XAxis.Right + px / 6);
 
                 float GetS() => (float)(Math.Round(pos * px) - offset) + u.Chart.X;
 
                 for (float s = GetS();; pos++, s = GetS()) {
-                    if (s.InRange(u.Chart.X, u.Chart.Right)) {
+                    if (s.InRangeII(u.Chart.X, u.Chart.Right)) {
                         float sr = (float)Math.Round(s);
                         e.Graphics.DrawLine(cs.XPen, sr, u.Chart.Y - 0.5f, sr, u.XAxis.Y + 4.5f);
                     }
@@ -865,7 +867,7 @@ namespace Keyboard_Inspector {
                     string text = $"{interval * pos:0.###}";
                     textRect.Width = e.Graphics.MeasureString(text, Font).Width;
 
-                    if (textLowS <= s && s <= textHighS) {
+                    if (s.InRangeII(textLowS, textHighS)) {
                         textRect.X = (float)Math.Round(s.Clamp(u.XAxis.X, u.XAxis.Right) - textRect.Width / 2);
                         e.Graphics.DrawShadowString(text, Font, cs.TextBrush, cs.ShadowTextBrush, textRect, true);
 

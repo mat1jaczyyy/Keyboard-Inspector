@@ -78,7 +78,7 @@ namespace Keyboard_Inspector {
                     if (i.UsagePage == Native.HIDUsagePage.Generic && i.UsageMin == Native.HIDUsage.HatSwitch) {
                         if (Native.HidP_GetUsageValue(Native.HIDP_REPORT_TYPE.HidP_Input, i.UsagePage, 0, i.UsageMin, out int hat, ppd, input.bRawData, input.dwSizeHid) != Native.NTSTATUS.HIDP_STATUS_SUCCESS) return;                        
                         
-                        if (i.LogicalMin <= hat && hat <= i.LogicalMax) {
+                        if (hat.InRangeII(i.LogicalMin, i.LogicalMax)) {
                             int size = i.LogicalMax - i.LogicalMin + 1;
                             hat -= i.LogicalMin;
 
