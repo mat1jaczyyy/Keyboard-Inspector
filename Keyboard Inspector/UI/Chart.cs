@@ -367,19 +367,15 @@ namespace Keyboard_Inspector {
             return -1;
         }
 
-        protected override void OnMouseWheel(MouseEventArgs e) {
-            base.OnMouseWheel(e);
+        bool ZoomChange(Units u, Point pt, double scrolls) {
+            if (scrolls == 0) return false;
 
-            if (!HasAny) return;
+            u = u?? GetUnits();
 
-            Units u = GetUnits();
-            var x = (e.X - u.Chart.X) / u.Chart.Width;
-
-            if (!x.InRangeIE(0, 1)) return;
-
+            var x = (pt.X - u.Chart.X) / u.Chart.Width;
             double s = 1 / Zoom;
 
-            double change = Math.Pow(1.05, e.Delta / 120.0);
+            double change = Math.Pow(1.05, scrolls);
             Zoom *= change;
 
             if (Zoom <= 1) {
@@ -395,13 +391,27 @@ namespace Keyboard_Inspector {
                 Viewport += x * (1 - 1 / change) * s;
             }
 
-            if (Capture) {
+            FindHighlightPoint(pt);
+            Invalidate();
+
+            return true;
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e) {
+            base.OnMouseWheel(e);
+
+            if (!HasAny) return;
+
+            if (CapturedScrollBar != null) return;
+            if (Captured && CapturedDirection == PanDirection.Vertical) return;
+
+            Units u = GetUnits();
+            if (!u.Chart.Contains(e.Location) && !u.XAxis.Contains(e.Location)) return;
+
+            if (ZoomChange(u, e.Location, e.Delta / 120.0) && Captured) {
                 CapturedOffset = 0;
                 CapturedViewport = Viewport;
             }
-
-            FindHighlightPoint(e.Location);
-            Invalidate();
         }
 
         protected override void OnMouseLeave(EventArgs e) {
@@ -464,10 +474,29 @@ namespace Keyboard_Inspector {
                     HighlightPoint = -1;
                 }
 
-                if (e.X != CapturedPoint.X) {
-                    CapturedOffset += CapturedPoint.X - e.X;
-                    Viewport = CapturedViewport + (CapturedOffset / u.Chart.Width / Zoom);
-                    Invalidate();
+                Point offset = new Point(CapturedPoint.X - e.X, CapturedPoint.Y - e.Y);
+
+                if (CapturedDirection == PanDirection.None) {
+                    Point abs = new Point(Math.Abs(offset.X), Math.Abs(offset.Y));
+
+                    if (abs.X > abs.Y) CapturedDirection = PanDirection.Horizontal;
+                    else if (abs.Y > abs.X) CapturedDirection = PanDirection.Vertical;
+                }
+
+                if (CapturedDirection == PanDirection.Horizontal) {
+                    if (offset.X != 0) {
+                        CapturedOffset += offset.X;
+                        Viewport = CapturedViewport + (CapturedOffset / u.Chart.Width / Zoom);
+                        Invalidate();
+                    }
+
+                } else if (CapturedDirection == PanDirection.Vertical) {
+                    if (offset.Y != 0) {
+                        CapturedOffset += offset.Y;
+                        Zoom = CapturedZoom;
+                        Viewport = CapturedViewport;
+                        ZoomChange(u, CapturedPoint, CapturedOffset / 10.0);
+                    }
                 }
             
             } else if (CapturedScrollBar is int origin) {
@@ -563,11 +592,17 @@ namespace Keyboard_Inspector {
             KeyMenu.Show(this, e.Location);
         }
 
+        enum PanDirection {
+            None, Horizontal, Vertical
+        }
+
         bool Captured;
+        int? CapturedScrollBar;
         int CapturedOffset;
         Point CapturedPoint;
+        PanDirection CapturedDirection;
+        double CapturedZoom;
         double CapturedViewport;
-        int? CapturedScrollBar;
 
         protected override void OnMouseDown(MouseEventArgs e) {
             base.OnMouseDown(e);
@@ -588,12 +623,24 @@ namespace Keyboard_Inspector {
                 Captured = true;
                 CapturedOffset = 0;
                 CapturedPoint = e.Location;
+                CapturedDirection = PanDirection.None;
+                CapturedZoom = Zoom;
                 CapturedViewport = Viewport;
-            
+
             } else if (u.ScrollBar.Contains(e.Location)) {
                 HoveringScrollBar = false;
                 CapturedScrollBar = e.X;
                 CapturedViewport = Viewport;
+            }
+        }
+
+        void StopUIAction() {
+            Program.CursorVisible = true;
+            Captured = false;
+
+            if (CapturedScrollBar != null) {
+                CapturedScrollBar = null;
+                Invalidate();
             }
         }
 
@@ -602,13 +649,14 @@ namespace Keyboard_Inspector {
 
             if (e.Button != MouseButtons.Left) return;
 
-            Program.CursorVisible = true;
-            Captured = false;
+            StopUIAction();
+        }
 
-            if (CapturedScrollBar != null) {
-                CapturedScrollBar = null;
-                Invalidate();
-            }
+        protected override void OnMouseCaptureChanged(EventArgs e) {
+            base.OnMouseCaptureChanged(e);
+
+            if (!Capture)
+                StopUIAction();
         }
 
         bool ValidateDrag(DragEventArgs e, out int result) {
