@@ -68,7 +68,7 @@ namespace Keyboard_Inspector {
 
             labelN.Text = Result.IsEmpty(Result)? "" : Result.Events.Count.ToString();
 
-            screen.Area.LoadData(Result);
+            screen.LoadData(Result);
 
             if (Result.IsEmpty(Result)) return;
 
@@ -190,7 +190,7 @@ namespace Keyboard_Inspector {
             fCharts = Charts.Where(i => tlpCharts.GetRow(i) == 1).ToList();
 
             foreach (var chart in Charts) {
-                chart.Area.Spotlight += (_, __) => {
+                chart.Spotlight += (_, __) => {
                     if (chart.Parent == tlpCharts) {
                         chart.SuspendLayout();
 
@@ -217,19 +217,19 @@ namespace Keyboard_Inspector {
             }
 
             foreach (var chart in tCharts) {
-                chart.Area.ScopeDefaultX = 100;
-                chart.Area.IntervalGenerator = i => ScreenInterval(i) * 1000;
+                chart.ScopeDefaultX = 100;
+                chart.IntervalGenerator = i => ScreenInterval(i) * 1000;
             }
 
             foreach (var chart in fCharts) {
-                chart.Area.IntervalGenerator = i => {
+                chart.IntervalGenerator = i => {
                     if (i < 2) return (i + 1) * 5;
                     if (i < 4) return (i - 1) * 25;
                     return Math.Pow(2, i - 4) * 125;
                 };
             }
 
-            screen.Area.IntervalGenerator = ScreenInterval;
+            screen.IntervalGenerator = ScreenInterval;
         }
 
         void CloseFile() {

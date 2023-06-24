@@ -70,13 +70,7 @@
     <Compile Include="FileSystem\Format.cs" />
     <Compile Include="Result\Analysis.cs" />
     <Compile Include="Benchmark.cs" />
-    <Compile Include="Chart\Chart.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Chart\Chart.Designer.cs">
-      <DependentUpon>Chart.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Chart\ChartArea.cs">
+    <Compile Include="UI\Chart.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Result\Source.cs" />
@@ -84,10 +78,10 @@
     <Compile Include="FileSystem\FileSystem.cs" />
     <Compile Include="Result\Input.cs" />
     <Compile Include="Result\IBinary.cs" />
-    <Compile Include="MainForm.cs">
+    <Compile Include="UI\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="UI\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
@@ -118,7 +112,7 @@
     <None Include="keyboard.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TETR.IO\TTRMPickerForm.resx">

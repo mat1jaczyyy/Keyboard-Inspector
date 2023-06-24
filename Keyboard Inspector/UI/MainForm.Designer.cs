@@ -164,7 +164,7 @@ namespace Keyboard_Inspector {
             // fDiffs
             // 
             this.fDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fDiffs.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
+            this.fDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
             this.fDiffs.Location = new System.Drawing.Point(3, 246);
             this.fDiffs.Name = "fDiffs";
             this.fDiffs.Size = new System.Drawing.Size(425, 237);
@@ -173,7 +173,7 @@ namespace Keyboard_Inspector {
             // fCompound
             // 
             this.fCompound.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fCompound.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
+            this.fCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
             this.fCompound.Location = new System.Drawing.Point(434, 246);
             this.fCompound.Name = "fCompound";
             this.fCompound.Size = new System.Drawing.Size(425, 237);
@@ -182,7 +182,7 @@ namespace Keyboard_Inspector {
             // fCircular
             // 
             this.fCircular.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fCircular.LineColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
+            this.fCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
             this.fCircular.Location = new System.Drawing.Point(865, 246);
             this.fCircular.Name = "fCircular";
             this.fCircular.Size = new System.Drawing.Size(426, 237);

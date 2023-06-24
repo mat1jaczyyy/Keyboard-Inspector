@@ -9,10 +9,10 @@ using System.Windows.Forms;
 using DarkUI.Controls;
 
 namespace Keyboard_Inspector {
-    class ChartArea: Control {
+    class Chart: Control {
         ContextMenuStrip KeyMenu;
 
-        public ChartArea() {
+        public Chart() {
             AllowDrop = true;
             DoubleBuffered = true;
             ResizeRedraw = true;
@@ -135,54 +135,11 @@ namespace Keyboard_Inspector {
         public Func<int, double> IntervalGenerator = i => Math.Pow(2, i - 10);
         public double? ScopeDefaultX = null;
 
-        DarkScrollBar _scroll;
-        public DarkScrollBar ScrollBar {
-            get => _scroll;
-            set {
-                if (_scroll != null)
-                    _scroll.ValueChanged -= Scrolled;
-
-                _scroll = value;
-
-                if (_scroll != null)
-                    _scroll.ValueChanged += Scrolled;
-
-                UpdateScroll();
-            }
-        }
-
-        void Scrolled(object sender, EventArgs e) {
-            if (updatingScroll) return;
-
-            Viewport = (double)ScrollBar.Value / ScrollBar.Maximum;
-            Invalidate();
-        }
-
-        bool updatingScroll = false;
-
-        void UpdateScroll() {
-            if (ScrollBar == null) return;
-
-            try {
-                updatingScroll = true;
-                ScrollBar.ViewSize = (int)(ScrollBar.Maximum / Zoom);
-
-                if (ScrollBar.ViewSize == ScrollBar.Maximum)
-                    ScrollBar.ViewSize--;
-
-                ScrollBar.Value = (int)(ScrollBar.Maximum * Viewport);
-
-            } finally {
-                updatingScroll = false;
-            }
-        }
-
         void ScopeReset() {
             Zoom = ScopeDefaultX == null? 1 : (XMaxFactored / ScopeDefaultX.Value);
             Viewport = 0;
 
             Invalidate();
-            UpdateScroll();
         }
 
         string _title = "";
@@ -443,7 +400,6 @@ namespace Keyboard_Inspector {
                 CapturedViewport = Viewport;
             }
 
-            UpdateScroll();
             FindHighlightPoint(e.Location);
             Invalidate();
         }
@@ -452,6 +408,7 @@ namespace Keyboard_Inspector {
             base.OnMouseLeave(e);
 
             HighlightPoint = -1;
+            HoveringScrollBar = false;
         }
 
         bool IntersectYText(Point pt, bool menu, out int result) {
@@ -481,10 +438,23 @@ namespace Keyboard_Inspector {
             return IntersectYText(pt, false, out result);
         }
 
+        bool _hovering;
+        bool HoveringScrollBar {
+            get => _hovering;
+            set {
+                if (_hovering != value) {
+                    _hovering = value;
+                    Invalidate();
+                }
+            }
+        }
+
         protected override void OnMouseMove(MouseEventArgs e) {
             base.OnMouseMove(e);
 
             if (!HasAny) return;
+
+            Units u = GetUnits();
 
             if (Captured) {
                 Cursor.Position = PointToScreen(CapturedPoint);
@@ -496,15 +466,21 @@ namespace Keyboard_Inspector {
 
                 if (e.X != CapturedPoint.X) {
                     CapturedOffset += CapturedPoint.X - e.X;
-                    Units u = GetUnits();
-
                     Viewport = CapturedViewport + (CapturedOffset / u.Chart.Width / Zoom);
-
-                    UpdateScroll();
                     Invalidate();
                 }
             
+            } else if (CapturedScrollBar is int origin) {
+                Viewport = CapturedViewport + (e.X - origin) / u.ScrollBarArea.Width;
+                Invalidate();
+
+            } else if (u.ScrollBar.Contains(e.Location)) {
+                HoveringScrollBar = true;
+                return;
+
             } else FindHighlightPoint(e.Location);
+
+            HoveringScrollBar = false;
         }
 
         int _highlight = -1;
@@ -591,6 +567,7 @@ namespace Keyboard_Inspector {
         int CapturedOffset;
         Point CapturedPoint;
         double CapturedViewport;
+        int? CapturedScrollBar;
 
         protected override void OnMouseDown(MouseEventArgs e) {
             base.OnMouseDown(e);
@@ -612,6 +589,11 @@ namespace Keyboard_Inspector {
                 CapturedOffset = 0;
                 CapturedPoint = e.Location;
                 CapturedViewport = Viewport;
+            
+            } else if (u.ScrollBar.Contains(e.Location)) {
+                HoveringScrollBar = false;
+                CapturedScrollBar = e.X;
+                CapturedViewport = Viewport;
             }
         }
 
@@ -622,6 +604,11 @@ namespace Keyboard_Inspector {
 
             Program.CursorVisible = true;
             Captured = false;
+
+            if (CapturedScrollBar != null) {
+                CapturedScrollBar = null;
+                Invalidate();
+            }
         }
 
         bool ValidateDrag(DragEventArgs e, out int result) {
@@ -662,7 +649,7 @@ namespace Keyboard_Inspector {
         }
 
         class Units {
-            public RectangleF Title, Chart, XAxis, YAxis;
+            public RectangleF Title, Chart, XAxis, YAxis, ScrollBarArea, ScrollBar;
             public double TextHeight, Space, XUnit, YUnit, Min, Max;
         }
 
@@ -680,14 +667,33 @@ namespace Keyboard_Inspector {
                 if (!string.IsNullOrWhiteSpace(Title))
                     u.Title.Height = (float)u.TextHeight + 3;
 
+                u.ScrollBarArea = new RectangleF();
+                u.ScrollBarArea.X = u.Title.X + 11.5f;
+                u.ScrollBarArea.Width = u.Title.Width - 23;
+                u.ScrollBarArea.Height = 17;
+                u.ScrollBarArea.Y = ClientRectangle.Bottom - u.ScrollBarArea.Height;
+
+                u.ScrollBar = new RectangleF();
+                u.ScrollBar.Y = u.ScrollBarArea.Y + 2.5f;
+                u.ScrollBar.Height = u.ScrollBarArea.Height - 8;
+                u.ScrollBar.Width = u.ScrollBarArea.Width / (float)Zoom;
+
+                if (u.ScrollBar.Width < 11) {
+                    u.ScrollBarArea.Width -= 11 - u.ScrollBar.Width;
+                    u.ScrollBar.Width = 11;
+                }
+
+                u.ScrollBar.Width = (float)Math.Round(u.ScrollBar.Width);
+                u.ScrollBar.X = u.ScrollBarArea.X + (float)Math.Round(u.ScrollBarArea.Width * Viewport);
+
                 u.XAxis = new RectangleF();
                 u.XAxis.Height = (float)u.TextHeight + 10;
-                u.XAxis.Y = ClientRectangle.Bottom - u.XAxis.Height;
+                u.XAxis.Y = u.ScrollBarArea.Y - u.XAxis.Height;
 
                 u.YAxis = new RectangleF();
                 u.YAxis.X = ClientRectangle.X + 20;
                 u.YAxis.Y = u.Title.Bottom;
-                u.YAxis.Height = ClientRectangle.Height - u.Title.Height - u.XAxis.Height;
+                u.YAxis.Height = u.XAxis.Y - u.Title.Bottom;
             
                 if (kind == Kind.KeyHistory) {
                     foreach (var i in VisibleInputs)
@@ -750,12 +756,12 @@ namespace Keyboard_Inspector {
         // TODO Remove unused
         class ColorSet {
             public Color TextColor, BackColor, LineColor, LowColor, LowTransparentColor, PointColor;
-            public Brush TextBrush, BackBrush, LineBrush, LowBrush, LowTransparentBrush, ShadowBrush, ShadowTextBrush, FrozenBrush;
+            public Brush TextBrush, BackBrush, LineBrush, LowBrush, LowTransparentBrush, ShadowBrush, ShadowTextBrush, FrozenBrush, ScrollBarBrush, ScrollBarHoverBrush, ScrollBarCapturedBrush;
             public LinearGradientBrush GradientBrush, PointBrush;
             public Pen LinePen, GradientPen, XPen, YPen;
         }
 
-        ColorSet GetDrawing(Units u) {
+        ColorSet GetColorSet(Units u) {
             ColorSet cs = new ColorSet();
 
             cs.TextColor = Color.FromArgb(160, 160, 160);
@@ -787,6 +793,9 @@ namespace Keyboard_Inspector {
             cs.ShadowBrush = new SolidBrush(Color.FromArgb(200, cs.BackColor));
             cs.ShadowTextBrush = new SolidBrush(Color.FromArgb(224, (byte)(BackColor.R * 0.75), (byte)(BackColor.G * 0.75), (byte)(BackColor.B * 0.75)));
             cs.FrozenBrush = new SolidBrush(cs.TextColor.Blend(Color.SkyBlue, 0.45));
+            cs.ScrollBarBrush = new SolidBrush(Color.FromArgb(92, 92, 92));
+            cs.ScrollBarHoverBrush = new SolidBrush(Color.FromArgb(122, 128, 132));
+            cs.ScrollBarCapturedBrush = new SolidBrush(Color.FromArgb(158, 177, 195));
 
             cs.LinePen = new Pen(cs.LineBrush);
             cs.GradientPen = new Pen(cs.GradientBrush);
@@ -805,7 +814,7 @@ namespace Keyboard_Inspector {
             if (!HasAny) return;
 
             Units u = GetUnits();
-            ColorSet cs = GetDrawing(u);
+            ColorSet cs = GetColorSet(u);
 
             PointF ToPointF(int index) => new PointF(
                 (float)((GetX(index) - u.Min) * u.XUnit - 0.5) + u.Chart.X,
@@ -1063,6 +1072,15 @@ namespace Keyboard_Inspector {
 
                 e.Graphics.FillRectangle(cs.ShadowBrush, shadowRect);
                 e.Graphics.DrawShadowString(text, Font, cs.TextBrush, cs.ShadowTextBrush, textRect, true);
+            }
+
+            /* ScrollBar */
+            {
+                var brush = cs.ScrollBarBrush;
+                if (HoveringScrollBar) brush = cs.ScrollBarHoverBrush;
+                if (CapturedScrollBar != null) brush = cs.ScrollBarCapturedBrush;
+
+                e.Graphics.FillRectangle(brush, u.ScrollBar);
             }
         }
     }

@@ -155,11 +155,11 @@ namespace Keyboard_Inspector {
         }
 
         void DrawGraph(Chart chart, IEnumerable<double> data, double xFactor = 1, string estimate = "") {
-            chart.Area.LoadData(data, xFactor);
+            chart.LoadData(data, xFactor);
 
             var titles = chart.Tag as MainForm.ChartTitles;
 
-            chart.Area.Title = $"{titles.Primary} ({titles.Secondary}{estimate})";
+            chart.Title = $"{titles.Primary} ({titles.Secondary}{estimate})";
         }
 
         Dictionary<Chart, double[]> beforeLowCut = new Dictionary<Chart, double[]>();
@@ -217,13 +217,13 @@ namespace Keyboard_Inspector {
         void RunChartsSuspendedAction(IEnumerable<Chart> charts, Action action) {
             try {
                 foreach (var chart in charts)
-                    chart.Area.SuspendPaint();
+                    chart.SuspendPaint();
 
                 action();
 
             } finally {
                 foreach (var chart in charts)
-                    chart.Area.ResumePaint();
+                    chart.ResumePaint();
             }
         }
 
