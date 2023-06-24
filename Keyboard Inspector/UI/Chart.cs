@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -11,6 +12,12 @@ using DarkUI.Controls;
 
 namespace Keyboard_Inspector {
     class Chart: Control {
+        static Stopwatch clickTimer = new Stopwatch();
+
+        static Chart() {
+            clickTimer.Start();
+        }
+
         ContextMenuStrip KeyMenu;
 
         public Chart() {
@@ -509,15 +516,22 @@ namespace Keyboard_Inspector {
         }
 
         protected override void OnMouseMove(MouseEventArgs e) {
+            /* Double Click Region */ {
+                Point dist = new Point(e.X - lastDown.X, e.Y - lastDown.Y);
+                if (Math.Sqrt(dist.X * dist.X + dist.Y * dist.Y) > SystemInformation.DoubleClickSize.Width / 2.0)
+                    clicks = 0;
+            }
+
             base.OnMouseMove(e);
 
             if (!HasAny) return;
 
             Units u = GetUnits();
+            bool canHighlight = false;
 
             if (Captured) {
                 PanAction(e.Location, u);
-            
+
             } else if (CapturedScrollBar is int origin) {
                 Viewport = CapturedViewport + (e.X - origin) / u.ScrollBarArea.Width;
                 Invalidate();
@@ -526,7 +540,12 @@ namespace Keyboard_Inspector {
                 HoveringScrollBar = true;
                 return;
 
-            } else FindHighlightPoint(e.Location);
+            } else canHighlight = true;
+            
+            if (canHighlight && (u.Title.Contains(e.Location) || u.Chart.Contains(e.Location) || u.XAxis.Contains(e.Location))) {
+                FindHighlightPoint(e.Location);
+
+            } else HighlightPoint = -1;
 
             HoveringScrollBar = false;
         }
@@ -580,15 +599,35 @@ namespace Keyboard_Inspector {
 
         protected override void OnMouseDoubleClick(MouseEventArgs e) {
             base.OnMouseDoubleClick(e);
-
-            if (!HasAny) return;
-            if (e.Button != MouseButtons.Left) return;
-
-            Spotlight?.Invoke(Parent, EventArgs.Empty);
+            HandleMouseClick(e);
         }
 
         protected override void OnMouseClick(MouseEventArgs e) {
             base.OnMouseClick(e);
+            HandleMouseClick(e);
+        }
+
+        void HandleMouseClick(MouseEventArgs e) {
+            if (!HasAny) return;
+
+            if (e.Button == MouseButtons.Left) {
+                Units u = GetUnits();
+
+                if (clicks == 2 && u.Chart.Contains(e.Location)) {
+                    Spotlight?.Invoke(Parent, EventArgs.Empty);
+                    clicks = 0;
+                    return;
+                }
+
+                int jump = 0;
+                if (u.ScrollBarJumpLeft.Contains(e.Location) && u.ScrollBarJumpLeft.Contains(lastDown)) jump = -1;
+                else if (u.ScrollBarJumpRight.Contains(e.Location) && u.ScrollBarJumpRight.Contains(lastDown)) jump = 1;
+                else return;
+
+                Viewport += jump * (1 / Zoom);
+                Invalidate();
+                return;
+            }
 
             if (!HasHistory) return;
             if (e.Button != MouseButtons.Right) return;
@@ -624,7 +663,21 @@ namespace Keyboard_Inspector {
         double CapturedZoom;
         double CapturedViewport;
 
+        int clicks = 0;
+        long lastClick = long.MinValue;
+        Point lastDown;
+
         protected override void OnMouseDown(MouseEventArgs e) {
+            /* Double Click Timing */ {
+                long click = clickTimer.ElapsedMilliseconds;
+                if (click - SystemInformation.DoubleClickTime > lastClick)
+                    clicks = 0;
+
+                clicks++;
+                lastClick = click;
+                lastDown = e.Location;
+            }
+
             base.OnMouseDown(e);
 
             if (!HasAny) return;
@@ -722,7 +775,7 @@ namespace Keyboard_Inspector {
         }
 
         class Units {
-            public RectangleF Title, Chart, XAxis, YAxis, ScrollBarArea, ScrollBar;
+            public RectangleF Title, Chart, XAxis, YAxis, ScrollBarArea, ScrollBar, ScrollBarJumpLeft, ScrollBarJumpRight;
             public double TextHeight, Space, XUnit, YUnit, Min, Max;
         }
 
@@ -751,6 +804,8 @@ namespace Keyboard_Inspector {
                 u.ScrollBar.Height = u.ScrollBarArea.Height - 8;
                 u.ScrollBar.Width = u.ScrollBarArea.Width / (float)Zoom;
 
+                float scrollRight = u.ScrollBarArea.Right;
+
                 if (u.ScrollBar.Width < 11) {
                     u.ScrollBarArea.Width -= 11 - u.ScrollBar.Width;
                     u.ScrollBar.Width = 11;
@@ -758,6 +813,20 @@ namespace Keyboard_Inspector {
 
                 u.ScrollBar.Width = (float)Math.Round(u.ScrollBar.Width);
                 u.ScrollBar.X = u.ScrollBarArea.X + (float)Math.Round(u.ScrollBarArea.Width * Viewport);
+
+                u.ScrollBarJumpLeft = new RectangleF(
+                    u.ScrollBarArea.X,
+                    u.ScrollBar.Y,
+                    u.ScrollBar.X - u.ScrollBarArea.X,
+                    u.ScrollBar.Height
+                );
+
+                u.ScrollBarJumpRight = new RectangleF(
+                    u.ScrollBar.Right,
+                    u.ScrollBar.Y,
+                    scrollRight - u.ScrollBar.Right,
+                    u.ScrollBar.Height
+                );
 
                 u.XAxis = new RectangleF();
                 u.XAxis.Height = (float)u.TextHeight + 10;
@@ -1162,6 +1231,9 @@ namespace Keyboard_Inspector {
 
             /* ScrollBar */
             {
+                e.Graphics.FillRectangle(cs.BackBrush, u.ScrollBarJumpLeft);
+                e.Graphics.FillRectangle(cs.BackBrush, u.ScrollBarJumpRight);
+
                 var brush = cs.ScrollBarBrush;
                 if (HoveringScrollBar) brush = cs.ScrollBarHoverBrush;
                 if (CapturedScrollBar != null) brush = cs.ScrollBarCapturedBrush;
