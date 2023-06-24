@@ -391,9 +391,7 @@ namespace Keyboard_Inspector {
                 Viewport += x * (1 - 1 / change) * s;
             }
 
-            FindHighlightPoint(pt);
             Invalidate();
-
             return true;
         }
 
@@ -412,6 +410,8 @@ namespace Keyboard_Inspector {
                 CapturedOffset = 0;
                 CapturedViewport = Viewport;
             }
+
+            FindHighlightPoint(e.Location);
         }
 
         protected override void OnMouseLeave(EventArgs e) {
@@ -636,7 +636,11 @@ namespace Keyboard_Inspector {
 
         void StopUIAction() {
             Program.CursorVisible = true;
-            Captured = false;
+
+            if (Captured) {
+                Captured = false;
+                Invalidate();
+            }
 
             if (CapturedScrollBar != null) {
                 CapturedScrollBar = null;
@@ -803,10 +807,10 @@ namespace Keyboard_Inspector {
 
         // TODO Remove unused
         class ColorSet {
-            public Color TextColor, BackColor, LineColor, LowColor, LowTransparentColor, PointColor;
+            public Color TextColor, BackColor, LineColor, LowColor, LowTransparentColor, PointColor, CapturedColor;
             public Brush TextBrush, BackBrush, LineBrush, LowBrush, LowTransparentBrush, ShadowBrush, ShadowTextBrush, FrozenBrush, ScrollBarBrush, ScrollBarHoverBrush, ScrollBarCapturedBrush;
             public LinearGradientBrush GradientBrush, PointBrush;
-            public Pen LinePen, GradientPen, XPen, YPen;
+            public Pen LinePen, GradientPen, XPen, YPen, CapturedPen;
         }
 
         ColorSet GetColorSet(Units u) {
@@ -818,6 +822,7 @@ namespace Keyboard_Inspector {
             cs.LowColor = ForeColor.Blend(cs.BackColor, 0.5);
             cs.LowTransparentColor = Color.FromArgb(128, ForeColor);
             cs.PointColor = ForeColor.Blend(Color.White, 0.6);
+            cs.CapturedColor = Color.FromArgb(158, 177, 195);
 
             cs.TextBrush = new SolidBrush(cs.TextColor);
             cs.BackBrush = new SolidBrush(cs.BackColor);
@@ -843,7 +848,8 @@ namespace Keyboard_Inspector {
             cs.FrozenBrush = new SolidBrush(cs.TextColor.Blend(Color.SkyBlue, 0.45));
             cs.ScrollBarBrush = new SolidBrush(Color.FromArgb(92, 92, 92));
             cs.ScrollBarHoverBrush = new SolidBrush(Color.FromArgb(122, 128, 132));
-            cs.ScrollBarCapturedBrush = new SolidBrush(Color.FromArgb(158, 177, 195));
+            cs.ScrollBarCapturedBrush = new SolidBrush(cs.CapturedColor);
+            cs.CapturedPen = new Pen(Color.FromArgb(150, cs.CapturedColor));
 
             cs.LinePen = new Pen(cs.LineBrush);
             cs.GradientPen = new Pen(cs.GradientBrush);
@@ -1120,6 +1126,11 @@ namespace Keyboard_Inspector {
 
                 e.Graphics.FillRectangle(cs.ShadowBrush, shadowRect);
                 e.Graphics.DrawShadowString(text, Font, cs.TextBrush, cs.ShadowTextBrush, textRect, true);
+            }
+
+            /* Captured */
+            if (Captured && CapturedDirection != PanDirection.None) {
+                e.Graphics.DrawLine(cs.CapturedPen, CapturedPoint.X, u.Chart.Y, CapturedPoint.X, u.Chart.Bottom);
             }
 
             /* ScrollBar */
