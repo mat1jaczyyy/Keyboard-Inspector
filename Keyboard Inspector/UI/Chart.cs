@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Windows.Forms;
 
 using DarkUI.Controls;
@@ -367,7 +368,7 @@ namespace Keyboard_Inspector {
             return -1;
         }
 
-        bool ZoomChange(Units u, Point pt, double scrolls) {
+        bool ZoomChange(Point pt, double scrolls, Units u = null) {
             if (scrolls == 0) return false;
 
             u = u?? GetUnits();
@@ -406,8 +407,8 @@ namespace Keyboard_Inspector {
             Units u = GetUnits();
             if (!u.Chart.Contains(e.Location) && !u.XAxis.Contains(e.Location)) return;
 
-            if (ZoomChange(u, e.Location, e.Delta / 120.0) && Captured) {
-                CapturedOffset = 0;
+            if (ZoomChange(e.Location, e.Delta / 120.0, u) && Captured) {
+                CapturedOffset = new Point(0, 0);
                 CapturedViewport = Viewport;
             }
 
@@ -459,6 +460,54 @@ namespace Keyboard_Inspector {
             }
         }
 
+        void PanAction(Point pt, Units u = null) {
+            u = u?? GetUnits();
+
+            Cursor.Position = PointToScreen(CapturedPoint);
+
+            if (pt != CapturedPoint) {
+                Program.CursorVisible = false;
+                HighlightPoint = -1;
+            }
+
+            Point offset = new Point(CapturedPoint.X - pt.X, CapturedPoint.Y - pt.Y);
+            CapturedOffset.X += offset.X;
+            CapturedOffset.Y += offset.Y;
+
+            if (CapturedDirection == PanDirection.None) {
+                if (Zoom == 1) {
+                    CapturedDirection = PanDirection.Vertical;
+
+                } else {
+                    if (CapturedOffset.X * CapturedOffset.X + CapturedOffset.Y * CapturedOffset.Y < 9) return;
+
+                    double ang = Math.Atan2(Math.Abs(offset.Y), Math.Abs(offset.X));
+                    if (ang <= Math.PI / 6) CapturedDirection = PanDirection.Horizontal;
+                    else if (ang >= Math.PI / 3) CapturedDirection = PanDirection.Vertical;
+
+                    if (CapturedDirection != PanDirection.None) {
+                        CapturedOffset = new Point(0, 0);
+                        CapturedOffset.X += offset.X;
+                        CapturedOffset.Y += offset.Y;
+                    }
+                }
+            }
+
+            if (CapturedDirection == PanDirection.Horizontal) {
+                if (offset.X != 0) {
+                    Viewport = CapturedViewport + (CapturedOffset.X / u.Chart.Width / Zoom);
+                    Invalidate();
+                }
+
+            } else if (CapturedDirection == PanDirection.Vertical) {
+                if (offset.Y != 0) {
+                    Zoom = CapturedZoom;
+                    Viewport = CapturedViewport;
+                    ZoomChange(CapturedPoint, CapturedOffset.Y / 10.0, u);
+                }
+            }
+        }
+
         protected override void OnMouseMove(MouseEventArgs e) {
             base.OnMouseMove(e);
 
@@ -467,37 +516,7 @@ namespace Keyboard_Inspector {
             Units u = GetUnits();
 
             if (Captured) {
-                Cursor.Position = PointToScreen(CapturedPoint);
-
-                if (e.Location != CapturedPoint) {
-                    Program.CursorVisible = false;
-                    HighlightPoint = -1;
-                }
-
-                Point offset = new Point(CapturedPoint.X - e.X, CapturedPoint.Y - e.Y);
-
-                if (CapturedDirection == PanDirection.None) {
-                    Point abs = new Point(Math.Abs(offset.X), Math.Abs(offset.Y));
-
-                    if (abs.X > abs.Y) CapturedDirection = PanDirection.Horizontal;
-                    else if (abs.Y > abs.X) CapturedDirection = PanDirection.Vertical;
-                }
-
-                if (CapturedDirection == PanDirection.Horizontal) {
-                    if (offset.X != 0) {
-                        CapturedOffset += offset.X;
-                        Viewport = CapturedViewport + (CapturedOffset / u.Chart.Width / Zoom);
-                        Invalidate();
-                    }
-
-                } else if (CapturedDirection == PanDirection.Vertical) {
-                    if (offset.Y != 0) {
-                        CapturedOffset += offset.Y;
-                        Zoom = CapturedZoom;
-                        Viewport = CapturedViewport;
-                        ZoomChange(u, CapturedPoint, CapturedOffset / 10.0);
-                    }
-                }
+                PanAction(e.Location, u);
             
             } else if (CapturedScrollBar is int origin) {
                 Viewport = CapturedViewport + (e.X - origin) / u.ScrollBarArea.Width;
@@ -598,8 +617,9 @@ namespace Keyboard_Inspector {
 
         bool Captured;
         int? CapturedScrollBar;
-        int CapturedOffset;
+        Point CapturedOffset;
         Point CapturedPoint;
+        double CapturedXValue;
         PanDirection CapturedDirection;
         double CapturedZoom;
         double CapturedViewport;
@@ -621,8 +641,9 @@ namespace Keyboard_Inspector {
                 // Mouse Capture is done automatically by WinForms
                 // Just need a flag so we know it's because user is panning
                 Captured = true;
-                CapturedOffset = 0;
+                CapturedOffset = new Point(0, 0);
                 CapturedPoint = e.Location;
+                CapturedXValue = (e.X - u.Chart.X) / u.XUnit + u.Min;
                 CapturedDirection = PanDirection.None;
                 CapturedZoom = Zoom;
                 CapturedViewport = Viewport;
@@ -1130,7 +1151,13 @@ namespace Keyboard_Inspector {
 
             /* Captured */
             if (Captured && CapturedDirection != PanDirection.None) {
-                e.Graphics.DrawLine(cs.CapturedPen, CapturedPoint.X, u.Chart.Y, CapturedPoint.X, u.Chart.Bottom);
+                float x = CapturedPoint.X;
+                
+                if (CapturedDirection == PanDirection.Vertical)
+                    x = (float)Math.Round((CapturedXValue - u.Min) * u.XUnit + u.Chart.X);
+
+                if (x.InRangeIE(u.Chart.X, u.Chart.Right))
+                    e.Graphics.DrawLine(cs.CapturedPen, x, u.Chart.Y, x, u.Chart.Bottom);
             }
 
             /* ScrollBar */
