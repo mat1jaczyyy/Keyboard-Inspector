@@ -83,6 +83,10 @@ namespace Keyboard_Inspector {
             return val;
         }
 
+        public static bool ContainsIX(this RectangleF rect, Point point)
+            => rect.Left <= point.X && point.X <= rect.Right &&
+               rect.Top <= point.Y && point.Y < rect.Bottom;
+
         public static void ToBinary<T>(this List<T> l, BinaryWriter bw) where T: IBinary {
             bw.Write(l.Count);
             

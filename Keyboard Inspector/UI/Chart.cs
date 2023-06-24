@@ -412,7 +412,7 @@ namespace Keyboard_Inspector {
             if (Captured && CapturedDirection == PanDirection.Vertical) return;
 
             Units u = GetUnits();
-            if (!u.Chart.Contains(e.Location) && !u.XAxis.Contains(e.Location)) return;
+            if (!u.Chart.ContainsIX(e.Location) && !u.XAxis.ContainsIX(e.Location)) return;
 
             if (ZoomChange(e.Location, e.Delta / 120.0, u) && Captured) {
                 CapturedOffset = new Point(0, 0);
@@ -542,7 +542,7 @@ namespace Keyboard_Inspector {
 
             } else canHighlight = true;
             
-            if (canHighlight && (u.Title.Contains(e.Location) || u.Chart.Contains(e.Location) || u.XAxis.Contains(e.Location))) {
+            if (canHighlight && (u.Title.ContainsIX(e.Location) || u.Chart.ContainsIX(e.Location) || u.XAxis.ContainsIX(e.Location))) {
                 FindHighlightPoint(e.Location);
 
             } else HighlightPoint = -1;
@@ -613,7 +613,7 @@ namespace Keyboard_Inspector {
             if (e.Button == MouseButtons.Left) {
                 Units u = GetUnits();
 
-                if (clicks == 2 && u.Chart.Contains(e.Location)) {
+                if (clicks == 2 && u.Chart.ContainsIX(e.Location)) {
                     Spotlight?.Invoke(Parent, EventArgs.Empty);
                     clicks = 0;
                     return;
@@ -690,7 +690,7 @@ namespace Keyboard_Inspector {
             
             Units u = GetUnits();
 
-            if (u.Chart.Contains(e.Location) || u.XAxis.Contains(e.Location)) {
+            if (u.Chart.ContainsIX(e.Location) || u.XAxis.ContainsIX(e.Location)) {
                 // Mouse Capture is done automatically by WinForms
                 // Just need a flag so we know it's because user is panning
                 Captured = true;
@@ -1225,7 +1225,7 @@ namespace Keyboard_Inspector {
                 if (CapturedDirection == PanDirection.Vertical)
                     x = (float)Math.Round((CapturedXValue - u.Min) * u.XUnit + u.Chart.X);
 
-                if (x.InRangeIE(u.Chart.X, u.Chart.Right))
+                if (x.InRangeII(u.Chart.X, u.Chart.Right))
                     e.Graphics.DrawLine(cs.CapturedPen, x, u.Chart.Y, x, u.Chart.Bottom);
             }
 
