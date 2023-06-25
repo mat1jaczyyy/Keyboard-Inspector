@@ -18,7 +18,7 @@ namespace Keyboard_Inspector {
             clickTimer.Start();
         }
 
-        ContextMenuStrip KeyMenu;
+        ContextMenuStrip InputMenu;
 
         public Chart() {
             AllowDrop = true;
@@ -27,25 +27,27 @@ namespace Keyboard_Inspector {
 
             ForeColor = Color.FromArgb(65, 140, 240);
 
-            KeyMenu = new DarkContextMenu();
-            KeyMenu.SuspendLayout();
+            InputMenu = new DarkContextMenu();
+            InputMenu.SuspendLayout();
 
-            KeyMenu.Items.AddRange(new ToolStripItem[] {
+            InputMenu.Items.AddRange(new ToolStripItem[] {
                 new ToolStripMenuItem("Change &Color..."),
                 new ToolStripMenuItem("&Reset Color"),
                 new ToolStripSeparator(),
-                new ToolStripMenuItem("&Hide Key"),
-                new ToolStripMenuItem("Show &All Keys"),
+                new ToolStripMenuItem("&Hide Input"),
+                new ToolStripMenuItem("Hide &Device"),
+                new ToolStripMenuItem("Show &All Inputs"),
                 new ToolStripSeparator(),
                 new ToolStripMenuItem("&Freeze"),
                 new ToolStripMenuItem("Un&freeze")
             });
 
-            KeyMenu.Items[0].Click += (_, __) => {
+            // Change Color
+            InputMenu.Items[0].Click += (_, __) => {
                 if (!HasHistory) return;
-                if (!(KeyMenu.Tag is int k)) return;
+                if (!(InputMenu.Tag is int k)) return;
 
-                KeyMenu.Tag = null;
+                InputMenu.Tag = null;
 
                 ColorDialog cd = new ColorDialog();
                 cd.Color = Inputs[k].Color;
@@ -56,34 +58,56 @@ namespace Keyboard_Inspector {
                 }
             };
 
-            KeyMenu.Items[1].Click += (_, __) => {
+            // Reset Color
+            InputMenu.Items[1].Click += (_, __) => {
                 if (!HasHistory) return;
-                if (!(KeyMenu.Tag is int k)) return;
+                if (!(InputMenu.Tag is int k)) return;
 
-                KeyMenu.Tag = null;
+                InputMenu.Tag = null;
 
                 Inputs[k].Color = Input.DefaultColor;
                 Invalidate();
             };
 
-            KeyMenu.Items[3].Click += (_, __) => {
+            // Hide Input
+            InputMenu.Items[3].Click += (_, __) => {
                 if (!HasHistory) return;
-                if (!(KeyMenu.Tag is int k)) return;
+                if (!(InputMenu.Tag is int k)) return;
 
-                KeyMenu.Tag = null;
+                InputMenu.Tag = null;
 
                 Inputs[k].Visible = false;
                 YMaxValue--;
 
                 RefreshVisibleInputs();
-
                 Invalidate();
             };
 
-            KeyMenu.Items[4].Click += (_, __) => {
+            // Hide Device
+            InputMenu.Items[4].Click += (_, __) => {
+                if (!HasHistory) return;
+                if (!(InputMenu.Tag is int k)) return;
+
+                InputMenu.Tag = null;
+
+                for (int i = 0; i < Inputs.Count; i++) {
+                    if (Inputs[i].Input.Source == Inputs[k].Input.Source) {
+                        if (Inputs[i].Visible)
+                            YMaxValue--;
+
+                        Inputs[i].Visible = false;
+                    }
+                }
+
+                RefreshVisibleInputs();
+                Invalidate();
+            };
+
+            // Show All Inputs
+            InputMenu.Items[5].Click += (_, __) => {
                 if (!HasHistory) return;
 
-                KeyMenu.Tag = null;
+                InputMenu.Tag = null;
 
                 for (int i = 0; i < Inputs.Count; i++)
                     Inputs[i].Visible = true;
@@ -91,31 +115,32 @@ namespace Keyboard_Inspector {
                 YMaxValue = Inputs.Count;
 
                 RefreshVisibleInputs();
-
                 Invalidate();
             };
 
-            KeyMenu.Items[6].Click += (_, __) => {
+            // Freeze
+            InputMenu.Items[7].Click += (_, __) => {
                 if (!HasHistory) return;
 
-                KeyMenu.Tag = null;
+                InputMenu.Tag = null;
 
                 Frozen = true;
 
                 Invalidate();
             };
 
-            KeyMenu.Items[7].Click += (_, __) => {
+            // Unfreeze
+            InputMenu.Items[8].Click += (_, __) => {
                 if (!HasHistory) return;
 
-                KeyMenu.Tag = null;
+                InputMenu.Tag = null;
 
                 Frozen = false;
 
                 Invalidate();
             };
 
-            KeyMenu.ResumeLayout(false);
+            InputMenu.ResumeLayout(false);
         }
 
         bool Suspended = false;
@@ -682,21 +707,22 @@ namespace Keyboard_Inspector {
             if (e.Button != MouseButtons.Right) return;
 
             bool intersects = IntersectForMenu(e.Location, out int k);
-            if (intersects) KeyMenu.Tag = k;
+            if (intersects) InputMenu.Tag = k;
 
-            KeyMenu.Items[0].Available = intersects;
-            KeyMenu.Items[1].Available = intersects && Inputs[k].Color != Input.DefaultColor;
+            InputMenu.Items[0].Available = intersects;
+            InputMenu.Items[1].Available = intersects && Inputs[k].Color != Input.DefaultColor;
 
-            KeyMenu.Items[3].Available = intersects && VisibleInputs.Count > 1;
-            KeyMenu.Items[4].Available = Inputs.Any(i => !i.Visible);
+            InputMenu.Items[3].Available = intersects && VisibleInputs.Count > 1;
+            InputMenu.Items[4].Available = intersects && VisibleInputs.Count > 1 && MultipleSources;
+            InputMenu.Items[5].Available = Inputs.Any(i => !i.Visible);
 
-            KeyMenu.Items[6].Available = !Frozen;
-            KeyMenu.Items[7].Available = Frozen;
+            InputMenu.Items[7].Available = !Frozen;
+            InputMenu.Items[8].Available = Frozen;
 
-            KeyMenu.Items.AutoSeparators();
+            InputMenu.Items.AutoSeparators();
 
             Cursor = Cursors.Default;
-            KeyMenu.Show(this, e.Location);
+            InputMenu.Show(this, e.Location);
         }
 
         enum PanDirection {
