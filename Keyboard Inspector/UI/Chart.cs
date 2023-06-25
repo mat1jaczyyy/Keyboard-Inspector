@@ -966,54 +966,52 @@ namespace Keyboard_Inspector {
 
         // TODO Remove unused
         class ColorSet {
-            public Color TextColor, BackColor, LineColor, LowColor, LowTransparentColor, PointColor, CapturedColor;
-            public Brush TextBrush, BackBrush, LineBrush, LowBrush, LowTransparentBrush, ShadowBrush, ShadowTextBrush, FrozenBrush, ScrollBarBrush, ScrollBarHoverBrush, ScrollBarCapturedBrush;
-            public LinearGradientBrush GradientBrush, PointBrush;
-            public Pen LinePen, GradientPen, XPen, YPen, CapturedPen;
+            public Color LineColor;
+            public Brush TextBrush, BackBrush, ShadowBrush, ShadowTextBrush, FrozenBrush, ScrollBarBrush, ScrollBarHoverBrush, ScrollBarCapturedBrush;
+            public LinearGradientBrush PointBrush;
+            public Pen GradientPen, XPen, YPen, CapturedPen;
         }
 
         ColorSet GetColorSet(Units u) {
             ColorSet cs = new ColorSet();
 
-            cs.TextColor = Color.FromArgb(160, 160, 160);
-            cs.BackColor = BackColor.Blend(Color.Black, 0.9);
+            Color TextColor, BGColor, PointColor, CapturedColor;
+            LinearGradientBrush GradientBrush;
+
+            TextColor = Color.FromArgb(160, 160, 160);
+            BGColor = BackColor.Blend(Color.Black, 0.9);
             cs.LineColor = ForeColor;
-            cs.LowColor = ForeColor.Blend(cs.BackColor, 0.5);
-            cs.LowTransparentColor = ForeColor.WithAlpha(128);
-            cs.PointColor = ForeColor.Blend(Color.White, 0.6);
-            cs.CapturedColor = Color.FromArgb(158, 177, 195);
+            PointColor = ForeColor.Blend(Color.White, 0.6);
+            CapturedColor = Color.FromArgb(158, 177, 195);
 
-            cs.TextBrush = new SolidBrush(cs.TextColor);
-            cs.BackBrush = new SolidBrush(cs.BackColor);
-            cs.LineBrush = new SolidBrush(cs.LineColor);
-            cs.LowBrush = new SolidBrush(cs.LowColor);
-            cs.LowTransparentBrush = new SolidBrush(cs.LowTransparentColor);
-
-            u.Chart.Inflate(1, 1);
-            cs.GradientBrush = new LinearGradientBrush(u.Chart, Color.Transparent, Color.Transparent, LinearGradientMode.Vertical);
-            cs.PointBrush = new LinearGradientBrush(u.Chart, Color.Transparent, Color.Transparent, LinearGradientMode.Vertical);
-            u.Chart.Inflate(-1, -1);
+            cs.TextBrush = new SolidBrush(TextColor);
+            cs.BackBrush = new SolidBrush(BGColor);
 
             var blend = new ColorBlend();
             blend.Positions = new float[] { 0, 0.5f, 1 };
-            blend.Colors = new Color[] { cs.LineColor, cs.LineColor, cs.LowColor };
-            cs.GradientBrush.InterpolationColors = blend;
 
-            blend.Colors = new Color[] { cs.PointColor, cs.PointColor, cs.LineColor };
+            u.Chart.Inflate(1, 1);
+            GradientBrush = new LinearGradientBrush(u.Chart, Color.Transparent, Color.Transparent, LinearGradientMode.Vertical);
+            cs.PointBrush = new LinearGradientBrush(u.Chart, Color.Transparent, Color.Transparent, LinearGradientMode.Vertical);
+            u.Chart.Inflate(-1, -1);
+
+            blend.Colors = new Color[] { cs.LineColor, cs.LineColor, ForeColor.Blend(BGColor, 0.5) };
+            GradientBrush.InterpolationColors = blend;
+
+            blend.Colors = new Color[] { PointColor, PointColor, cs.LineColor };
             cs.PointBrush.InterpolationColors = blend;
 
-            cs.ShadowBrush = new SolidBrush(cs.BackColor.WithAlpha(200));
+            cs.ShadowBrush = new SolidBrush(BGColor.WithAlpha(200));
             cs.ShadowTextBrush = new SolidBrush(BackColor.Blend(Color.Black, 0.75).WithAlpha(224));
-            cs.FrozenBrush = new SolidBrush(cs.TextColor.Blend(Color.SkyBlue, 0.45));
+            cs.FrozenBrush = new SolidBrush(TextColor.Blend(Color.SkyBlue, 0.45));
             cs.ScrollBarBrush = new SolidBrush(Color.FromArgb(92, 92, 92));
             cs.ScrollBarHoverBrush = new SolidBrush(Color.FromArgb(122, 128, 132));
-            cs.ScrollBarCapturedBrush = new SolidBrush(cs.CapturedColor);
+            cs.ScrollBarCapturedBrush = new SolidBrush(CapturedColor);
 
-            cs.LinePen = new Pen(cs.LineBrush);
-            cs.GradientPen = new Pen(cs.GradientBrush);
+            cs.GradientPen = new Pen(GradientBrush);
             cs.XPen = new Pen(Color.FromArgb(20, 20, 20));
             cs.YPen = new Pen(Color.FromArgb(44, 44, 44));
-            cs.CapturedPen = new Pen(cs.CapturedColor.WithAlpha(150));
+            cs.CapturedPen = new Pen(CapturedColor.WithAlpha(150));
 
             return cs;
         }
