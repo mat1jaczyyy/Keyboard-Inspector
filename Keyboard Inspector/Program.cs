@@ -116,6 +116,9 @@ namespace Keyboard_Inspector {
             return Color.FromArgb(r, g, b);
         }
 
+        public static Color WithAlpha(this Color color, byte alpha)
+            => Color.FromArgb(alpha, color);
+
         public static void DrawShadowString(this Graphics g, string text, Font font, Brush textBrush, Brush shadowBrush, RectangleF rect, bool center = false) {
             StringFormat format = center? new StringFormat() { Alignment = StringAlignment.Center } : null;
 

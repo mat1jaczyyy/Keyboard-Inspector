@@ -310,6 +310,13 @@ namespace Keyboard_Inspector {
                 return XMax;
             }
         }
+        public double MaxZoom {
+            get {
+                if (kind == Kind.Line) return XMax * 0.66;
+                else if (kind == Kind.KeyHistory) return XMax * 1000 * 0.66;
+                return 1;
+            }
+        }
         double YMaxValue;
         bool ShouldFlipY => kind == Kind.Line;
         double FlipY(double y) => ShouldFlipY? YMaxValue - y : y;
@@ -391,8 +398,8 @@ namespace Keyboard_Inspector {
                 Viewport = 0;
 
             } else {
-                if (Zoom > 200000) {
-                    Zoom = 200000;
+                if (Zoom > MaxZoom) {
+                    Zoom = MaxZoom;
                     change = Zoom * s;
                 }
 
@@ -408,7 +415,7 @@ namespace Keyboard_Inspector {
 
             if (!HasAny) return;
 
-            if (CapturedScrollBar != null) return;
+            if (CapturedScrollBar != ScrollBarComponent.None) return;
             if (Captured && CapturedDirection == PanDirection.Vertical) return;
 
             Units u = GetUnits();
@@ -426,7 +433,7 @@ namespace Keyboard_Inspector {
             base.OnMouseLeave(e);
 
             HighlightPoint = -1;
-            HoveringScrollBar = false;
+            Hovering = ScrollBarComponent.None;
         }
 
         bool IntersectYText(Point pt, bool menu, out int result) {
@@ -456,8 +463,12 @@ namespace Keyboard_Inspector {
             return IntersectYText(pt, false, out result);
         }
 
-        bool _hovering;
-        bool HoveringScrollBar {
+        enum ScrollBarComponent {
+            None, ScrollBar, NotchLeft, NotchRight
+        }
+
+        ScrollBarComponent _hovering = ScrollBarComponent.None;
+        ScrollBarComponent Hovering {
             get => _hovering;
             set {
                 if (_hovering != value) {
@@ -515,6 +526,23 @@ namespace Keyboard_Inspector {
             }
         }
 
+        double NotchAction(double dist, Units u = null) {
+            u = u?? GetUnits();
+            double invCrampedZoom = 1 / u.CrampedZoom;
+
+            double newInvZoom = 1 / CapturedZoom + dist;
+
+            if (newInvZoom >= invCrampedZoom)
+                return newInvZoom;
+
+            // https://www.desmos.com/calculator/dycwd5avjg
+            double invMaxZoom = 1 / MaxZoom;
+            double am = invCrampedZoom - invMaxZoom;
+            double slope = Math.Pow(Math.E, -1 / am);
+            Console.WriteLine(newInvZoom);
+            return Math.Pow(slope, invCrampedZoom - newInvZoom) * am + invMaxZoom;
+        }
+
         protected override void OnMouseMove(MouseEventArgs e) {
             /* Double Click Region */ {
                 Point dist = new Point(e.X - lastDown.X, e.Y - lastDown.Y);
@@ -529,16 +557,37 @@ namespace Keyboard_Inspector {
             Units u = GetUnits();
             bool canHighlight = false;
 
+            ScrollBarComponent setHovering = ScrollBarComponent.None;
+
+            double ScrollBarDistance()
+                => (e.X - CapturedScrollBarX) / u.ScrollBarArea.Width;
+
             if (Captured) {
                 PanAction(e.Location, u);
 
-            } else if (CapturedScrollBar is int origin) {
-                Viewport = CapturedViewport + (e.X - origin) / u.ScrollBarArea.Width;
+            } else if (CapturedScrollBar == ScrollBarComponent.ScrollBar) {
+                Viewport = CapturedViewport + ScrollBarDistance();
                 Invalidate();
 
+            } else if (CapturedScrollBar == ScrollBarComponent.NotchLeft) {
+                double rightEdge = CapturedViewport + 1 / CapturedZoom;
+                double newInvZoom = NotchAction(-ScrollBarDistance(), u).Clamp(0, rightEdge);
+                Zoom = 1 / newInvZoom;
+                Viewport = rightEdge - newInvZoom;
+                Invalidate();
+
+            } else if (CapturedScrollBar == ScrollBarComponent.NotchRight) {
+                Zoom = 1 / NotchAction(ScrollBarDistance(), u).Clamp(0, 1 - Viewport);
+                Invalidate();
+
+            } else if (u.NotchLeft.Contains(e.Location)) {
+                setHovering = ScrollBarComponent.NotchLeft;
+            
+            } else if (u.NotchRight.Contains(e.Location)) {
+                setHovering = ScrollBarComponent.NotchRight;
+
             } else if (u.ScrollBar.Contains(e.Location)) {
-                HoveringScrollBar = true;
-                return;
+                setHovering = ScrollBarComponent.ScrollBar;
 
             } else canHighlight = true;
             
@@ -547,7 +596,7 @@ namespace Keyboard_Inspector {
 
             } else HighlightPoint = -1;
 
-            HoveringScrollBar = false;
+            Hovering = setHovering;
         }
 
         int _highlight = -1;
@@ -655,13 +704,14 @@ namespace Keyboard_Inspector {
         }
 
         bool Captured;
-        int? CapturedScrollBar;
         Point CapturedOffset;
         Point CapturedPoint;
         double CapturedXValue;
         PanDirection CapturedDirection;
         double CapturedZoom;
         double CapturedViewport;
+        int CapturedScrollBarX;
+        ScrollBarComponent CapturedScrollBar;
 
         int clicks = 0;
         long lastClick = long.MinValue;
@@ -702,8 +752,10 @@ namespace Keyboard_Inspector {
                 CapturedViewport = Viewport;
 
             } else if (u.ScrollBar.Contains(e.Location)) {
-                HoveringScrollBar = false;
-                CapturedScrollBar = e.X;
+                CapturedScrollBar = Hovering;
+                Hovering = ScrollBarComponent.None;
+                CapturedScrollBarX = e.X;
+                CapturedZoom = Zoom;
                 CapturedViewport = Viewport;
             }
         }
@@ -716,8 +768,8 @@ namespace Keyboard_Inspector {
                 Invalidate();
             }
 
-            if (CapturedScrollBar != null) {
-                CapturedScrollBar = null;
+            if (CapturedScrollBar != ScrollBarComponent.None) {
+                CapturedScrollBar = ScrollBarComponent.None;
                 Invalidate();
             }
         }
@@ -775,9 +827,11 @@ namespace Keyboard_Inspector {
         }
 
         class Units {
-            public RectangleF Title, Chart, XAxis, YAxis, ScrollBarArea, ScrollBar, ScrollBarJumpLeft, ScrollBarJumpRight;
-            public double TextHeight, Space, XUnit, YUnit, Min, Max;
+            public RectangleF Title, Chart, XAxis, YAxis, ScrollBarArea, ScrollBar, ScrollBarJumpLeft, ScrollBarJumpRight, NotchLeft, NotchRight;
+            public double TextHeight, Space, XUnit, YUnit, Min, Max, CrampedZoom;
         }
+
+        const int MinScrollBarWidth = 20;
 
         Units GetUnits() {
             Units u = new Units();
@@ -799,20 +853,21 @@ namespace Keyboard_Inspector {
                 u.ScrollBarArea.Height = 17;
                 u.ScrollBarArea.Y = ClientRectangle.Bottom - u.ScrollBarArea.Height;
 
+                u.CrampedZoom = (double)u.ScrollBarArea.Width / MinScrollBarWidth;
+                float scrollRight = u.ScrollBarArea.Right;
+
                 u.ScrollBar = new RectangleF();
                 u.ScrollBar.Y = u.ScrollBarArea.Y + 2.5f;
                 u.ScrollBar.Height = u.ScrollBarArea.Height - 8;
-                u.ScrollBar.Width = u.ScrollBarArea.Width / (float)Zoom;
+                u.ScrollBar.Width = (float)(u.ScrollBarArea.Width / Zoom);
 
-                float scrollRight = u.ScrollBarArea.Right;
-
-                if (u.ScrollBar.Width < 11) {
-                    u.ScrollBarArea.Width -= 11 - u.ScrollBar.Width;
-                    u.ScrollBar.Width = 11;
+                if (u.ScrollBar.Width < MinScrollBarWidth) {
+                    u.ScrollBarArea.Width -= MinScrollBarWidth - u.ScrollBar.Width;
+                    u.ScrollBar.Width = MinScrollBarWidth;
                 }
 
                 u.ScrollBar.Width = (float)Math.Round(u.ScrollBar.Width);
-                u.ScrollBar.X = u.ScrollBarArea.X + (float)Math.Round(u.ScrollBarArea.Width * Viewport);
+                u.ScrollBar.X = (float)(u.ScrollBarArea.X + Math.Round(u.ScrollBarArea.Width * Viewport));
 
                 u.ScrollBarJumpLeft = new RectangleF(
                     u.ScrollBarArea.X,
@@ -825,6 +880,20 @@ namespace Keyboard_Inspector {
                     u.ScrollBar.Right,
                     u.ScrollBar.Y,
                     scrollRight - u.ScrollBar.Right,
+                    u.ScrollBar.Height
+                );
+
+                u.NotchLeft = new RectangleF(
+                    u.ScrollBar.X,
+                    u.ScrollBar.Y,
+                    6,
+                    u.ScrollBar.Height
+                );
+
+                u.NotchRight = new RectangleF(
+                    u.ScrollBar.Right - 6,
+                    u.ScrollBar.Y,
+                    6,
                     u.ScrollBar.Height
                 );
 
@@ -907,10 +976,10 @@ namespace Keyboard_Inspector {
             ColorSet cs = new ColorSet();
 
             cs.TextColor = Color.FromArgb(160, 160, 160);
-            cs.BackColor = Color.FromArgb((byte)(BackColor.R * 0.9), (byte)(BackColor.G * 0.9), (byte)(BackColor.B * 0.9));
-            cs.LineColor = ForeColor.Blend(ForeColor.Blend(cs.BackColor, 0.9), 0.9);
+            cs.BackColor = BackColor.Blend(Color.Black, 0.9);
+            cs.LineColor = ForeColor;
             cs.LowColor = ForeColor.Blend(cs.BackColor, 0.5);
-            cs.LowTransparentColor = Color.FromArgb(128, ForeColor);
+            cs.LowTransparentColor = ForeColor.WithAlpha(128);
             cs.PointColor = ForeColor.Blend(Color.White, 0.6);
             cs.CapturedColor = Color.FromArgb(158, 177, 195);
 
@@ -933,19 +1002,18 @@ namespace Keyboard_Inspector {
             blend.Colors = new Color[] { cs.PointColor, cs.PointColor, cs.LineColor };
             cs.PointBrush.InterpolationColors = blend;
 
-            cs.ShadowBrush = new SolidBrush(Color.FromArgb(200, cs.BackColor));
-            cs.ShadowTextBrush = new SolidBrush(Color.FromArgb(224, (byte)(BackColor.R * 0.75), (byte)(BackColor.G * 0.75), (byte)(BackColor.B * 0.75)));
+            cs.ShadowBrush = new SolidBrush(cs.BackColor.WithAlpha(200));
+            cs.ShadowTextBrush = new SolidBrush(BackColor.Blend(Color.Black, 0.75).WithAlpha(224));
             cs.FrozenBrush = new SolidBrush(cs.TextColor.Blend(Color.SkyBlue, 0.45));
             cs.ScrollBarBrush = new SolidBrush(Color.FromArgb(92, 92, 92));
             cs.ScrollBarHoverBrush = new SolidBrush(Color.FromArgb(122, 128, 132));
             cs.ScrollBarCapturedBrush = new SolidBrush(cs.CapturedColor);
-            cs.CapturedPen = new Pen(Color.FromArgb(150, cs.CapturedColor));
 
             cs.LinePen = new Pen(cs.LineBrush);
             cs.GradientPen = new Pen(cs.GradientBrush);
-
             cs.XPen = new Pen(Color.FromArgb(20, 20, 20));
             cs.YPen = new Pen(Color.FromArgb(44, 44, 44));
+            cs.CapturedPen = new Pen(cs.CapturedColor.WithAlpha(150));
 
             return cs;
         }
@@ -1234,11 +1302,39 @@ namespace Keyboard_Inspector {
                 e.Graphics.FillRectangle(cs.BackBrush, u.ScrollBarJumpLeft);
                 e.Graphics.FillRectangle(cs.BackBrush, u.ScrollBarJumpRight);
 
-                var brush = cs.ScrollBarBrush;
-                if (HoveringScrollBar) brush = cs.ScrollBarHoverBrush;
-                if (CapturedScrollBar != null) brush = cs.ScrollBarCapturedBrush;
+                bool GetScrollBarBrush(ScrollBarComponent component, out Brush brush) {
+                    brush = null;
 
-                e.Graphics.FillRectangle(brush, u.ScrollBar);
+                    if (Hovering == component) brush = cs.ScrollBarHoverBrush;
+                    if (CapturedScrollBar == component) brush = cs.ScrollBarCapturedBrush;
+
+                    return brush != null;
+                }
+
+                e.Graphics.FillRectangle(cs.ScrollBarBrush, u.ScrollBar);
+
+                Brush b;
+                if (GetScrollBarBrush(ScrollBarComponent.ScrollBar, out b))
+                    e.Graphics.FillRectangle(b, u.ScrollBar);
+
+                if (GetScrollBarBrush(ScrollBarComponent.NotchLeft, out b))
+                    e.Graphics.FillRectangle(b, u.NotchLeft);
+
+                if (GetScrollBarBrush(ScrollBarComponent.NotchRight, out b))
+                    e.Graphics.FillRectangle(b, u.NotchRight);
+
+                if (Hovering != ScrollBarComponent.None || CapturedScrollBar != ScrollBarComponent.None) {
+                    RectangleF notch = new RectangleF();
+                    notch.Y = u.ScrollBar.Y + 1.6f;
+                    notch.Width = 1.4f;
+                    notch.Height = u.ScrollBar.Height - 3.2f;
+
+                    notch.X = u.ScrollBar.X + 1.8f;
+                    e.Graphics.FillRectangle(cs.BackBrush, notch);
+
+                    notch.X = u.ScrollBar.Right - 1.8f - notch.Width;
+                    e.Graphics.FillRectangle(cs.BackBrush, notch);
+                }
             }
         }
     }
