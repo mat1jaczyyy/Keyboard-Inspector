@@ -277,6 +277,8 @@ namespace Keyboard_Inspector {
         }
 
         async void open_Click(object sender, EventArgs e) {
+            if (!mainmenu.Enabled) return;
+
             if (FileSystem.OpenDialog(out string filename, out FileFormat format)) {
                 CloseFile();
                 await LoadFile(filename, format);
@@ -284,12 +286,15 @@ namespace Keyboard_Inspector {
         }
 
         void save_Click(object sender, EventArgs e) {
+            if (!mainmenu.Enabled) return;
             if (Result.IsEmpty(Result)) return;
 
             status.Text = FileSystem.Save(Result);
         }
 
         async void import_Click(object sender, EventArgs e) {
+            if (!mainmenu.Enabled) return;
+
             if (FileSystem.ImportDialog(out Uri url, out FileFormat format)) {
                 CloseFile();
                 await LoadURL(url, format);

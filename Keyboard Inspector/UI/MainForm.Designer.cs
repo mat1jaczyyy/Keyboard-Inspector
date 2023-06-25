@@ -139,7 +139,9 @@ namespace Keyboard_Inspector {
             // 
             // tDiffs
             // 
+            this.tDiffs.AllowDrop = true;
             this.tDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
             this.tDiffs.Location = new System.Drawing.Point(3, 3);
             this.tDiffs.Name = "tDiffs";
             this.tDiffs.Size = new System.Drawing.Size(425, 237);
@@ -147,7 +149,9 @@ namespace Keyboard_Inspector {
             // 
             // tCompound
             // 
+            this.tCompound.AllowDrop = true;
             this.tCompound.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
             this.tCompound.Location = new System.Drawing.Point(434, 3);
             this.tCompound.Name = "tCompound";
             this.tCompound.Size = new System.Drawing.Size(425, 237);
@@ -155,7 +159,9 @@ namespace Keyboard_Inspector {
             // 
             // tCircular
             // 
+            this.tCircular.AllowDrop = true;
             this.tCircular.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
             this.tCircular.Location = new System.Drawing.Point(865, 3);
             this.tCircular.Name = "tCircular";
             this.tCircular.Size = new System.Drawing.Size(426, 237);
@@ -163,6 +169,7 @@ namespace Keyboard_Inspector {
             // 
             // fDiffs
             // 
+            this.fDiffs.AllowDrop = true;
             this.fDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.fDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
             this.fDiffs.Location = new System.Drawing.Point(3, 246);
@@ -172,6 +179,7 @@ namespace Keyboard_Inspector {
             // 
             // fCompound
             // 
+            this.fCompound.AllowDrop = true;
             this.fCompound.Dock = System.Windows.Forms.DockStyle.Fill;
             this.fCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
             this.fCompound.Location = new System.Drawing.Point(434, 246);
@@ -181,6 +189,7 @@ namespace Keyboard_Inspector {
             // 
             // fCircular
             // 
+            this.fCircular.AllowDrop = true;
             this.fCircular.Dock = System.Windows.Forms.DockStyle.Fill;
             this.fCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
             this.fCircular.Location = new System.Drawing.Point(865, 246);
@@ -360,7 +369,9 @@ namespace Keyboard_Inspector {
             // 
             // screen
             // 
+            this.screen.AllowDrop = true;
             this.screen.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.screen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
             this.screen.Location = new System.Drawing.Point(0, 0);
             this.screen.Name = "screen";
             this.screen.Size = new System.Drawing.Size(1294, 222);
@@ -385,7 +396,7 @@ namespace Keyboard_Inspector {
             this.open.Name = "open";
             this.open.ShortcutKeyDisplayString = "";
             this.open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.open.Size = new System.Drawing.Size(172, 22);
+            this.open.Size = new System.Drawing.Size(180, 22);
             this.open.Text = "&Open...";
             this.open.Click += new System.EventHandler(this.open_Click);
             // 
@@ -396,7 +407,7 @@ namespace Keyboard_Inspector {
             this.save.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(153)))), ((int)(((byte)(153)))));
             this.save.Name = "save";
             this.save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.save.Size = new System.Drawing.Size(172, 22);
+            this.save.Size = new System.Drawing.Size(180, 22);
             this.save.Text = "&Save As...";
             this.save.Click += new System.EventHandler(this.save_Click);
             // 
@@ -405,8 +416,11 @@ namespace Keyboard_Inspector {
             this.import.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.import.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.import.Name = "import";
-            this.import.Size = new System.Drawing.Size(172, 22);
-            this.import.Text = "Import from URL...";
+            this.import.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.O)));
+            this.import.ShowShortcutKeys = false;
+            this.import.Size = new System.Drawing.Size(180, 22);
+            this.import.Text = "&Import from URL...";
             this.import.Click += new System.EventHandler(this.import_Click);
             // 
             // mainmenu
