@@ -257,6 +257,9 @@ namespace Keyboard_Inspector {
         void RefreshVisibleInputs() {
             VisibleInputs = Inputs.Where(x => x.Visible).ToList();
             MultipleSources = VisibleInputs.Select(i => i.Input.Source).Distinct().Count() > 1;
+
+            for (int i = 0; i < VisibleInputs.Count; i++)
+                InputIndexes[VisibleInputs[i].Input] = i;
         }
 
         Dictionary<Input, int> InputIndexes;
@@ -299,12 +302,10 @@ namespace Keyboard_Inspector {
 
                 }
 
+                InputIndexes = new Dictionary<Input, int>();
                 RefreshVisibleInputs();
 
-                InputIndexes = new Dictionary<Input, int>();
-
                 for (int i = 0; i < Inputs.Count; i++) {
-                    InputIndexes[Inputs[i].Input] = i;
                     Inputs[i].Events = new List<Event>(KeyHistory.Events.Count);
                 }
 
