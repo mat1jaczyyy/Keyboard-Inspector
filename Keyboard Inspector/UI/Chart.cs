@@ -36,6 +36,8 @@ namespace Keyboard_Inspector {
                 new ToolStripSeparator(),
                 new ToolStripMenuItem("&Hide Input"),
                 new ToolStripMenuItem("Hide &Device"),
+                new ToolStripSeparator(),
+                new ToolStripMenuItem("&Sort by Device"),
                 new ToolStripMenuItem("Show &All Inputs"),
                 new ToolStripSeparator(),
                 new ToolStripMenuItem("&Freeze"),
@@ -103,8 +105,18 @@ namespace Keyboard_Inspector {
                 Invalidate();
             };
 
+            // Sort by Device
+            InputMenu.Items[6].Click += (_, __) => {
+                if (!HasHistory) return;
+
+                Inputs = Inputs.OrderBy(i => KeyHistory.Sources[i.Input.Source].Name).ToList();
+
+                RefreshVisibleInputs();
+                Invalidate();
+            };
+
             // Show All Inputs
-            InputMenu.Items[5].Click += (_, __) => {
+            InputMenu.Items[7].Click += (_, __) => {
                 if (!HasHistory) return;
 
                 InputMenu.Tag = null;
@@ -119,7 +131,7 @@ namespace Keyboard_Inspector {
             };
 
             // Freeze
-            InputMenu.Items[7].Click += (_, __) => {
+            InputMenu.Items[9].Click += (_, __) => {
                 if (!HasHistory) return;
 
                 InputMenu.Tag = null;
@@ -130,7 +142,7 @@ namespace Keyboard_Inspector {
             };
 
             // Unfreeze
-            InputMenu.Items[8].Click += (_, __) => {
+            InputMenu.Items[10].Click += (_, __) => {
                 if (!HasHistory) return;
 
                 InputMenu.Tag = null;
@@ -719,10 +731,12 @@ namespace Keyboard_Inspector {
 
             InputMenu.Items[3].Available = intersects && VisibleInputs.Count > 1;
             InputMenu.Items[4].Available = intersects && VisibleInputs.Count > 1 && MultipleSources;
-            InputMenu.Items[5].Available = Inputs.Any(i => !i.Visible);
 
-            InputMenu.Items[7].Available = !Frozen;
-            InputMenu.Items[8].Available = Frozen;
+            InputMenu.Items[6].Available = VisibleInputs.Count > 1 && MultipleSources;
+            InputMenu.Items[7].Available = Inputs.Any(i => !i.Visible);
+
+            InputMenu.Items[9].Available = !Frozen;
+            InputMenu.Items[10].Available = Frozen;
 
             InputMenu.Items.AutoSeparators();
 
