@@ -250,12 +250,14 @@ namespace Keyboard_Inspector {
 
         List<InputHolder> Inputs;
         List<InputHolder> VisibleInputs;
+        HashSet<Input> VisibleInputSet;
         
         bool Frozen;
         bool MultipleSources;
 
         void RefreshVisibleInputs() {
             VisibleInputs = Inputs.Where(x => x.Visible).ToList();
+            VisibleInputSet = new HashSet<Input>(VisibleInputs.Select(i => i.Input));
             MultipleSources = VisibleInputs.Select(i => i.Input.Source).Distinct().Count() > 1;
 
             for (int i = 0; i < VisibleInputs.Count; i++)
@@ -655,6 +657,8 @@ namespace Keyboard_Inspector {
             int win = -1;
 
             for (int i = first; i <= last; i++) {
+                if (HasHistory && !VisibleInputSet.Contains(KeyHistory.Events[i].Input)) continue;
+
                 var x2 = GetX(i) - x;
                 x2 *= x2;
                 var y2 = (GetY(i) - y) * aspect;
