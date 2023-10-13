@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 
 namespace Keyboard_Inspector {
     class Event: IBinary {
@@ -22,19 +21,12 @@ namespace Keyboard_Inspector {
             Input.ToBinary(bw);
         }
 
-        public static List<Event> ListFromBinary(BinaryReader br, uint fileVersion) {
-            int n = br.ReadInt32();
-            var ret = new List<Event>(n);
-
-            for (int i = 0; i < n; i++) {
-                ret.Add(new Event(
-                    br.ReadDouble(),
-                    br.ReadBoolean(),
-                    Input.FromBinary(br, fileVersion)
-                ));
-            }
-
-            return ret;
+        public static Event FromBinary(BinaryReader br, uint fileVersion) {
+            return new Event(
+                br.ReadDouble(),
+                br.ReadBoolean(),
+                Input.FromBinary(br, fileVersion)
+            );
         }
     }
 }

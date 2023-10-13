@@ -70,6 +70,7 @@
     <Compile Include="FileSystem\Format.cs" />
     <Compile Include="Result\Analysis.cs" />
     <Compile Include="Benchmark.cs" />
+    <Compile Include="Result\InputInfo.cs" />
     <Compile Include="UI\Chart.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -103,6 +104,7 @@
     <Compile Include="FileSystem\ImportFileDialog.Designer.cs">
       <DependentUpon>ImportFileDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

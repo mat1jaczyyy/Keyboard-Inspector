@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Windows.Forms;
 
 using DarkUI.Controls;
@@ -52,10 +51,10 @@ namespace Keyboard_Inspector {
                 InputMenu.Tag = null;
 
                 ColorDialog cd = new ColorDialog();
-                cd.Color = Inputs[k].Color;
+                cd.Color = KeyHistory.Inputs[k].Color;
 
                 if (cd.ShowDialog() == DialogResult.OK) {
-                    Inputs[k].Color = cd.Color;
+                    KeyHistory.Inputs[k].Color = cd.Color;
                     Invalidate();
                 }
             };
@@ -67,7 +66,7 @@ namespace Keyboard_Inspector {
 
                 InputMenu.Tag = null;
 
-                Inputs[k].Color = Input.DefaultColor;
+                KeyHistory.Inputs[k].Color = Input.DefaultColor;
                 Invalidate();
             };
 
@@ -78,11 +77,12 @@ namespace Keyboard_Inspector {
 
                 InputMenu.Tag = null;
 
-                Inputs[k].Visible = false;
+                KeyHistory.Inputs[k].Visible = false;
                 YMaxValue--;
 
-                RefreshVisibleInputs();
                 Invalidate();
+
+                KeyHistory.Analysis.Analyze();
             };
 
             // Hide Device
@@ -92,26 +92,25 @@ namespace Keyboard_Inspector {
 
                 InputMenu.Tag = null;
 
-                for (int i = 0; i < Inputs.Count; i++) {
-                    if (Inputs[i].Input.Source == Inputs[k].Input.Source) {
-                        if (Inputs[i].Visible)
-                            YMaxValue--;
+                var source = KeyHistory.Inputs[k].Input.Source;
+                
+                foreach (var i in KeyHistory.Inputs)
+                    if (i.Input.Source == source)
+                        i.Visible = false;
 
-                        Inputs[i].Visible = false;
-                    }
-                }
-
-                RefreshVisibleInputs();
+                YMaxValue = KeyHistory.VisibleInputs().Count();
+                
                 Invalidate();
+
+                KeyHistory.Analysis.Analyze();
             };
 
             // Sort by Device
             InputMenu.Items[6].Click += (_, __) => {
                 if (!HasHistory) return;
 
-                Inputs = Inputs.OrderBy(i => KeyHistory.Sources[i.Input.Source].Name).ToList();
+                KeyHistory.Inputs.SortByKey(i => KeyHistory.Sources[i.Input.Source].Name);
 
-                RefreshVisibleInputs();
                 Invalidate();
             };
 
@@ -121,13 +120,14 @@ namespace Keyboard_Inspector {
 
                 InputMenu.Tag = null;
 
-                for (int i = 0; i < Inputs.Count; i++)
-                    Inputs[i].Visible = true;
+                foreach (var i in KeyHistory.Inputs)
+                    i.Visible = true;
 
-                YMaxValue = Inputs.Count;
+                YMaxValue = KeyHistory.Inputs.Count;
 
-                RefreshVisibleInputs();
                 Invalidate();
+
+                KeyHistory.Analysis.Analyze();
             };
 
             // Freeze
@@ -136,7 +136,7 @@ namespace Keyboard_Inspector {
 
                 InputMenu.Tag = null;
 
-                Frozen = true;
+                Program.Freeze();
 
                 Invalidate();
             };
@@ -147,7 +147,7 @@ namespace Keyboard_Inspector {
 
                 InputMenu.Tag = null;
 
-                Frozen = false;
+                Program.Unfreeze();
 
                 Invalidate();
             };
@@ -240,43 +240,11 @@ namespace Keyboard_Inspector {
             Invalidate();
         }
 
-        class InputHolder {
-            public readonly Input Input;
-            public Color Color;
-            public bool Visible;
-            public List<Event> Events;
-            public RectangleF TextRect, MenuRect, DragRect;
-
-            public InputHolder(Input input) {
-                Input = input;
-                Color = Input.DefaultColor;
-                Visible = true;
-            }
-        }
-
         string InputAsString(Input i, bool includeSource)
             => $"{(includeSource? $"[{KeyHistory.Sources[i.Source]}] " : "")}{i}";
 
         Result KeyHistory;
         bool HasHistory => !Result.IsEmpty(KeyHistory);
-
-        List<InputHolder> Inputs;
-        List<InputHolder> VisibleInputs;
-        HashSet<Input> VisibleInputSet;
-        
-        bool Frozen;
-        bool MultipleSources;
-
-        void RefreshVisibleInputs() {
-            VisibleInputs = Inputs.Where(x => x.Visible).ToList();
-            VisibleInputSet = new HashSet<Input>(VisibleInputs.Select(i => i.Input));
-            MultipleSources = VisibleInputs.Select(i => i.Input.Source).Distinct().Count() > 1;
-
-            for (int i = 0; i < VisibleInputs.Count; i++)
-                InputIndexes[VisibleInputs[i].Input] = i;
-        }
-
-        Dictionary<Input, int> InputIndexes;
 
         public void LoadData(Result result) {
             KeyHistory = result;
@@ -286,48 +254,8 @@ namespace Keyboard_Inspector {
 
             if (HasHistory) {
                 kind = Kind.KeyHistory;
-                
-                var newInputs = KeyHistory.Events.Select(i => i.Input).Distinct().Select(i => new InputHolder(i)).ToList();
 
-                if (Frozen) {
-                    Inputs.RemoveAll(i => !i.Visible);
-                    YMaxValue = Inputs.Count;
-
-                    foreach (var i in newInputs) {
-                        if (Inputs.Any(j => j.Input == i.Input)) continue;
-
-                        i.Visible = false;
-                        Inputs.Add(i);
-                    }
-
-                } else {
-                    Inputs = newInputs;
-
-                    Source best = KeyHistory.GetBestSource(0.8);
-                    if (best != null) {
-                        foreach (var i in Inputs) {
-                            i.Visible = KeyHistory.Sources[i.Input.Source] == best;
-                        }
-                        YMaxValue = Inputs.Count(i => i.Visible);
-
-                    } else {
-                        YMaxValue = Inputs.Count;
-                    }
-
-                }
-
-                InputIndexes = new Dictionary<Input, int>();
-                RefreshVisibleInputs();
-
-                for (int i = 0; i < Inputs.Count; i++) {
-                    Inputs[i].Events = new List<Event>(KeyHistory.Events.Count);
-                }
-
-                for (int i = 0; i < KeyHistory.Events.Count; i++) {
-                    var e = KeyHistory.Events[i];
-                    Inputs[InputIndexes[e.Input]].Events.Add(e);
-                }
-
+                YMaxValue = KeyHistory.VisibleInputs().Count();
                 ScopeReset();
 
             } else {
@@ -374,7 +302,7 @@ namespace Keyboard_Inspector {
 
         double GetY(int index) {
             if (kind == Kind.Line) return LineData[index];
-            else if (kind == Kind.KeyHistory) return InputIndexes[KeyHistory.Events[index].Input] + 0.5;
+            else if (kind == Kind.KeyHistory) return KeyHistory.VisibleIndex(KeyHistory.Events[index].Input) + 0.5; // TODO: perf?
             return double.NaN;
         }
 
@@ -476,31 +404,34 @@ namespace Keyboard_Inspector {
             Hovering = ScrollBarComponent.None;
         }
 
-        bool IntersectYText(Point pt, bool menu, out int result) {
+        bool IntersectYText(Point pt, bool menu, out int result, Units u = null) {
+            u = u?? GetUnits();
+
             result = -1;
 
-            for (int k = 0; k < Inputs.Count; k++) {
-                if (!Inputs[k].Visible) continue;
+            for (int i = 0, v = 0; i < KeyHistory.Inputs.Count; i++) {
+                if (!KeyHistory.Inputs[i].Visible) continue;
 
-                if ((menu? Inputs[k].MenuRect : Inputs[k].DragRect).Contains(pt)) {
-                    result = k;
+                if ((menu? u.KeyMenu : u.KeyDrag)[v].Contains(pt)) {
+                    result = i;
                     return true;
                 }
+                v++;
             }
 
             return false;
         }
 
-        bool IntersectForMenu(Point pt, out int result)
-            => IntersectYText(pt, true, out result);
+        bool IntersectForMenu(Point pt, out int result, Units u = null)
+            => IntersectYText(pt, true, out result, u);
         
-        bool IntersectForDrag(Point pt, out int result) {
-            if (Inputs.Count <= 1) {
+        bool IntersectForDrag(Point pt, out int result, Units u = null) {
+            if (KeyHistory.Inputs.Count <= 1) {
                 result = -1;
                 return false;
             }
 
-            return IntersectYText(pt, false, out result);
+            return IntersectYText(pt, false, out result, u);
         }
 
         enum ScrollBarComponent {
@@ -668,8 +599,10 @@ namespace Keyboard_Inspector {
             double closest = r * r;
             int win = -1;
 
+            var visible = HasHistory? KeyHistory.VisibleInputSet() : null;
+
             for (int i = first; i <= last; i++) {
-                if (HasHistory && !VisibleInputSet.Contains(KeyHistory.Events[i].Input)) continue;
+                if (visible?.Contains(KeyHistory.Events[i].Input) == false) continue;
 
                 var x2 = GetX(i) - x;
                 x2 *= x2;
@@ -721,27 +654,32 @@ namespace Keyboard_Inspector {
             }
 
             if (!HasHistory) return;
-            if (e.Button != MouseButtons.Right) return;
 
-            bool intersects = IntersectForMenu(e.Location, out int k);
-            if (intersects) InputMenu.Tag = k;
+            if (e.Button == MouseButtons.Right) {
+                Units u = GetUnits();
 
-            InputMenu.Items[0].Available = intersects;
-            InputMenu.Items[1].Available = intersects && Inputs[k].Color != Input.DefaultColor;
+                bool intersects = IntersectForMenu(e.Location, out int k, u);
+                if (intersects) InputMenu.Tag = k;
 
-            InputMenu.Items[3].Available = intersects && VisibleInputs.Count > 1;
-            InputMenu.Items[4].Available = intersects && VisibleInputs.Count > 1 && MultipleSources;
+                bool multipleInputs = KeyHistory.VisibleInputs().Count() > 1;
 
-            InputMenu.Items[6].Available = VisibleInputs.Count > 1 && MultipleSources;
-            InputMenu.Items[7].Available = Inputs.Any(i => !i.Visible);
+                InputMenu.Items[0].Available = intersects;
+                InputMenu.Items[1].Available = intersects && KeyHistory.Inputs[k].Color != Input.DefaultColor;
 
-            InputMenu.Items[9].Available = !Frozen;
-            InputMenu.Items[10].Available = Frozen;
+                InputMenu.Items[3].Available = intersects && multipleInputs;
+                InputMenu.Items[4].Available = intersects && multipleInputs && u.MultipleSources;
 
-            InputMenu.Items.AutoSeparators();
+                InputMenu.Items[6].Available = multipleInputs && u.MultipleSources;
+                InputMenu.Items[7].Available = KeyHistory.Inputs.Any(i => !i.Visible);
 
-            Cursor = Cursors.Default;
-            InputMenu.Show(this, e.Location);
+                InputMenu.Items[9].Available = !Program.IsFrozen;
+                InputMenu.Items[10].Available = Program.IsFrozen;
+
+                InputMenu.Items.AutoSeparators();
+
+                Cursor = Cursors.Default;
+                InputMenu.Show(this, e.Location);
+            }
         }
 
         enum PanDirection {
@@ -778,12 +716,12 @@ namespace Keyboard_Inspector {
             if (!HasAny) return;
             if (e.Button != MouseButtons.Left) return;
 
-            if (HasHistory && IntersectForDrag(e.Location, out int k)) {
+            Units u = GetUnits();
+
+            if (HasHistory && IntersectForDrag(e.Location, out int k, u)) {
                 DoDragDrop(k, DragDropEffects.Move);
                 return;
             }
-            
-            Units u = GetUnits();
 
             if (u.Chart.ContainsIX(e.Location) || u.XAxis.ContainsIX(e.Location)) {
                 // Mouse Capture is done automatically by WinForms
@@ -839,7 +777,7 @@ namespace Keyboard_Inspector {
             if (!e.Data.GetDataPresent("System.Int32")) return false;
 
             result = (int)e.Data.GetData("System.Int32");
-            return result.InRangeIE(0, Inputs.Count) && Inputs[result].Visible;
+            return result.InRangeIE(0, KeyHistory.Inputs.Count) && KeyHistory.Inputs[result].Visible;
         }
 
         protected override void OnDragOver(DragEventArgs e) {
@@ -861,11 +799,7 @@ namespace Keyboard_Inspector {
             if (!ValidateDrag(e, out int f)) return;
 
             if (IntersectForDrag(PointToClient(new Point(e.X, e.Y)), out int k)) {
-                var i = Inputs[f];
-                Inputs.RemoveAt(f);
-                Inputs.Insert(k, i);
-
-                RefreshVisibleInputs();
+                KeyHistory.Inputs.Move(f, k);
 
                 Invalidate();
             }
@@ -873,7 +807,9 @@ namespace Keyboard_Inspector {
 
         class Units {
             public RectangleF Title, Chart, XAxis, YAxis, ScrollBarArea, ScrollBar, ScrollBarJumpLeft, ScrollBarJumpRight, NotchLeft, NotchRight;
+            public RectangleF[] KeyDrag, KeyMenu, KeyText;
             public double TextHeight, Space, XUnit, YUnit, Min, Max, CrampedZoom;
+            public bool MultipleSources;
         }
 
         const int MinScrollBarWidth = 20;
@@ -952,10 +888,18 @@ namespace Keyboard_Inspector {
                 u.YAxis.Height = u.XAxis.Y - u.Title.Bottom;
             
                 if (kind == Kind.KeyHistory) {
-                    foreach (var i in VisibleInputs)
-                        i.TextRect.Size = gfx.MeasureString(InputAsString(i.Input, MultipleSources), Font);
+                    var visible = KeyHistory.VisibleInputs().ToList();
+                    
+                    u.MultipleSources = visible.Select(i => i.Input.Source).Distinct().Count() > 1;
 
-                    u.YAxis.Width = (float)Math.Ceiling(VisibleInputs.Max(i => i.TextRect.Width));
+                    u.KeyDrag = new RectangleF[visible.Count];
+                    u.KeyMenu = new RectangleF[visible.Count];
+                    u.KeyText = new RectangleF[visible.Count];
+
+                    for (int i = 0; i < visible.Count; i++)
+                        u.KeyText[i].Size = gfx.MeasureString(InputAsString(visible[i].Input, u.MultipleSources), Font);
+
+                    u.YAxis.Width = (float)Math.Ceiling(u.KeyText.Max(i => i.Width));
                 }
 
                 u.XAxis.X = u.YAxis.Right;
@@ -986,22 +930,20 @@ namespace Keyboard_Inspector {
                         compensation = 25 - clickWidth;
                         clickWidth = 25;
                     }
-
-                    for (int k = 0; k < VisibleInputs.Count; k++) {
-                        var i = VisibleInputs[k];
-
-                        i.DragRect = new RectangleF(
+                    
+                    for (int i = 0; i < u.KeyText.Length; i++) {
+                        u.KeyDrag[i] = new RectangleF(
                             (float)(u.YAxis.X - compensation),
-                            (float)(u.Chart.Y + k * u.YUnit),
+                            (float)(u.Chart.Y + i * u.YUnit),
                             (float)clickWidth,
                             (float)u.YUnit
                         );
 
-                        i.MenuRect = i.DragRect;
-                        i.MenuRect.Width += u.Chart.Width;
+                        u.KeyMenu[i] = u.KeyDrag[i];
+                        u.KeyMenu[i].Width += u.Chart.Width;
 
-                        i.TextRect.X = u.YAxis.Right - i.TextRect.Width;
-                        i.TextRect.Y = i.MenuRect.Y + (float)((u.YUnit - i.TextRect.Height) / 2);
+                        u.KeyText[i].X = u.YAxis.Right - u.KeyText[i].Width;
+                        u.KeyText[i].Y = u.KeyMenu[i].Y + (float)((u.YUnit - u.KeyText[i].Height) / 2);
                     }
                 }
             }
@@ -1210,7 +1152,7 @@ namespace Keyboard_Inspector {
 
             /* KeyHistory chart */
             if (kind == Kind.KeyHistory) {
-                PointColor = _ => Inputs[InputIndexes[KeyHistory.Events[_].Input]].Color; // it's weird, but good enough
+                PointColor = _ => KeyHistory.GetInfo(KeyHistory.Events[_].Input).Color;
                 
                 var blend = new ColorBlend();
                 blend.Positions = new float[] { 0f, 0.1f, 0.3f, 1 };
@@ -1218,25 +1160,32 @@ namespace Keyboard_Inspector {
                 var height = u.YUnit - 2;
                 RectangleF bar = new RectangleF(u.Chart.X, 0, u.Chart.Width, 0);
 
-                for (int k = 0; k < VisibleInputs.Count; k++) {
-                    var i = VisibleInputs[k];
-                    e.Graphics.DrawShadowString(InputAsString(i.Input, MultipleSources), Font, Frozen? cs.FrozenBrush : cs.TextBrush, cs.ShadowTextBrush, i.TextRect);
+                var visible = KeyHistory.VisibleInputs().ToList();
 
-                    double y = u.Chart.Y + k * u.YUnit;
+                for (int i = 0; i < visible.Count; i++) {
+                    e.Graphics.DrawShadowString(
+                        InputAsString(visible[i].Input, u.MultipleSources),
+                        Font,
+                        Program.IsFrozen? cs.FrozenBrush : cs.TextBrush,
+                        cs.ShadowTextBrush,
+                        u.KeyText[i]
+                    );
+
+                    double y = u.Chart.Y + i * u.YUnit;
 
                     bar.Height = Math.Max(1, (float)(Math.Floor(y + height) - (y = Math.Floor(y))));
                     bar.Y = (float)(y + 0.5);
 
                     LinearGradientBrush brush = new LinearGradientBrush(bar, Color.Transparent, Color.Transparent, LinearGradientMode.Vertical);
 
-                    var color = Color.FromArgb(250, i.Color);
+                    var color = Color.FromArgb(250, visible[i].Color);
                     var topColor = Color.FromArgb(240, color.Blend(Color.Black, 0.98));
                     var bottomColor = Color.FromArgb(215, color.Blend(Color.Black, 0.95));
 
                     blend.Colors = new Color[] { topColor, color, color, bottomColor };
                     brush.InterpolationColors = blend;
 
-                    var events = i.Events;
+                    var events = visible[i].Events;
                     if (!events.Any()) continue;
 
                     int left = BinarySearch(events, u.Min, 1);

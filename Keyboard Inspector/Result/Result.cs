@@ -6,7 +6,7 @@ using System.Linq;
 namespace Keyboard_Inspector {
     class Result: IBinary {
         static readonly char[] Header = new char[] { 'K', 'B', 'I', '\0' };
-        static readonly uint FileVersion = 1;
+        static readonly uint FileVersion = 2;
 
         public string Title;
         public DateTime Recorded;
@@ -17,29 +17,75 @@ namespace Keyboard_Inspector {
 
         public Analysis Analysis;
 
-        public Result(string title, DateTime recorded, double time, List<Event> events, Dictionary<long, Source> sources, Analysis analysis = null) {
-            Title = title?? "";
-            Recorded = recorded;
-            Time = time;
-            
-            // Filter auto-repeat
-            Dictionary<Input, bool> last = new Dictionary<Input, bool>();
-            Events = new List<Event>(events.Count);
+        public List<InputInfo> Inputs { get; private set; }
+
+        public Result(string title, DateTime recorded, double time, List<Event> events, Dictionary<long, Source> sources, Analysis analysis = null, List<InputInfo> inputs = null) {
+            Dictionary<Input, InputInfo> groups = new Dictionary<Input, InputInfo>();
 
             for (int i = 0; i < events.Count; i++) {
                 var e = events[i];
 
-                if (last.ContainsKey(e.Input) && last[e.Input] == e.Pressed)
-                    continue;
+                // Filter Windows auto-repeat
+                if (groups.ContainsKey(e.Input) && groups[e.Input].Events.Last().Pressed == e.Pressed) {
+                    events.RemoveAt(i);
+                    i--;
 
-                last[e.Input] = e.Pressed;
-                Events.Add(e);
+                } else {
+                    if (!groups.ContainsKey(e.Input))
+                        groups[e.Input] = new InputInfo(e.Input);
+
+                    groups[e.Input].Events.Add(e);
+                }
             }
 
-            Sources = sources;
+            if (inputs == null) {
+                inputs = groups.Values.ToList();
+            
+            } else {
+                foreach (var i in inputs) {
+                    i.Events = groups[i.Input].Events;
+                }
+            }
 
+            if (Program.IsFrozen) {
+                Program.Frozen.RemoveAll(i => !i.Visible);
+
+                foreach (var i in Program.Frozen)
+                    i.Events.Clear();
+
+                foreach (var i in inputs) {
+                    int f = Program.Frozen.FindIndex(j => j.Input == i.Input);
+
+                    if (f == -1) {
+                        i.Visible = false;
+                        Program.Frozen.Add(i);
+
+                    } else {
+                        Program.Frozen[f] = i;
+                    }
+                }
+
+                inputs = Program.Frozen;
+            }
+            
+            Title = title?? "";
+            Recorded = recorded;
+            Time = time;
+            Events = events;
+            Sources = sources;
             Analysis = analysis?? new Analysis();
             Analysis.Result = this;
+            Inputs = inputs;
+            
+            if (!Program.IsFrozen) {
+                Source best = GetBestSource(0.8);
+
+                if (best != null) {
+                    foreach (var i in Inputs) {
+                        i.Visible = Sources[i.Input.Source] == best;
+                    }
+                }
+            }
         }
 
         public string GetTitle()
@@ -59,6 +105,23 @@ namespace Keyboard_Inspector {
             return best;
         }
 
+        public IEnumerable<InputInfo> VisibleInputs()
+            => Inputs.Where(i => i.Visible);
+
+        public HashSet<Input> VisibleInputSet()
+            => VisibleInputs().Select(i => i.Input).ToHashSet();
+
+        public int VisibleIndex(Input input) 
+            => VisibleInputs().TakeWhile(i => i.Input != input).Count();
+
+        public InputInfo GetInfo(Input input)
+            => Inputs.Find(i => i.Input == input);
+
+        public List<Event> AllVisibleEvents() {
+            var visible = VisibleInputSet();
+            return Events.Where(i => visible.Contains(i.Input)).ToList();
+        }
+
         public void ToBinary(BinaryWriter bw) {
             bw.Write(Header);
             bw.Write(FileVersion);
@@ -70,6 +133,7 @@ namespace Keyboard_Inspector {
             Events.ToBinary(bw);
             Sources.ToBinary(bw);
             Analysis.ToBinary(bw);
+            Inputs.ToBinary(bw);
         }
 
         static Dictionary<int, string> LegacySources = new Dictionary<int, string>() {
@@ -88,7 +152,7 @@ namespace Keyboard_Inspector {
             string title = br.ReadString();
             DateTime recorded = DateTime.FromBinary(br.ReadInt64());
             double time = br.ReadDouble();
-            List<Event> events = Event.ListFromBinary(br, fileVersion);
+            List<Event> events = Utility.ListFromBinary(br, fileVersion, Event.FromBinary);
 
             Dictionary<long, Source> sources = new Dictionary<long, Source>();
 
@@ -103,12 +167,21 @@ namespace Keyboard_Inspector {
                 }
 
             } else {
-                sources = Source.DictionaryFromBinary(br, fileVersion);
+                sources = Utility.DictionaryFromBinary(br, fileVersion, Source.FromBinary);
             }
 
             Analysis analysis = Analysis.FromBinary(br, fileVersion);
 
-            return new Result(title, recorded, time, events, sources, analysis);
+            List<InputInfo> inputs;
+
+            if (fileVersion < 2) {
+                inputs = null;
+
+            } else {
+                inputs = Utility.ListFromBinary(br, fileVersion, InputInfo.FromBinary);
+            }
+
+            return new Result(title, recorded, time, events, sources, analysis, inputs);
         }
 
         public static Result FromStream(Stream stream) {

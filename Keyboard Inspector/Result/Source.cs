@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -136,21 +135,12 @@ namespace Keyboard_Inspector {
             bw.Write(DeviceInterface);
         }
 
-        public static Dictionary<long, Source> DictionaryFromBinary(BinaryReader br, uint fileVersion) {
-            int n = br.ReadInt32();
-            var ret = new Dictionary<long, Source>();
-
-            for (int i = 0; i < n; i++) {
-                ret.Add(br.ReadInt64(),
-                    new Source(
-                        br.ReadInt32(),
-                        br.ReadString(),
-                        br.ReadString()
-                    )
-                );
-            }
-
-            return ret;
+        public static Source FromBinary(BinaryReader br, uint fileVersion) {
+            return new Source(
+                br.ReadInt32(),
+                br.ReadString(),
+                br.ReadString()
+            );
         }
     }
 }

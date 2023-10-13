@@ -21,7 +21,7 @@ namespace Keyboard_Inspector {
         }
 
         public bool Equals(Input other)
-            => !(other is null) && Key.Equals(other.Key);
+            => !(other is null) && Key.Equals(other.Key) && Source.Equals(other.Source);
 
         public override bool Equals(object obj)
             => Equals(obj as Input);

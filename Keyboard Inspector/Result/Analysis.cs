@@ -44,20 +44,20 @@ namespace Keyboard_Inspector {
         public Result Result;
 
         List<double> diffs;
-        void CalcDiffs() {
-            diffs = new List<double>(Result.Events.Count);
+        void CalcDiffs(List<Event> e) {
+            diffs = new List<double>(e.Count);
 
-            for (int i = 1; i < Result.Events.Count; i++)
-                diffs.Add(Result.Events[i].Time - Result.Events[i - 1].Time);
+            for (int i = 1; i < e.Count; i++)
+                diffs.Add(e[i].Time - e[i - 1].Time);
         }
 
         List<double> compound;
-        void CalcCompound() {
-            compound = new List<double>(Math.Min(100_000_000, Result.Events.Count * Result.Events.Count / 2));
+        void CalcCompound(List<Event> e) {
+            compound = new List<double>(Math.Min(100_000_000, e.Count * e.Count / 2));
 
-            for (int i = 0; i < Result.Events.Count - 1; i++) {
-                for (int j = i + 1; j < Result.Events.Count; j++) {
-                    double diff = Result.Events[j].Time - Result.Events[i].Time;
+            for (int i = 0; i < e.Count - 1; i++) {
+                for (int j = i + 1; j < e.Count; j++) {
+                    double diff = e[j].Time - e[i].Time;
 
                     if (j > i + 1 && diff >= 1)
                         break;
@@ -68,11 +68,11 @@ namespace Keyboard_Inspector {
         }
 
         List<double> circular;
-        void CalcCircular() {
-            circular = new List<double>(Result.Events.Count);
+        void CalcCircular(List<Event> e) {
+            circular = new List<double>(e.Count);
 
-            for (int i = 0; i < Result.Events.Count; i++)
-                circular.Add(Result.Events[i].Time % 1);
+            for (int i = 0; i < e.Count; i++)
+                circular.Add(e[i].Time % 1);
         }
 
         IEnumerable<double> CircularRotationFix(AlignedArrayDouble arr) {
@@ -90,14 +90,6 @@ namespace Keyboard_Inspector {
             for (int i = 0; i < arr.Length; i++) {
                 yield return arr[(i + rot) % arr.Length];
             }
-        }
-
-        public void CreateCache() {
-            if (Result.IsEmpty(Result)) return;
-
-            CalcDiffs();
-            CalcCompound();
-            CalcCircular();
         }
 
         bool EstimatePeak(double[] data, out int result) {
@@ -228,6 +220,18 @@ namespace Keyboard_Inspector {
         }
 
         public void Analyze() {
+            if (Result.IsEmpty(Result)) return;
+
+            List<Event> events = Result.AllVisibleEvents();
+
+            CalcDiffs(events);
+            CalcCompound(events);
+            CalcCircular(events);
+
+            ReanalyzeFromCache();
+        }
+
+        public void ReanalyzeFromCache() {
             if (Result.IsEmpty(Result)) return;
             if (!Result.Analysis.PrecisionValid) return;
 

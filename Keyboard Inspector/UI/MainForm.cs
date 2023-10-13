@@ -56,28 +56,25 @@ namespace Keyboard_Inspector {
             rec.Refresh();
         }
 
-        public Result Result { get; private set; } = null;
-
         void ResultLoaded() {
             UpdateState(Recorder.IsRecording? UIState.Recording : UIState.None);
 
-            string title = Result.IsEmpty(Result)? "" : Result.GetTitle();
+            string title = Result.IsEmpty(Program.Result)? "" : Program.Result.GetTitle();
             Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
 
-            save.Enabled = split.Visible = !Result.IsEmpty(Result);
+            save.Enabled = split.Visible = !Result.IsEmpty(Program.Result);
 
-            labelN.Text = Result.IsEmpty(Result)? "" : Result.Events.Count.ToString();
+            labelN.Text = Result.IsEmpty(Program.Result) ? "" : Program.Result.Events.Count.ToString();
 
-            screen.LoadData(Result);
+            screen.LoadData(Program.Result);
 
-            if (Result.IsEmpty(Result)) return;
+            if (Result.IsEmpty(Program.Result)) return;
 
             SetPrecisionSilently();
             SetHPSSilently();
             SetLowCutSilently();
 
-            Result.Analysis.CreateCache();
-            Result.Analysis.Analyze();
+            Program.Result.Analysis.Analyze();
         }
 
         void rec_Click(object sender, EventArgs e) {
@@ -85,11 +82,11 @@ namespace Keyboard_Inspector {
                 ctsLoadURL.Cancel();
 
             } else if (!Recorder.IsRecording) {
-                Result = null;
+                Program.Result = null;
                 Recorder.StartRecording();
 
             } else {
-                Result = Recorder.StopRecording();
+                Program.Result = Recorder.StopRecording();
             }
 
             ResultLoaded();
@@ -99,19 +96,19 @@ namespace Keyboard_Inspector {
 
         void SetPrecisionSilently() {
             silent = true;
-            tbPrecision.Text = Result.Analysis.Precision.ToString();
+            tbPrecision.Text = Program.Result.Analysis.Precision.ToString();
             silent = false;
         }
 
         void SetHPSSilently() {
             silent = true;
-            hps.Value = Result.Analysis.HPS;
+            hps.Value = Program.Result.Analysis.HPS;
             silent = false;
         }
 
         void SetLowCutSilently() {
             silent = true;
-            lowCut.Checked = Result.Analysis.LowCut;
+            lowCut.Checked = Program.Result.Analysis.LowCut;
             silent = false;
         }
 
@@ -119,36 +116,36 @@ namespace Keyboard_Inspector {
             if (silent) return;
 
             if (!int.TryParse(tbPrecision.Text, out int precision)) return;
-            Result.Analysis.Precision = precision;
+            Program.Result.Analysis.Precision = precision;
 
             SetPrecisionSilently();
             tbPrecision.Refresh();
 
-            Result.Analysis.Analyze();
+            Program.Result.Analysis.ReanalyzeFromCache();
         }
 
         void precisionDouble_Click(object sender, EventArgs e) {
-            Result.Analysis.Precision *= 2;
-            tbPrecision.Text = Result.Analysis.Precision.ToString();
+            Program.Result.Analysis.Precision *= 2;
+            tbPrecision.Text = Program.Result.Analysis.Precision.ToString();
         }
 
         void precisionHalf_Click(object sender, EventArgs e) {
-            Result.Analysis.Precision /= 2;
-            tbPrecision.Text = Result.Analysis.Precision.ToString();
+            Program.Result.Analysis.Precision /= 2;
+            tbPrecision.Text = Program.Result.Analysis.Precision.ToString();
         }
 
         void lowCut_CheckedChanged(object sender, EventArgs e) {
             if (silent) return;
 
-            Result.Analysis.LowCut = lowCut.Checked;
-            Result.Analysis.ReanalyzeFromLowCut();
+            Program.Result.Analysis.LowCut = lowCut.Checked;
+            Program.Result.Analysis.ReanalyzeFromLowCut();
         }
 
         void hps_ValueChanged(object sender, EventArgs e) {
             if (silent) return;
 
-            Result.Analysis.HPS = (int)hps.Value;
-            Result.Analysis.ReanalyzeFromHPS();
+            Program.Result.Analysis.HPS = (int)hps.Value;
+            Program.Result.Analysis.ReanalyzeFromHPS();
         }
 
         public List<Chart> Charts { get; private set; }
@@ -233,7 +230,7 @@ namespace Keyboard_Inspector {
         }
 
         void CloseFile() {
-            Result = null;
+            Program.Result = null;
             ResultLoaded();
         }
 
@@ -243,7 +240,8 @@ namespace Keyboard_Inspector {
             var load = await FileSystem.Open(filename, format);
 
             if (load.Error == null) {
-                Result = load.Result;
+                Program.Unfreeze();
+                Program.Result = load.Result;
                 ResultLoaded();
             }
 
@@ -260,7 +258,8 @@ namespace Keyboard_Inspector {
             var load = await FileSystem.Import(url, format, ctsLoadURL.Token);
 
             if (load.Error == null) {
-                Result = load.Result;
+                Program.Unfreeze();
+                Program.Result = load.Result;
                 ResultLoaded();
             }
 
@@ -287,9 +286,9 @@ namespace Keyboard_Inspector {
 
         void save_Click(object sender, EventArgs e) {
             if (!mainmenu.Enabled) return;
-            if (Result.IsEmpty(Result)) return;
+            if (Result.IsEmpty(Program.Result)) return;
 
-            status.Text = FileSystem.Save(Result);
+            status.Text = FileSystem.Save(Program.Result);
         }
 
         async void import_Click(object sender, EventArgs e) {
