@@ -449,9 +449,7 @@ namespace Keyboard_Inspector {
             }
         }
 
-        void PanAction(Point pt, Units u = null) {
-            u = u?? GetUnits();
-
+        Point CapturedCursorTick(Point pt) {
             Cursor.Position = PointToScreen(CapturedPoint);
 
             if (pt != CapturedPoint) {
@@ -462,6 +460,14 @@ namespace Keyboard_Inspector {
             Point offset = new Point(CapturedPoint.X - pt.X, CapturedPoint.Y - pt.Y);
             CapturedOffset.X += offset.X;
             CapturedOffset.Y += offset.Y;
+
+            return offset;
+        }
+
+        void PanAction(Point pt, Units u = null) {
+            u = u?? GetUnits();
+
+            Point offset = CapturedCursorTick(pt);
 
             if (CapturedDirection == PanDirection.None) {
                 if (Zoom == 1) {
@@ -530,6 +536,31 @@ namespace Keyboard_Inspector {
             return Cramp.Calc(1 / CapturedZoomWithCramp + dist);
         }
 
+        void ScrollAction(Point pt, Units u = null) {
+            u = u?? GetUnits();
+
+            CapturedCursorTick(pt);
+
+            double ScrollBarDistance() => -CapturedOffset.X / u.ScrollBarArea.Width;
+
+            if (CapturedScrollBar == ScrollBarComponent.ScrollBar) {
+                Viewport = CapturedViewport + ScrollBarDistance();
+
+            } else if (CapturedScrollBar == ScrollBarComponent.NotchLeft) {
+                Program.CursorVisible = false;
+                double rightEdge = CapturedViewport + 1 / CapturedZoom;
+                double newInvZoom = NotchAction(-ScrollBarDistance(), u).Clamp(0, rightEdge);
+                Zoom = 1 / newInvZoom;
+                Viewport = rightEdge - newInvZoom;
+
+            } else if (CapturedScrollBar == ScrollBarComponent.NotchRight) {
+                Program.CursorVisible = false;
+                Zoom = 1 / NotchAction(ScrollBarDistance(), u).Clamp(0, 1 - Viewport);
+            }
+
+            Invalidate();
+        }
+
         protected override void OnMouseMove(MouseEventArgs e) {
             /* Double Click Region */ {
                 Point dist = new Point(e.X - lastDown.X, e.Y - lastDown.Y);
@@ -546,26 +577,11 @@ namespace Keyboard_Inspector {
 
             ScrollBarComponent setHovering = ScrollBarComponent.None;
 
-            double ScrollBarDistance()
-                => (e.X - CapturedScrollBarX) / u.ScrollBarArea.Width;
-
             if (Captured) {
                 PanAction(e.Location, u);
 
-            } else if (CapturedScrollBar == ScrollBarComponent.ScrollBar) {
-                Viewport = CapturedViewport + ScrollBarDistance();
-                Invalidate();
-
-            } else if (CapturedScrollBar == ScrollBarComponent.NotchLeft) {
-                double rightEdge = CapturedViewport + 1 / CapturedZoom;
-                double newInvZoom = NotchAction(-ScrollBarDistance(), u).Clamp(0, rightEdge);
-                Zoom = 1 / newInvZoom;
-                Viewport = rightEdge - newInvZoom;
-                Invalidate();
-
-            } else if (CapturedScrollBar == ScrollBarComponent.NotchRight) {
-                Zoom = 1 / NotchAction(ScrollBarDistance(), u).Clamp(0, 1 - Viewport);
-                Invalidate();
+            } else if (CapturedScrollBar != ScrollBarComponent.None) {
+                ScrollAction(e.Location, u);
 
             } else if (u.NotchLeft.Contains(e.Location)) {
                 setHovering = ScrollBarComponent.NotchLeft;
@@ -650,6 +666,8 @@ namespace Keyboard_Inspector {
         void HandleMouseClick(MouseEventArgs e) {
             if (!HasAny) return;
 
+            if (AnyCaptured) return;
+
             if (e.Button == MouseButtons.Left) {
                 Units u = GetUnits();
 
@@ -710,8 +728,9 @@ namespace Keyboard_Inspector {
         double CapturedZoom;
         double CapturedZoomWithCramp;
         double CapturedViewport;
-        int CapturedScrollBarX;
         ScrollBarComponent CapturedScrollBar;
+
+        bool AnyCaptured => Captured || CapturedScrollBar != ScrollBarComponent.None;
 
         int clicks = 0;
         long lastClick = long.MinValue;
@@ -754,7 +773,9 @@ namespace Keyboard_Inspector {
             } else if (u.ScrollBar.Contains(e.Location)) {
                 CapturedScrollBar = Hovering;
                 Hovering = ScrollBarComponent.None;
-                CapturedScrollBarX = e.X;
+                CapturedOffset = new Point(0, 0);
+                CapturedPoint = e.Location;
+                CapturedXValue = (e.X - u.ScrollBar.X - u.NotchLeft.Width) / (u.ScrollBar.Width - u.NotchLeft.Width - u.NotchRight.Width);
                 CapturedZoom = Zoom;
                 Cramp.Refresh(u.CrampedZoom, MaxZoom);
                 CapturedZoomWithCramp = 1 / Cramp.Inv(1 / Zoom);
@@ -762,9 +783,7 @@ namespace Keyboard_Inspector {
             }
         }
 
-        void StopUIAction() {
-            Program.CursorVisible = true;
-
+        void StopUIAction(Units u = null) {
             if (Captured) {
                 Captured = false;
                 Invalidate();
@@ -772,8 +791,22 @@ namespace Keyboard_Inspector {
 
             if (CapturedScrollBar != ScrollBarComponent.None) {
                 CapturedScrollBar = ScrollBarComponent.None;
+
+                u = u?? GetUnits();
+
+                if (CapturedXValue < 0)
+                    CapturedPoint.X = (int)(u.NotchLeft.X + u.NotchLeft.Width / 2);
+
+                else if (CapturedXValue >= 1)
+                    CapturedPoint.X = (int)(u.NotchRight.X + u.NotchRight.Width / 2);
+
+                else CapturedPoint.X = (int)(CapturedXValue * (u.ScrollBar.Width - u.NotchLeft.Width - u.NotchRight.Width) + u.ScrollBar.X + u.NotchLeft.Width);
+
+                Cursor.Position = PointToScreen(CapturedPoint);
                 Invalidate();
             }
+
+            Program.CursorVisible = true;
         }
 
         protected override void OnMouseUp(MouseEventArgs e) {
