@@ -53,7 +53,7 @@ namespace Keyboard_Inspector {
 
         List<double> compound;
         void CalcCompound(List<Event> e) {
-            compound = new List<double>(Math.Min(100_000_000, e.Count * e.Count / 2));
+            compound = new List<double>();
 
             for (int i = 0; i < e.Count - 1; i++) {
                 for (int j = i + 1; j < e.Count; j++) {
