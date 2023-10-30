@@ -497,21 +497,37 @@ namespace Keyboard_Inspector {
             }
         }
 
+        // https://www.desmos.com/calculator/qtg073idnp
+        static class Cramp {
+            const double s = 0.0004;
+            static double a, m, n, z;
+
+            public static void Refresh(double crampedZoom, double maxZoom) {
+                a = 1 / crampedZoom;
+                m = 1 / maxZoom;
+                n = Math.Pow(Math.E, -1 / (a - m));
+                z = a - Math.Log(s, n);
+            }
+
+            static double f(double x) => Math.Pow(n, a - x) * (a - m) + m;
+
+            public static double Calc(double x) {
+                if (x < z) return Math.Max(m, s * (x - z) + f(z));
+                if (x < a) return f(x);
+                return x;
+            }
+
+            public static double Inv(double y) {
+                double fz = f(z);
+                if (y < fz) return (y - fz) / s + z;
+                if (y < a) return a - Math.Log((y - m) / (a - m), n); // f^-1
+                return y;
+            }
+        }
+
         double NotchAction(double dist, Units u = null) {
-            u = u?? GetUnits();
-            double invCrampedZoom = 1 / u.CrampedZoom;
-
-            double newInvZoom = 1 / CapturedZoom + dist;
-
-            if (newInvZoom >= invCrampedZoom)
-                return newInvZoom;
-
-            // https://www.desmos.com/calculator/dycwd5avjg
-            double invMaxZoom = 1 / MaxZoom;
-            double am = invCrampedZoom - invMaxZoom;
-            double slope = Math.Pow(Math.E, -1 / am);
-            Console.WriteLine(newInvZoom);
-            return Math.Pow(slope, invCrampedZoom - newInvZoom) * am + invMaxZoom;
+            Cramp.Refresh(u.CrampedZoom, MaxZoom);
+            return Cramp.Calc(1 / CapturedZoomWithCramp + dist);
         }
 
         protected override void OnMouseMove(MouseEventArgs e) {
@@ -692,6 +708,7 @@ namespace Keyboard_Inspector {
         double CapturedXValue;
         PanDirection CapturedDirection;
         double CapturedZoom;
+        double CapturedZoomWithCramp;
         double CapturedViewport;
         int CapturedScrollBarX;
         ScrollBarComponent CapturedScrollBar;
@@ -739,6 +756,8 @@ namespace Keyboard_Inspector {
                 Hovering = ScrollBarComponent.None;
                 CapturedScrollBarX = e.X;
                 CapturedZoom = Zoom;
+                Cramp.Refresh(u.CrampedZoom, MaxZoom);
+                CapturedZoomWithCramp = 1 / Cramp.Inv(1 / Zoom);
                 CapturedViewport = Viewport;
             }
         }
