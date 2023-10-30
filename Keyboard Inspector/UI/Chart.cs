@@ -449,6 +449,18 @@ namespace Keyboard_Inspector {
             }
         }
 
+        RectangleF GetScrollBarComponent(ScrollBarComponent x, Units u = null) {
+            u = u?? GetUnits();
+
+            switch (x) {
+                case ScrollBarComponent.ScrollBar: return u.ScrollBar;
+                case ScrollBarComponent.NotchLeft: return u.NotchLeft;
+                case ScrollBarComponent.NotchRight: return u.NotchRight;
+            }
+
+            return RectangleF.Empty;
+        }
+
         Point CapturedCursorTick(Point pt) {
             Cursor.Position = PointToScreen(CapturedPoint);
 
@@ -775,7 +787,7 @@ namespace Keyboard_Inspector {
                 Hovering = ScrollBarComponent.None;
                 CapturedOffset = new Point(0, 0);
                 CapturedPoint = e.Location;
-                CapturedXValue = (e.X - u.ScrollBar.X - u.NotchLeft.Width) / (u.ScrollBar.Width - u.NotchLeft.Width - u.NotchRight.Width);
+                CapturedXValue = e.X - GetScrollBarComponent(CapturedScrollBar, u).X;
                 CapturedZoom = Zoom;
                 Cramp.Refresh(u.CrampedZoom, MaxZoom);
                 CapturedZoomWithCramp = 1 / Cramp.Inv(1 / Zoom);
@@ -790,19 +802,10 @@ namespace Keyboard_Inspector {
             }
 
             if (CapturedScrollBar != ScrollBarComponent.None) {
-                CapturedScrollBar = ScrollBarComponent.None;
-
-                u = u?? GetUnits();
-
-                if (CapturedXValue < 0)
-                    CapturedPoint.X = (int)(u.NotchLeft.X + u.NotchLeft.Width / 2);
-
-                else if (CapturedXValue >= 1)
-                    CapturedPoint.X = (int)(u.NotchRight.X + u.NotchRight.Width / 2);
-
-                else CapturedPoint.X = (int)(CapturedXValue * (u.ScrollBar.Width - u.NotchLeft.Width - u.NotchRight.Width) + u.ScrollBar.X + u.NotchLeft.Width);
-
+                CapturedPoint.X = (int)(GetScrollBarComponent(CapturedScrollBar, u).X + CapturedXValue);
                 Cursor.Position = PointToScreen(CapturedPoint);
+
+                CapturedScrollBar = ScrollBarComponent.None;
                 Invalidate();
             }
 
