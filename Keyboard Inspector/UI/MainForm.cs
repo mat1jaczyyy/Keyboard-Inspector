@@ -64,7 +64,7 @@ namespace Keyboard_Inspector {
 
             save.Enabled = split.Visible = !Result.IsEmpty(Program.Result);
 
-            labelN.Text = Result.IsEmpty(Program.Result) ? "" : Program.Result.Events.Count.ToString();
+            labelN.Text = Result.IsEmpty(Program.Result)? "" : $"Events: {Program.Result.Events.Count}";
 
             screen.LoadData(Program.Result);
 

@@ -30,17 +30,9 @@ namespace Keyboard_Inspector {
             this.status = new DarkUI.Controls.DarkLabel();
             this.split = new System.Windows.Forms.SplitContainer();
             this.tlpCharts = new System.Windows.Forms.TableLayoutPanel();
-            this.tDiffs = new Keyboard_Inspector.Chart();
-            this.tCompound = new Keyboard_Inspector.Chart();
-            this.tCircular = new Keyboard_Inspector.Chart();
-            this.fDiffs = new Keyboard_Inspector.Chart();
-            this.fCompound = new Keyboard_Inspector.Chart();
-            this.fCircular = new Keyboard_Inspector.Chart();
-            this.tlpMain = new System.Windows.Forms.TableLayoutPanel();
             this.precisionPanel = new System.Windows.Forms.Panel();
             this.lowCut = new DarkUI.Controls.DarkCheckBox();
             this.label25 = new DarkUI.Controls.DarkLabel();
-            this.label24 = new DarkUI.Controls.DarkLabel();
             this.hps = new DarkUI.Controls.DarkNumericUpDown();
             this.label23 = new DarkUI.Controls.DarkLabel();
             this.precisionHalf = new DarkUI.Controls.DarkButton();
@@ -49,7 +41,6 @@ namespace Keyboard_Inspector {
             this.tbPrecision = new DarkUI.Controls.DarkTextBox();
             this.label21 = new DarkUI.Controls.DarkLabel();
             this.label22 = new DarkUI.Controls.DarkLabel();
-            this.screen = new Keyboard_Inspector.Chart();
             this.recording = new System.Windows.Forms.ToolStripMenuItem();
             this.open = new System.Windows.Forms.ToolStripMenuItem();
             this.save = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,12 +51,18 @@ namespace Keyboard_Inspector {
             this.captureGamepad = new System.Windows.Forms.ToolStripMenuItem();
             this.captureMouse = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.tDiffs = new Keyboard_Inspector.Chart();
+            this.tCompound = new Keyboard_Inspector.Chart();
+            this.tCircular = new Keyboard_Inspector.Chart();
+            this.fDiffs = new Keyboard_Inspector.Chart();
+            this.fCompound = new Keyboard_Inspector.Chart();
+            this.fCircular = new Keyboard_Inspector.Chart();
+            this.screen = new Keyboard_Inspector.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
             this.split.Panel1.SuspendLayout();
             this.split.Panel2.SuspendLayout();
             this.split.SuspendLayout();
             this.tlpCharts.SuspendLayout();
-            this.tlpMain.SuspendLayout();
             this.precisionPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.hps)).BeginInit();
             this.mainmenu.SuspendLayout();
@@ -103,7 +100,7 @@ namespace Keyboard_Inspector {
             // split.Panel1
             // 
             this.split.Panel1.Controls.Add(this.tlpCharts);
-            this.split.Panel1.Controls.Add(this.tlpMain);
+            this.split.Panel1.Controls.Add(this.precisionPanel);
             this.split.Panel1MinSize = 400;
             // 
             // split.Panel2
@@ -134,91 +131,13 @@ namespace Keyboard_Inspector {
             this.tlpCharts.RowCount = 2;
             this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tlpCharts.Size = new System.Drawing.Size(1294, 486);
+            this.tlpCharts.Size = new System.Drawing.Size(1294, 536);
             this.tlpCharts.TabIndex = 0;
-            // 
-            // tDiffs
-            // 
-            this.tDiffs.AllowDrop = true;
-            this.tDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
-            this.tDiffs.Location = new System.Drawing.Point(3, 3);
-            this.tDiffs.Name = "tDiffs";
-            this.tDiffs.Size = new System.Drawing.Size(425, 237);
-            this.tDiffs.TabIndex = 0;
-            // 
-            // tCompound
-            // 
-            this.tCompound.AllowDrop = true;
-            this.tCompound.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
-            this.tCompound.Location = new System.Drawing.Point(434, 3);
-            this.tCompound.Name = "tCompound";
-            this.tCompound.Size = new System.Drawing.Size(425, 237);
-            this.tCompound.TabIndex = 1;
-            // 
-            // tCircular
-            // 
-            this.tCircular.AllowDrop = true;
-            this.tCircular.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
-            this.tCircular.Location = new System.Drawing.Point(865, 3);
-            this.tCircular.Name = "tCircular";
-            this.tCircular.Size = new System.Drawing.Size(426, 237);
-            this.tCircular.TabIndex = 2;
-            // 
-            // fDiffs
-            // 
-            this.fDiffs.AllowDrop = true;
-            this.fDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
-            this.fDiffs.Location = new System.Drawing.Point(3, 246);
-            this.fDiffs.Name = "fDiffs";
-            this.fDiffs.Size = new System.Drawing.Size(425, 237);
-            this.fDiffs.TabIndex = 3;
-            // 
-            // fCompound
-            // 
-            this.fCompound.AllowDrop = true;
-            this.fCompound.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
-            this.fCompound.Location = new System.Drawing.Point(434, 246);
-            this.fCompound.Name = "fCompound";
-            this.fCompound.Size = new System.Drawing.Size(425, 237);
-            this.fCompound.TabIndex = 4;
-            // 
-            // fCircular
-            // 
-            this.fCircular.AllowDrop = true;
-            this.fCircular.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
-            this.fCircular.Location = new System.Drawing.Point(865, 246);
-            this.fCircular.Name = "fCircular";
-            this.fCircular.Size = new System.Drawing.Size(426, 237);
-            this.fCircular.TabIndex = 5;
-            // 
-            // tlpMain
-            // 
-            this.tlpMain.ColumnCount = 3;
-            this.tlpMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlpMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlpMain.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlpMain.Controls.Add(this.precisionPanel, 0, 0);
-            this.tlpMain.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.tlpMain.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
-            this.tlpMain.Location = new System.Drawing.Point(0, 486);
-            this.tlpMain.Name = "tlpMain";
-            this.tlpMain.RowCount = 1;
-            this.tlpMain.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tlpMain.Size = new System.Drawing.Size(1294, 75);
-            this.tlpMain.TabIndex = 1;
             // 
             // precisionPanel
             // 
-            this.tlpMain.SetColumnSpan(this.precisionPanel, 3);
             this.precisionPanel.Controls.Add(this.lowCut);
             this.precisionPanel.Controls.Add(this.label25);
-            this.precisionPanel.Controls.Add(this.label24);
             this.precisionPanel.Controls.Add(this.hps);
             this.precisionPanel.Controls.Add(this.label23);
             this.precisionPanel.Controls.Add(this.precisionHalf);
@@ -227,10 +146,10 @@ namespace Keyboard_Inspector {
             this.precisionPanel.Controls.Add(this.tbPrecision);
             this.precisionPanel.Controls.Add(this.label21);
             this.precisionPanel.Controls.Add(this.label22);
-            this.precisionPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.precisionPanel.Location = new System.Drawing.Point(3, 3);
+            this.precisionPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.precisionPanel.Location = new System.Drawing.Point(0, 536);
             this.precisionPanel.Name = "precisionPanel";
-            this.precisionPanel.Size = new System.Drawing.Size(1288, 69);
+            this.precisionPanel.Size = new System.Drawing.Size(1294, 25);
             this.precisionPanel.TabIndex = 5;
             // 
             // lowCut
@@ -238,7 +157,7 @@ namespace Keyboard_Inspector {
             this.lowCut.AutoSize = true;
             this.lowCut.Checked = true;
             this.lowCut.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.lowCut.Location = new System.Drawing.Point(323, 26);
+            this.lowCut.Location = new System.Drawing.Point(300, 3);
             this.lowCut.Name = "lowCut";
             this.lowCut.Size = new System.Drawing.Size(90, 17);
             this.lowCut.TabIndex = 13;
@@ -249,31 +168,18 @@ namespace Keyboard_Inspector {
             // 
             // label25
             // 
-            this.label25.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label25.AutoSize = true;
             this.label25.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label25.Location = new System.Drawing.Point(234, 51);
+            this.label25.Location = new System.Drawing.Point(614, 5);
             this.label25.Name = "label25";
             this.label25.Size = new System.Drawing.Size(40, 13);
             this.label25.TabIndex = 12;
             this.label25.Text = "partials";
             this.label25.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
-            // label24
-            // 
-            this.label24.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label24.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label24.Location = new System.Drawing.Point(33, 5);
-            this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(123, 13);
-            this.label24.TabIndex = 11;
-            this.label24.Text = "Event Count:";
-            this.label24.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
             // hps
             // 
-            this.hps.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.hps.Location = new System.Drawing.Point(162, 49);
+            this.hps.Location = new System.Drawing.Point(542, 3);
             this.hps.Maximum = new decimal(new int[] {
             9,
             0,
@@ -287,9 +193,8 @@ namespace Keyboard_Inspector {
             // 
             // label23
             // 
-            this.label23.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label23.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label23.Location = new System.Drawing.Point(33, 51);
+            this.label23.Location = new System.Drawing.Point(418, 5);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(123, 13);
             this.label23.TabIndex = 9;
@@ -298,8 +203,7 @@ namespace Keyboard_Inspector {
             // 
             // precisionHalf
             // 
-            this.precisionHalf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.precisionHalf.Location = new System.Drawing.Point(245, 26);
+            this.precisionHalf.Location = new System.Drawing.Point(192, 3);
             this.precisionHalf.Name = "precisionHalf";
             this.precisionHalf.Padding = new System.Windows.Forms.Padding(5, 3, 5, 5);
             this.precisionHalf.Size = new System.Drawing.Size(29, 20);
@@ -310,8 +214,7 @@ namespace Keyboard_Inspector {
             // 
             // precisionDouble
             // 
-            this.precisionDouble.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.precisionDouble.Location = new System.Drawing.Point(274, 26);
+            this.precisionDouble.Location = new System.Drawing.Point(221, 3);
             this.precisionDouble.Name = "precisionDouble";
             this.precisionDouble.Padding = new System.Windows.Forms.Padding(5, 3, 5, 5);
             this.precisionDouble.Size = new System.Drawing.Size(29, 20);
@@ -322,21 +225,19 @@ namespace Keyboard_Inspector {
             // 
             // labelN
             // 
-            this.labelN.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.labelN.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.labelN.Location = new System.Drawing.Point(162, 5);
+            this.labelN.Location = new System.Drawing.Point(1084, 5);
             this.labelN.Name = "labelN";
-            this.labelN.Size = new System.Drawing.Size(57, 13);
+            this.labelN.Size = new System.Drawing.Size(177, 13);
             this.labelN.TabIndex = 4;
             this.labelN.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // tbPrecision
             // 
-            this.tbPrecision.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.tbPrecision.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
             this.tbPrecision.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.tbPrecision.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.tbPrecision.Location = new System.Drawing.Point(162, 26);
+            this.tbPrecision.Location = new System.Drawing.Point(109, 3);
             this.tbPrecision.MaxLength = 7;
             this.tbPrecision.Name = "tbPrecision";
             this.tbPrecision.Size = new System.Drawing.Size(56, 20);
@@ -346,36 +247,24 @@ namespace Keyboard_Inspector {
             // 
             // label21
             // 
-            this.label21.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label21.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label21.Location = new System.Drawing.Point(33, 28);
+            this.label21.Location = new System.Drawing.Point(12, 5);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(123, 13);
+            this.label21.Size = new System.Drawing.Size(97, 13);
             this.label21.TabIndex = 4;
             this.label21.Text = "Analysis Precision:";
             this.label21.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // label22
             // 
-            this.label22.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label22.AutoSize = true;
             this.label22.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.label22.Location = new System.Drawing.Point(219, 28);
+            this.label22.Location = new System.Drawing.Point(166, 5);
             this.label22.Name = "label22";
             this.label22.Size = new System.Drawing.Size(20, 13);
             this.label22.TabIndex = 6;
             this.label22.Text = "Hz";
             this.label22.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
-            // 
-            // screen
-            // 
-            this.screen.AllowDrop = true;
-            this.screen.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.screen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
-            this.screen.Location = new System.Drawing.Point(0, 0);
-            this.screen.Name = "screen";
-            this.screen.Size = new System.Drawing.Size(1294, 222);
-            this.screen.TabIndex = 1;
             // 
             // recording
             // 
@@ -482,6 +371,76 @@ namespace Keyboard_Inspector {
             this.captureMouse.Size = new System.Drawing.Size(171, 22);
             this.captureMouse.Text = "Mouse";
             // 
+            // tDiffs
+            // 
+            this.tDiffs.AllowDrop = true;
+            this.tDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
+            this.tDiffs.Location = new System.Drawing.Point(3, 3);
+            this.tDiffs.Name = "tDiffs";
+            this.tDiffs.Size = new System.Drawing.Size(425, 262);
+            this.tDiffs.TabIndex = 0;
+            // 
+            // tCompound
+            // 
+            this.tCompound.AllowDrop = true;
+            this.tCompound.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
+            this.tCompound.Location = new System.Drawing.Point(434, 3);
+            this.tCompound.Name = "tCompound";
+            this.tCompound.Size = new System.Drawing.Size(425, 262);
+            this.tCompound.TabIndex = 1;
+            // 
+            // tCircular
+            // 
+            this.tCircular.AllowDrop = true;
+            this.tCircular.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
+            this.tCircular.Location = new System.Drawing.Point(865, 3);
+            this.tCircular.Name = "tCircular";
+            this.tCircular.Size = new System.Drawing.Size(426, 262);
+            this.tCircular.TabIndex = 2;
+            // 
+            // fDiffs
+            // 
+            this.fDiffs.AllowDrop = true;
+            this.fDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
+            this.fDiffs.Location = new System.Drawing.Point(3, 271);
+            this.fDiffs.Name = "fDiffs";
+            this.fDiffs.Size = new System.Drawing.Size(425, 262);
+            this.fDiffs.TabIndex = 3;
+            // 
+            // fCompound
+            // 
+            this.fCompound.AllowDrop = true;
+            this.fCompound.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
+            this.fCompound.Location = new System.Drawing.Point(434, 271);
+            this.fCompound.Name = "fCompound";
+            this.fCompound.Size = new System.Drawing.Size(425, 262);
+            this.fCompound.TabIndex = 4;
+            // 
+            // fCircular
+            // 
+            this.fCircular.AllowDrop = true;
+            this.fCircular.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
+            this.fCircular.Location = new System.Drawing.Point(865, 271);
+            this.fCircular.Name = "fCircular";
+            this.fCircular.Size = new System.Drawing.Size(426, 262);
+            this.fCircular.TabIndex = 5;
+            // 
+            // screen
+            // 
+            this.screen.AllowDrop = true;
+            this.screen.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.screen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
+            this.screen.Location = new System.Drawing.Point(0, 0);
+            this.screen.Name = "screen";
+            this.screen.Size = new System.Drawing.Size(1294, 222);
+            this.screen.TabIndex = 1;
+            // 
             // MainForm
             // 
             this.AllowDrop = true;
@@ -506,7 +465,6 @@ namespace Keyboard_Inspector {
             ((System.ComponentModel.ISupportInitialize)(this.split)).EndInit();
             this.split.ResumeLayout(false);
             this.tlpCharts.ResumeLayout(false);
-            this.tlpMain.ResumeLayout(false);
             this.precisionPanel.ResumeLayout(false);
             this.precisionPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.hps)).EndInit();
@@ -531,13 +489,11 @@ namespace Keyboard_Inspector {
         private DarkUI.Controls.DarkButton precisionDouble;
         private DarkUI.Controls.DarkLabel label23;
         private DarkUI.Controls.DarkNumericUpDown hps;
-        private DarkUI.Controls.DarkLabel label24;
         private DarkUI.Controls.DarkLabel label25;
         private System.Windows.Forms.ToolStripMenuItem recording;
         private System.Windows.Forms.ToolStripMenuItem open;
         private System.Windows.Forms.ToolStripMenuItem save;
         private DarkUI.Controls.DarkMenuStrip mainmenu;
-        private System.Windows.Forms.TableLayoutPanel tlpMain;
         private DarkUI.Controls.DarkCheckBox lowCut;
         private System.Windows.Forms.ToolTip toolTip1;
         private Chart screen;
