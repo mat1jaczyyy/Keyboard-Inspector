@@ -1,59 +1,41 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Keyboard_Inspector {
     static class Recorder {
-        public delegate void RecordEventMethod(Event e);
+        public static Result Recording { get; private set; }
 
         static Stopwatch time;
-        static List<Event> events;
-        static Dictionary<long, int> sources;
+        public static double Elapsed => (double)time.ElapsedTicks / Stopwatch.Frequency;
 
-        public static double ElapsedPrecise => (double)time.ElapsedTicks / Stopwatch.Frequency;
+        public static bool IsRecording => Recording != null;
 
-        public static bool IsRecording { get; private set; }
+        public static void StopRecording() {
+            if (!IsRecording) return;
 
-        public static void StartRecording() {
-            if (IsRecording)
-                StopRecording();
-
-            // TODO maybe increase initial capacity?
-            events = new List<Event>();
-            sources = new Dictionary<long, int>();
-
-            time?.Stop();
-            time = new Stopwatch();
-            time.Start();
-
-            IsRecording = true;
-
-            Listener.Start();
-        }
-
-        public static Result StopRecording() {
-            if (!IsRecording) return null;
-
-            Listener.Stop();
+            ListenerForm.Instance.InvokeIfRequired(() => ListenerForm.Instance.RegisterRawInput(false));
 
             time.Stop();
 
-            IsRecording = false;
-
-            return new Result("", DateTime.Now, ElapsedPrecise, events, sources.Keys.ToDictionary(i => i, i => Source.FromHandle(i, sources[i])));
+            Recording.Time = Elapsed;
+            Recording = null;
         }
 
-        public static void RecordInput(bool pressed, Input input)
-            => RecordInput(ElapsedPrecise, pressed, input);
+        public static void StartRecording(Result result) {
+            if (IsRecording)
+                StopRecording();
 
-        public static void RecordInput(double precise, bool pressed, Input input) {
-            events.Add(new Event(precise, pressed, input));
+            time?.Stop();
+            time = new Stopwatch();
 
-            if (!sources.ContainsKey(input.Source))
-                sources[input.Source] = 0;
+            Recording = result;
+            time.Start();
 
-            sources[input.Source]++;
+            ListenerForm.Instance.InvokeIfRequired(() => ListenerForm.Instance.RegisterRawInput(true));
         }
+
+        public static void RecordInput(double time, bool pressed, Input input)
+            => Recording.Record(new Event(time, pressed, input));
     }
 }

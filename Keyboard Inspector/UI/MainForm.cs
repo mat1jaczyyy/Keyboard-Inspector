@@ -56,7 +56,7 @@ namespace Keyboard_Inspector {
             rec.Refresh();
         }
 
-        void ResultLoaded() {
+        public void RefreshResult() {
             UpdateState(Recorder.IsRecording? UIState.Recording : UIState.None);
 
             string title = Result.IsEmpty(Program.Result)? "" : Program.Result.GetTitle();
@@ -67,8 +67,6 @@ namespace Keyboard_Inspector {
             labelN.Text = Result.IsEmpty(Program.Result) ? "" : Program.Result.Events.Count.ToString();
 
             screen.LoadData(Program.Result);
-
-            if (Result.IsEmpty(Program.Result)) return;
 
             SetPrecisionSilently();
             SetHPSSilently();
@@ -82,14 +80,14 @@ namespace Keyboard_Inspector {
                 ctsLoadURL.Cancel();
 
             } else if (!Recorder.IsRecording) {
-                Program.Result = null;
-                Recorder.StartRecording();
+                Program.Result = new Result();
+                Recorder.StartRecording(Program.Result);
 
             } else {
-                Program.Result = Recorder.StopRecording();
+                Recorder.StopRecording();
             }
 
-            ResultLoaded();
+            RefreshResult();
         }
 
         bool silent;
@@ -231,7 +229,7 @@ namespace Keyboard_Inspector {
 
         void CloseFile() {
             Program.Result = null;
-            ResultLoaded();
+            RefreshResult();
         }
 
         async Task LoadFile(string filename, FileFormat format = null) {
@@ -242,7 +240,7 @@ namespace Keyboard_Inspector {
             if (load.Error == null) {
                 Program.Unfreeze();
                 Program.Result = load.Result;
-                ResultLoaded();
+                RefreshResult();
             }
 
             UpdateState(UIState.None);
@@ -260,7 +258,7 @@ namespace Keyboard_Inspector {
             if (load.Error == null) {
                 Program.Unfreeze();
                 Program.Result = load.Result;
-                ResultLoaded();
+                RefreshResult();
             }
 
             UpdateState(UIState.None);
@@ -337,9 +335,7 @@ namespace Keyboard_Inspector {
             }
         }
 
-        private void captureDontClose(object sender, ToolStripDropDownClosingEventArgs e) {
-            if (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked)
-                e.Cancel = true;
-        }
+        void MainForm_FormClosed(object sender, FormClosedEventArgs e)
+            => Application.Exit();
     }
 }

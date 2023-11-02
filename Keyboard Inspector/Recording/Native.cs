@@ -345,23 +345,9 @@ namespace Keyboard_Inspector {
         /// <param name="cbSizeHeader">Size of the header.</param>
         /// <returns>0 if successful if pData is null, otherwise number of bytes if pData is not null.</returns>
         [DllImport("user32.dll")]
-        static extern bool GetRawInputData(IntPtr hRawInput, RawInputCommand uiCommand, out RawKeyboard pData, out int pcbSize, int cbSizeHeader);
-
-        [DllImport("user32.dll")]
         static extern bool GetRawInputData(IntPtr hRawInput, RawInputCommand uiCommand, out RawHID pData, out int pcbSize, int cbSizeHeader);
 
-        [DllImport("user32.dll")]
-        static extern bool GetRawInputData(IntPtr hRawInput, RawInputCommand uiCommand, out RawMouse pData, out int pcbSize, int cbSizeHeader);
-
-        public static bool GetRawInputData(IntPtr hRawInput, out RawKeyboard pData)
-            => GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)))
-                && GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)));
-
         public static bool GetRawInputData(IntPtr hRawInput, out RawHID pData)
-            => GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)))
-                && GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)));
-
-        public static bool GetRawInputData(IntPtr hRawInput, out RawMouse pData)
             => GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)))
                 && GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)));
 

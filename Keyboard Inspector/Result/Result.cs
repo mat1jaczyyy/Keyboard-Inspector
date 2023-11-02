@@ -11,61 +11,47 @@ namespace Keyboard_Inspector {
         public string Title;
         public DateTime Recorded;
 
-        public double Time;
+        double _time;
+        public double Time {
+            get => Recorder.Recording == this? Recorder.Elapsed : _time;
+            set => _time = value;
+        }
         public List<Event> Events;
         public Dictionary<long, Source> Sources;
 
         public Analysis Analysis;
 
         public List<InputInfo> Inputs { get; private set; }
+        Dictionary<Input, InputInfo> Groups = new Dictionary<Input, InputInfo>();
+
+        public Result()
+        : this("", DateTime.Now, 0, new List<Event>(), new Dictionary<long, Source>()) {}
 
         public Result(string title, DateTime recorded, double time, List<Event> events, Dictionary<long, Source> sources, Analysis analysis = null, List<InputInfo> inputs = null) {
-            Dictionary<Input, InputInfo> groups = new Dictionary<Input, InputInfo>();
-
+            // TODO Simplify?
             for (int i = 0; i < events.Count; i++) {
                 var e = events[i];
 
                 // Filter Windows auto-repeat
-                if (groups.ContainsKey(e.Input) && groups[e.Input].Events.Last().Pressed == e.Pressed) {
+                if (Groups.ContainsKey(e.Input) && Groups[e.Input].Events.Last().Pressed == e.Pressed) {
                     events.RemoveAt(i);
                     i--;
 
                 } else {
-                    if (!groups.ContainsKey(e.Input))
-                        groups[e.Input] = new InputInfo(e.Input);
+                    if (!Groups.ContainsKey(e.Input))
+                        Groups[e.Input] = new InputInfo(e.Input);
 
-                    groups[e.Input].Events.Add(e);
+                    Groups[e.Input].Events.Add(e);
                 }
             }
 
             if (inputs == null) {
-                inputs = groups.Values.ToList();
+                inputs = Groups.Values.ToList();
             
             } else {
                 foreach (var i in inputs) {
-                    i.Events = groups[i.Input].Events;
+                    i.Events = Groups[i.Input].Events;
                 }
-            }
-
-            if (Program.IsFrozen) {
-                Program.Frozen.RemoveAll(i => !i.Visible);
-
-                foreach (var i in Program.Frozen)
-                    i.Events.Clear();
-
-                foreach (var i in inputs) {
-                    int f = Program.Frozen.FindIndex(j => j.Input == i.Input);
-
-                    if (f == -1) {
-                        i.Visible = false;
-                        Program.Frozen.Add(i);
-
-                    } else {
-                        Program.Frozen[f] = i;
-                    }
-                }
-
-                inputs = Program.Frozen;
             }
             
             Title = title?? "";
@@ -76,16 +62,27 @@ namespace Keyboard_Inspector {
             Analysis = analysis?? new Analysis();
             Analysis.Result = this;
             Inputs = inputs;
-            
-            if (!Program.IsFrozen) {
-                Source best = GetBestSource(0.8);
+        }
 
-                if (best != null) {
-                    foreach (var i in Inputs) {
-                        i.Visible = Sources[i.Input.Source] == best;
-                    }
-                }
-            }
+        public void Record(Event e) {
+            if (Groups.ContainsKey(e.Input)) {
+                if (Groups[e.Input].Events.Last().Pressed == e.Pressed)
+                    return;
+
+            } else if (!e.Pressed)
+                return;
+
+            Events.Add(e);
+
+            if (!Groups.ContainsKey(e.Input))
+                Inputs.Add(Groups[e.Input] = new InputInfo(e.Input));
+
+            Groups[e.Input].Events.Add(e);
+
+            if (!Sources.ContainsKey(e.Input.Source))
+                Sources[e.Input.Source] = Source.FromHandle(e.Input.Source, 0);
+
+            Sources[e.Input.Source].Count++;
         }
 
         public string GetTitle()

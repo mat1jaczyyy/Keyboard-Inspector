@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
 
 using DarkUI.Win32;
@@ -13,19 +15,6 @@ namespace Keyboard_Inspector {
         public static readonly string WisdomFile = Path.Combine(DataDir, "wisdom");
 
         public static string[] Args = null;
-
-        class InputMessageFilter: IMessageFilter {
-            const int WM_INPUT = 0x00FF;
-
-            public bool PreFilterMessage(ref Message m) {
-                if (m.Msg == WM_INPUT) {
-                    Listener.Process(ref m);
-                    return true;
-                }
-
-                return false;
-            }
-        }
 
         static bool _cursorVisible = true;
         public static bool CursorVisible {
@@ -67,10 +56,30 @@ namespace Keyboard_Inspector {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Application.AddMessageFilter(new InputMessageFilter());
+            var thread = new Thread(ListenerThread);
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+
             Application.AddMessageFilter(new ControlScrollFilter());
+
+            Application.Idle += OnIdle;
 
             Application.Run(new MainForm());
         }
+
+        static void ListenerThread() {
+            Application.AddMessageFilter(new InputMessageFilter());
+            Application.Run(new ListenerForm());
+        }
+
+        static void OnIdle(object sender, EventArgs e) {
+            while (!PeekMessage(out _, IntPtr.Zero, 0, 0, 0)) {
+                if (!Recorder.IsRecording) return;
+                MainForm.Instance.RefreshResult();
+            }
+        }
+
+        [DllImport("User32.dll", CharSet = CharSet.Auto)]
+        public static extern bool PeekMessage(out Message msg, IntPtr hWnd, uint messageFilterMin, uint messageFilterMax, uint flags);
     }
 }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Keyboard_Inspector {
     class Source: IBinary {
-        public readonly int Count;
+        public int Count;
         public readonly string Name;
         public readonly string DeviceInterface;
 

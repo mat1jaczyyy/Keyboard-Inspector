@@ -68,9 +68,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FileSystem\Format.cs" />
+    <Compile Include="Recording\InputMessageFilter.cs" />
+    <Compile Include="Recording\UnprocessedInput.cs" />
     <Compile Include="Result\Analysis.cs" />
     <Compile Include="Benchmark.cs" />
     <Compile Include="Result\InputInfo.cs" />
+    <Compile Include="Result\Keys.cs" />
     <Compile Include="UI\Chart.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -79,6 +82,12 @@
     <Compile Include="FileSystem\FileSystem.cs" />
     <Compile Include="Result\Input.cs" />
     <Compile Include="Result\IBinary.cs" />
+    <Compile Include="Recording\ListenerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Recording\ListenerForm.Designer.cs">
+      <DependentUpon>ListenerForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -96,7 +105,6 @@
       <DependentUpon>TTRMPickerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="TETR.IO\TetrioReplay.cs" />
-    <Compile Include="Recording\Listener.cs" />
     <Compile Include="Recording\Native.cs" />
     <Compile Include="FileSystem\ImportFileDialog.cs">
       <SubType>Form</SubType>
@@ -114,6 +122,9 @@
     <None Include="keyboard.ico" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Recording\ListenerForm.resx">
+      <DependentUpon>ListenerForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
