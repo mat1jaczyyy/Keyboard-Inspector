@@ -152,6 +152,11 @@ namespace Keyboard_Inspector {
                 Invalidate();
             };
 
+            InputMenu.Closed += (_, __) => {
+                YTextCaptured = -1;
+                Invalidate();
+            };
+
             InputMenu.ResumeLayout(false);
         }
 
@@ -401,18 +406,43 @@ namespace Keyboard_Inspector {
             base.OnMouseLeave(e);
 
             HighlightPoint = -1;
-            Hovering = ScrollBarComponent.None;
+            ScrollHovering = ScrollBarComponent.None;
+            YTextHovering = -1;
         }
 
-        bool IntersectYText(Point pt, bool menu, out int result, Units u = null) {
+        enum YTextIntent {
+            Menu, Drag, Hover
+        }
+
+        int _ytexthovering = -1;
+        int YTextHovering {
+            get => _ytexthovering;
+            set {
+                if (_ytexthovering != value) {
+                    _ytexthovering = value;
+                    Invalidate();
+                }
+            }
+        }
+        int YTextCaptured = -1;
+
+        bool IntersectYText(Point pt, YTextIntent intent, out int result, Units u = null) {
             u = u?? GetUnits();
 
             result = -1;
 
+            if (intent == YTextIntent.Drag && KeyHistory.Inputs.Count <= 1)
+                return false;
+
+            var rects = u.KeyDrag;
+
+            if (intent == YTextIntent.Menu)
+                rects = u.KeyMenu;
+
             for (int i = 0, v = 0; i < KeyHistory.Inputs.Count; i++) {
                 if (!KeyHistory.Inputs[i].Visible) continue;
 
-                if ((menu? u.KeyMenu : u.KeyDrag)[v].Contains(pt)) {
+                if (rects[v].Contains(pt)) {
                     result = i;
                     return true;
                 }
@@ -422,28 +452,16 @@ namespace Keyboard_Inspector {
             return false;
         }
 
-        bool IntersectForMenu(Point pt, out int result, Units u = null)
-            => IntersectYText(pt, true, out result, u);
-        
-        bool IntersectForDrag(Point pt, out int result, Units u = null) {
-            if (KeyHistory.Inputs.Count <= 1) {
-                result = -1;
-                return false;
-            }
-
-            return IntersectYText(pt, false, out result, u);
-        }
-
         enum ScrollBarComponent {
             None, ScrollBar, NotchLeft, NotchRight
         }
 
-        ScrollBarComponent _hovering = ScrollBarComponent.None;
-        ScrollBarComponent Hovering {
-            get => _hovering;
+        ScrollBarComponent _scrollhovering = ScrollBarComponent.None;
+        ScrollBarComponent ScrollHovering {
+            get => _scrollhovering;
             set {
-                if (_hovering != value) {
-                    _hovering = value;
+                if (_scrollhovering != value) {
+                    _scrollhovering = value;
                     Invalidate();
                 }
             }
@@ -587,7 +605,8 @@ namespace Keyboard_Inspector {
             Units u = GetUnits();
             bool canHighlight = false;
 
-            ScrollBarComponent setHovering = ScrollBarComponent.None;
+            ScrollBarComponent setScrollHovering = ScrollBarComponent.None;
+            int setYTextHovering = -1;
 
             if (Captured) {
                 PanAction(e.Location, u);
@@ -596,13 +615,16 @@ namespace Keyboard_Inspector {
                 ScrollAction(e.Location, u);
 
             } else if (u.NotchLeft.Contains(e.Location)) {
-                setHovering = ScrollBarComponent.NotchLeft;
+                setScrollHovering = ScrollBarComponent.NotchLeft;
             
             } else if (u.NotchRight.Contains(e.Location)) {
-                setHovering = ScrollBarComponent.NotchRight;
+                setScrollHovering = ScrollBarComponent.NotchRight;
 
             } else if (u.ScrollBar.Contains(e.Location)) {
-                setHovering = ScrollBarComponent.ScrollBar;
+                setScrollHovering = ScrollBarComponent.ScrollBar;
+
+            } else if (HasHistory && IntersectYText(e.Location, YTextIntent.Hover, out int i, u)) {
+                setYTextHovering = i;
 
             } else canHighlight = true;
             
@@ -611,7 +633,8 @@ namespace Keyboard_Inspector {
 
             } else HighlightPoint = -1;
 
-            Hovering = setHovering;
+            ScrollHovering = setScrollHovering;
+            YTextHovering = setYTextHovering;
         }
 
         int _highlight = -1;
@@ -704,8 +727,12 @@ namespace Keyboard_Inspector {
             if (e.Button == MouseButtons.Right) {
                 Units u = GetUnits();
 
-                bool intersects = IntersectForMenu(e.Location, out int k, u);
-                if (intersects) InputMenu.Tag = k;
+                bool intersects = IntersectYText(e.Location, YTextIntent.Menu, out int k, u);
+                if (intersects) {
+                    InputMenu.Tag = k;
+                    YTextCaptured = k;
+                    Invalidate();
+                }
 
                 bool multipleInputs = KeyHistory.VisibleInputs().Count() > 1;
 
@@ -766,8 +793,10 @@ namespace Keyboard_Inspector {
 
             Units u = GetUnits();
 
-            if (HasHistory && IntersectForDrag(e.Location, out int k, u)) {
+            if (HasHistory && IntersectYText(e.Location, YTextIntent.Drag, out int k, u)) {
+                YTextCaptured = k;
                 DoDragDrop(k, DragDropEffects.Move);
+                YTextCaptured = -1;
                 return;
             }
 
@@ -783,8 +812,8 @@ namespace Keyboard_Inspector {
                 CapturedViewport = Viewport;
 
             } else if (u.ScrollBar.Contains(e.Location)) {
-                CapturedScrollBar = Hovering;
-                Hovering = ScrollBarComponent.None;
+                CapturedScrollBar = ScrollHovering;
+                ScrollHovering = ScrollBarComponent.None;
                 CapturedOffset = new Point(0, 0);
                 CapturedPoint = e.Location;
                 CapturedXValue = e.X - GetScrollBarComponent(CapturedScrollBar, u).X;
@@ -835,29 +864,37 @@ namespace Keyboard_Inspector {
             return result.InRangeIE(0, KeyHistory.Inputs.Count) && KeyHistory.Inputs[result].Visible;
         }
 
+        void DragCheck(DragEventArgs e, Action<int, int> success) {
+            if (!HasHistory) return;
+
+            if (!ValidateDrag(e, out int f)) return;
+
+            YTextHovering = f;
+
+            if (IntersectYText(PointToClient(new Point(e.X, e.Y)), YTextIntent.Drag, out int k))
+                success(f, k);
+        }
+
         protected override void OnDragOver(DragEventArgs e) {
             base.OnDragOver(e);
 
             e.Effect = DragDropEffects.None;
 
-            if (!HasHistory)
-            if (!ValidateDrag(e, out _)) return;
+            DragCheck(e, (f, k) => {
+                YTextHovering = k;
+                Invalidate();
 
-            if (IntersectForDrag(PointToClient(new Point(e.X, e.Y)), out _))
                 e.Effect = DragDropEffects.Move;
+            });
         }
 
         protected override void OnDragDrop(DragEventArgs e) {
-            base.OnDragOver(e);
+            base.OnDragDrop(e);
 
-            if (!HasHistory) return;
-            if (!ValidateDrag(e, out int f)) return;
-
-            if (IntersectForDrag(PointToClient(new Point(e.X, e.Y)), out int k)) {
+            DragCheck(e, (f, k) => {
                 KeyHistory.Inputs.Move(f, k);
-
                 Invalidate();
-            }
+            });
         }
 
         class Units {
@@ -1009,7 +1046,7 @@ namespace Keyboard_Inspector {
         // TODO Remove unused
         class ColorSet {
             public Color LineColor;
-            public Brush TextBrush, BackBrush, ShadowBrush, ShadowTextBrush, FrozenBrush, ScrollBarBrush, ScrollBarHoverBrush, ScrollBarCapturedBrush;
+            public Brush TextBrush, BackBrush, ShadowBrush, ShadowTextBrush, HoverBrush, CapturedBrush, ScrollBarBrush, ScrollBarHoverBrush, ScrollBarCapturedBrush;
             public LinearGradientBrush PointBrush;
             public Pen GradientPen, XPen, YPen, CapturedPen;
         }
@@ -1045,7 +1082,8 @@ namespace Keyboard_Inspector {
 
             cs.ShadowBrush = new SolidBrush(BGColor.WithAlpha(200));
             cs.ShadowTextBrush = new SolidBrush(BackColor.Blend(Color.Black, 0.75).WithAlpha(224));
-            cs.FrozenBrush = new SolidBrush(TextColor.Blend(Color.SkyBlue, 0.45));
+            cs.HoverBrush = new SolidBrush(TextColor.Blend(Color.SkyBlue, 0.3));
+            cs.CapturedBrush = new SolidBrush(TextColor.Blend(BackColor, 0.4));
             cs.ScrollBarBrush = new SolidBrush(Color.FromArgb(92, 92, 92));
             cs.ScrollBarHoverBrush = new SolidBrush(Color.FromArgb(122, 128, 132));
             cs.ScrollBarCapturedBrush = new SolidBrush(CapturedColor);
@@ -1218,12 +1256,14 @@ namespace Keyboard_Inspector {
                 var visible = KeyHistory.VisibleInputs().ToList();
 
                 for (int i = 0; i < visible.Count; i++) {
+                    var textBrush = cs.TextBrush;
+
+                    if (i == YTextHovering) textBrush = cs.HoverBrush;
+                    if (i == YTextCaptured) textBrush = cs.CapturedBrush;
+
                     e.Graphics.DrawShadowString(
                         InputAsString(visible[i].Input, u.MultipleSources),
-                        Font,
-                        Program.IsFrozen? cs.FrozenBrush : cs.TextBrush,
-                        cs.ShadowTextBrush,
-                        u.KeyText[i]
+                        Font, textBrush, cs.ShadowTextBrush, u.KeyText[i]
                     );
 
                     double y = u.Chart.Y + i * u.YUnit;
@@ -1352,7 +1392,7 @@ namespace Keyboard_Inspector {
                 bool GetScrollBarBrush(ScrollBarComponent component, out Brush brush) {
                     brush = null;
 
-                    if (Hovering == component) brush = cs.ScrollBarHoverBrush;
+                    if (ScrollHovering == component) brush = cs.ScrollBarHoverBrush;
                     if (CapturedScrollBar == component) brush = cs.ScrollBarCapturedBrush;
 
                     return brush != null;
@@ -1370,7 +1410,7 @@ namespace Keyboard_Inspector {
                 if (GetScrollBarBrush(ScrollBarComponent.NotchRight, out b))
                     e.Graphics.FillRectangle(b, u.NotchRight);
 
-                if (Hovering != ScrollBarComponent.None || CapturedScrollBar != ScrollBarComponent.None) {
+                if (ScrollHovering != ScrollBarComponent.None || CapturedScrollBar != ScrollBarComponent.None) {
                     RectangleF notch = new RectangleF();
                     notch.Y = u.ScrollBar.Y + 1.6f;
                     notch.Width = 1.4f;
