@@ -787,7 +787,7 @@ namespace Keyboard_Inspector {
         double CapturedViewport;
         ScrollBarComponent CapturedScrollBar;
 
-        bool AnyCaptured => Captured || CapturedScrollBar != ScrollBarComponent.None;
+        bool AnyCaptured => (Captured && CapturedDirection != PanDirection.None) || CapturedScrollBar != ScrollBarComponent.None;
 
         int clicks = 0;
         long lastClick = long.MinValue;
