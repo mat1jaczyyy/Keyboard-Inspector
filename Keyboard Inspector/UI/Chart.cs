@@ -40,7 +40,9 @@ namespace Keyboard_Inspector {
                 new ToolStripMenuItem("Show &All Inputs"),
                 new ToolStripSeparator(),
                 new ToolStripMenuItem("&Freeze"),
-                new ToolStripMenuItem("Un&freeze")
+                new ToolStripMenuItem("Un&freeze"),
+                new ToolStripSeparator(),
+                new ToolStripMenuItem("Copy &Interface")
             });
 
             // Change Color
@@ -109,6 +111,8 @@ namespace Keyboard_Inspector {
             InputMenu.Items[6].Click += (_, __) => {
                 if (!HasHistory) return;
 
+                InputMenu.Tag = null;
+
                 KeyHistory.Inputs.SortByKey(i => KeyHistory.Sources[i.Input.Source].Name);
 
                 Invalidate();
@@ -150,6 +154,18 @@ namespace Keyboard_Inspector {
                 Program.Unfreeze();
 
                 Invalidate();
+            };
+
+            // Copy Device Interface
+            InputMenu.Items[12].Click += (_, __) => {
+                if (!HasHistory) return;
+                if (!(InputMenu.Tag is int k)) return;
+
+                InputMenu.Tag = null;
+
+                var source = KeyHistory.Inputs[k].Input.Source;
+
+                Clipboard.SetText(KeyHistory.Sources[source].DeviceInterface);
             };
 
             InputMenu.Closed += (_, __) => {
@@ -747,6 +763,8 @@ namespace Keyboard_Inspector {
 
                 InputMenu.Items[9].Available = !Program.IsFrozen;
                 InputMenu.Items[10].Available = Program.IsFrozen;
+
+                InputMenu.Items[12].Available = intersects && ModifierKeys == Keys.Shift;
 
                 InputMenu.Items.AutoSeparators();
 

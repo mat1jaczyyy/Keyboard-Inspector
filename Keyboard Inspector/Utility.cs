@@ -118,16 +118,21 @@ namespace Keyboard_Inspector {
 
         public static void AutoSeparators(this ToolStripItemCollection items) {
             bool has = false;
+            ToolStripItem lastSep = null;
 
             foreach (ToolStripItem item in items) {
                 if (item is ToolStripMenuItem) {
                     has |= item.Available;
 
                 } else if (item is ToolStripSeparator) {
+                    lastSep = item;
                     item.Available = has;
                     has = false;
                 }
             }
+
+            if (!has && lastSep != null)
+                lastSep.Available = false;
         }
     }
 }
