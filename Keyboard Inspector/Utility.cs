@@ -93,6 +93,9 @@ namespace Keyboard_Inspector {
             return ret;
         }
 
+        public static SizeF Max(this SizeF a, SizeF b)
+            => new SizeF(Math.Max(a.Width, b.Width), Math.Max(a.Height, b.Height));
+
         public static double Blend(this double val, double backVal, double amount) {
             if (amount <= 0) return backVal;
             if (amount >= 1) return val;
@@ -109,8 +112,8 @@ namespace Keyboard_Inspector {
         public static Color WithAlpha(this Color color, byte alpha)
             => Color.FromArgb(alpha, color);
 
-        public static void DrawShadowString(this Graphics g, string text, Font font, Brush textBrush, Brush shadowBrush, RectangleF rect, bool center = false) {
-            StringFormat format = center? new StringFormat() { Alignment = StringAlignment.Center } : null;
+        public static void DrawShadowString(this Graphics g, string text, Font font, Brush textBrush, Brush shadowBrush, RectangleF rect, StringAlignment alignment = StringAlignment.Near) {
+            StringFormat format = new StringFormat() { Alignment = alignment };
 
             rect.Offset(-1, -1);
             g.DrawString(text, font, shadowBrush, rect, format);
@@ -122,16 +125,21 @@ namespace Keyboard_Inspector {
 
         public static void AutoSeparators(this ToolStripItemCollection items) {
             bool has = false;
+            ToolStripItem lastSep = null;
 
             foreach (ToolStripItem item in items) {
                 if (item is ToolStripMenuItem) {
                     has |= item.Available;
 
                 } else if (item is ToolStripSeparator) {
+                    lastSep = item;
                     item.Available = has;
                     has = false;
                 }
             }
+
+            if (!has && lastSep != null)
+                lastSep.Available = false;
         }
 
         public static T CopyMemoryTo<T>(this Native.RawHID raw) where T: struct {
