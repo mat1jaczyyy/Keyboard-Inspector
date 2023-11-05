@@ -471,6 +471,9 @@ namespace Keyboard_Inspector {
             }
         }
 
+        bool HoveringSource(Point pt, Units u = null)
+            => (u?? GetUnits()).SourceOnlyArea.ContainsIX(pt);
+
         bool IntersectYText(Point pt, YTextIntent intent, out int result, Units u = null) {
             u = u?? GetUnits();
 
@@ -674,7 +677,7 @@ namespace Keyboard_Inspector {
 
             } else if (HasHistory && IntersectYText(e.Location, YTextIntent.Hover, out int i, u)) {
                 setYTextHovering = i;
-                setYTextSourceOnly = u.SourceArea.ContainsIX(e.Location);
+                setYTextSourceOnly = HoveringSource(e.Location, u);
 
             } else canHighlight = true;
             
@@ -778,7 +781,7 @@ namespace Keyboard_Inspector {
             if (e.Button == MouseButtons.Right) {
                 Units u = GetUnits();
 
-                YTextSourceOnly = u.SourceArea.ContainsIX(e.Location);
+                YTextSourceOnly = HoveringSource(e.Location, u);
 
                 bool intersects = IntersectYText(e.Location, YTextIntent.Menu, out int k, u);
                 if (intersects) {
@@ -953,9 +956,10 @@ namespace Keyboard_Inspector {
         }
 
         class Units {
-            public RectangleF Title, Chart, XAxis, YAxis, SourceArea, ScrollBarArea, ScrollBar, ScrollBarJumpLeft, ScrollBarJumpRight, NotchLeft, NotchRight;
+            public RectangleF Title, Chart, XAxis, YAxis, SourceArea, SourceOnlyArea, ScrollBarArea, ScrollBar, ScrollBarJumpLeft, ScrollBarJumpRight, NotchLeft, NotchRight;
             public RectangleF[] KeyDrag, KeyHover, KeyMenu, KeyText;
             public double TextHeight, Space, XUnit, YUnit, Min, Max, CrampedZoom;
+            public int SourceLineWidth;
             public bool MultipleSources;
         }
 
@@ -1040,6 +1044,8 @@ namespace Keyboard_Inspector {
 
                     u.MultipleSources = visibleSources.Count > 1;
 
+                    u.SourceLineWidth = 10;
+
                     u.SourceArea = new RectangleF(
                         u.YAxis.X,
                         u.YAxis.Y,
@@ -1051,7 +1057,10 @@ namespace Keyboard_Inspector {
                         foreach (var source in visibleSources)
                             u.SourceArea.Size = u.SourceArea.Size.Max(gfx.MeasureString(KeyHistory.Sources[source].ToString(), Font));
 
-                        u.SourceArea.Width = (float)Math.Ceiling(u.SourceArea.Width) + 1;
+                        u.SourceArea.Width = (float)Math.Ceiling(u.SourceArea.Width) + u.SourceLineWidth + 1;
+
+                        u.SourceOnlyArea = u.SourceArea;
+                        u.SourceOnlyArea.Width -= u.SourceLineWidth / 2;
                     }
 
                     u.KeyDrag = new RectangleF[visible.Count];
@@ -1338,12 +1347,10 @@ namespace Keyboard_Inspector {
                     var textBrush = cs.TextBrush;
 
                     void drawSourceText(int to) {
-                        double mid = (from + to) / 2.0;
-
                         RectangleF rect = new RectangleF(
                             u.SourceArea.X,
-                            (u.KeyText[(int)Math.Floor(mid)].Y + u.KeyText[(int)Math.Ceiling(mid) - 1].Y) / 2,
-                            u.SourceArea.Width,
+                            (u.KeyText[from].Y + u.KeyText[to - 1].Y) / 2,
+                            u.SourceArea.Width - u.SourceLineWidth,
                             u.KeyText[from].Height
                         );
 
@@ -1351,6 +1358,8 @@ namespace Keyboard_Inspector {
                             KeyHistory.Sources[visible[from].Input.Source].ToString(),
                             Font, textBrush, cs.ShadowTextBrush, rect, StringAlignment.Far
                         );
+
+                        e.Graphics.DrawLine(cs.YPen, u.SourceOnlyArea.Right, u.KeyText[from].Y, u.SourceOnlyArea.Right, u.KeyText[to - 1].Bottom);
                     }
 
                     for (int i = 0, v = 0; i < KeyHistory.Inputs.Count; i++) {
