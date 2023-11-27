@@ -45,11 +45,11 @@ namespace Keyboard_Inspector {
                     return null;
                 }
 
-                int p1 = ttr.endcontext[0].user._id == form.SelectedPlayer? 0 : 1;
-                int p2 = ttr.endcontext[1].user._id == form.OtherPlayer? 1 : 0;
+                int p1 = TetrioReplay.GetUserID(ttr.endcontext[0]) == form.SelectedPlayer? 0 : 1;
+                int p2 = TetrioReplay.GetUserID(ttr.endcontext[1]) == form.OtherPlayer? 1 : 0;
 
-                title += $"{ttr.endcontext[p1].user.username.ToUpper()} ({ttr.endcontext[p1].wins}) versus ";
-                title += $"({ttr.endcontext[p2].wins}) {ttr.endcontext[p2].user.username.ToUpper()}, ";
+                title += $"{TetrioReplay.GetUsername(ttr.endcontext[p1])} ({ttr.endcontext[p1].wins}) versus ";
+                title += $"({ttr.endcontext[p2].wins}) {TetrioReplay.GetUsername(ttr.endcontext[p2])}, ";
                 title += $"round {form.SelectedIndex + 1}/{ttr.data.Count}, played ";
 
             } else {
@@ -90,5 +90,11 @@ namespace Keyboard_Inspector {
                 new Analysis() { Precision = 600 }
             );
         }
+
+        public static string GetUsername(dynamic ctx)
+            => (ctx.username()? ctx.username : ctx.user.username).ToUpper();
+
+        public static string GetUserID(dynamic ctx)
+            => ctx.id()? ctx.id : ctx.user._id;
     }
 }

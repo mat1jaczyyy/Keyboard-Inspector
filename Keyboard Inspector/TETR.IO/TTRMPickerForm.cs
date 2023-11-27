@@ -25,11 +25,11 @@ namespace Keyboard_Inspector {
         public TTRMPickerForm(dynamic ttr) {
             InitializeComponent();
 
-            p1lbl.Text = ttr.endcontext[0].user.username.ToUpper();
-            p2lbl.Text = ttr.endcontext[1].user.username.ToUpper();
+            p1lbl.Text = TetrioReplay.GetUsername(ttr.endcontext[0]);
+            p2lbl.Text = TetrioReplay.GetUsername(ttr.endcontext[1]);
 
-            string p1id = ttr.endcontext[0].user._id;
-            string p2id = ttr.endcontext[1].user._id;
+            string p1id = TetrioReplay.GetUserID(ttr.endcontext[0]);
+            string p2id = TetrioReplay.GetUserID(ttr.endcontext[1]);
 
             for (int i = 0; i < ttr.data.Count; i++) {
                 var left = new DarkLabel();
@@ -57,8 +57,8 @@ namespace Keyboard_Inspector {
 
                 var round = ttr.data[i];
 
-                int p1 = round.board[0].user._id == p1id? 0 : 1;
-                int p2 = round.board[1].user._id == p2id? 1 : 0;
+                int p1 = TetrioReplay.GetUserID(round.board[0]) == p1id? 0 : 1;
+                int p2 = TetrioReplay.GetUserID(round.board[1]) == p2id? 1 : 0;
 
                 left.Text = EventCount(round.replays[p1].events).ToString();
                 right.Text = EventCount(round.replays[p2].events).ToString();
