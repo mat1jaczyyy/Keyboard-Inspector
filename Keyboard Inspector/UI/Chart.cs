@@ -1416,54 +1416,54 @@ namespace Keyboard_Inspector {
                     brush.InterpolationColors = blend;
 
                     var events = visible[v].Events;
-                    if (!events.Any()) continue;
+                    if (events.Any()) {
+                        int left = BinarySearch(events, u.Min, 1);
+                        int right = BinarySearch(events, u.Max, 0) + 1;
 
-                    int left = BinarySearch(events, u.Min, 1);
-                    int right = BinarySearch(events, u.Max, 0) + 1;
+                        var points = new List<double>() { double.NegativeInfinity };
+                        var rounded = new List<double>();
 
-                    var points = new List<double>() { double.NegativeInfinity };
-                    var rounded = new List<double>();
+                        void makePoint(double start, double end) {
+                            if (start <= u.Min) start = u.Min;
+                            if (start >= u.Max) return;
+                            if (end <= u.Min) return;
+                            if (end >= u.Max) end = u.Max;
 
-                    void makePoint(double start, double end) {
-                        if (start <= u.Min) start = u.Min;
-                        if (start >= u.Max) return;
-                        if (end <= u.Min) return;
-                        if (end >= u.Max) end = u.Max;
+                            start = u.Chart.X + (start - u.Min) * u.XUnit;
+                            end = u.Chart.X + (end - u.Min) * u.XUnit;
 
-                        start = u.Chart.X + (start - u.Min) * u.XUnit;
-                        end = u.Chart.X + (end - u.Min) * u.XUnit;
+                            points.Add(start);
+                            points.Add(end);
 
-                        points.Add(start);
-                        points.Add(end);
+                            rounded.Add(Math.Floor(start) + 0.5);
+                            rounded.Add(Math.Floor(end) + 0.5);
+                        }
 
-                        rounded.Add(Math.Floor(start) + 0.5);
-                        rounded.Add(Math.Floor(end) + 0.5);
-                    }
+                        int ev = left;
+                        if (!events[ev].Pressed) {
+                            makePoint(0, events[ev].Time);
+                            ev++;
+                        }
 
-                    int ev = left;
-                    if (!events[ev].Pressed) {
-                        makePoint(0, events[ev].Time);
-                        ev++;
-                    }
+                        for (; ev < right; ev += 2) {
+                            makePoint(
+                                events[ev].Time,
+                                ev + 1 < right? events[ev + 1].Time : KeyHistory.Time
+                            );
+                        }
 
-                    for (; ev < right; ev += 2) {
-                        makePoint(
-                            events[ev].Time,
-                            ev + 1 < right? events[ev + 1].Time : KeyHistory.Time
-                        );
-                    }
+                        points.Add(double.PositiveInfinity);
 
-                    points.Add(double.PositiveInfinity);
+                        for (int p = 1; p < points.Count - 1; p++) {
+                            double dist = Math.Min(points[p] - points[p - 1], points[p + 1] - points[p]);
+                            points[p] = rounded[p - 1].Blend(points[p], (dist - 2) / 3);
 
-                    for (int p = 1; p < points.Count - 1; p++) {
-                        double dist = Math.Min(points[p] - points[p - 1], points[p + 1] - points[p]);
-                        points[p] = rounded[p - 1].Blend(points[p], (dist - 2) / 3);
+                            if (p % 2 == 0) {
+                                bar.X = (float)points[p - 1];
+                                bar.Width = (float)(points[p] - points[p - 1]);
 
-                        if (p % 2 == 0) {
-                            bar.X = (float)points[p - 1];
-                            bar.Width = (float)(points[p] - points[p - 1]);
-
-                            e.Graphics.FillRectangle(brush, bar);
+                                e.Graphics.FillRectangle(brush, bar);
+                            }
                         }
                     }
 

@@ -48,24 +48,31 @@ namespace Keyboard_Inspector {
             }
 
             if (Program.IsFrozen) {
-                Program.Frozen.RemoveAll(i => !i.Visible);
+                Program.FrozenInputs.KeepOnly(i => i.Visible);
 
-                foreach (var i in Program.Frozen)
+                foreach (var i in Program.FrozenInputs)
                     i.Events.Clear();
 
+                var leftover = Program.FrozenInputs.Select(i => i.Input.Source).Distinct();
+                Program.FrozenSources.KeepOnly(i => leftover.Contains(i));
+
                 foreach (var i in inputs) {
-                    int f = Program.Frozen.FindIndex(j => j.Input == i.Input);
+                    int f = Program.FrozenInputs.FindIndex(j => j.Input == i.Input);
 
                     if (f == -1) {
                         i.Visible = false;
-                        Program.Frozen.Add(i);
+                        Program.FrozenInputs.Add(i);
+
+                        if (!Program.FrozenSources.ContainsKey(i.Input.Source))
+                            Program.FrozenSources.Add(i.Input.Source, sources[i.Input.Source]);
 
                     } else {
-                        Program.Frozen[f] = i;
+                        Program.FrozenInputs[f] = i;
                     }
                 }
 
-                inputs = Program.Frozen;
+                inputs = Program.FrozenInputs;
+                sources = Program.FrozenSources;
             }
             
             Title = title?? "";

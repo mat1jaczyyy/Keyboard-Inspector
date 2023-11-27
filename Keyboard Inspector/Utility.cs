@@ -45,6 +45,17 @@ namespace Keyboard_Inspector {
             list.AddRange(sorted);
         }
 
+        public static void KeepOnly<T>(this List<T> list, Func<T, bool> predicate) {
+            list.RemoveAll(i => !predicate(i));
+        }
+
+        public static void KeepOnly<K, V>(this Dictionary<K, V> dict, Func<K, bool> predicate) {
+            foreach (var i in dict.Keys.ToList()) {
+                if (!predicate(i))
+                    dict.Remove(i);
+            }
+        }
+
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> collection)
             => new HashSet<T>(collection);
 

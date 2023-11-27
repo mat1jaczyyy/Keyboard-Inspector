@@ -44,15 +44,19 @@ namespace Keyboard_Inspector {
 
         public static Result Result;
 
-        public static List<InputInfo> Frozen { get; private set; }
-        public static bool IsFrozen => Frozen != null;
+        public static List<InputInfo> FrozenInputs { get; private set; }
+        public static Dictionary<long, Source> FrozenSources { get; private set; }
+
+        public static bool IsFrozen => FrozenInputs != null;
 
         public static void Freeze() {
-            Frozen = Result.Inputs;
+            FrozenInputs = Result.Inputs;
+            FrozenSources = Result.Sources;
         }
 
         public static void Unfreeze() {
-            Frozen = null;
+            FrozenInputs = null;
+            FrozenSources = null;
         }
 
         [STAThread]
