@@ -791,6 +791,8 @@ namespace Keyboard_Inspector {
 
                 bool multipleInputs = KeyHistory.VisibleInputs().Count() > 1;
 
+                bool knownInterface = !string.IsNullOrWhiteSpace(KeyHistory.Sources[KeyHistory.Inputs[k].Input.Source].DeviceInterface);
+
                 InputMenu.Items[0].Available = !YTextSourceOnly && intersects;
                 InputMenu.Items[1].Available = !YTextSourceOnly && intersects && KeyHistory.Inputs[k].Color != Input.DefaultColor;
 
@@ -803,7 +805,7 @@ namespace Keyboard_Inspector {
                 InputMenu.Items[9].Available = !Program.IsFrozen;
                 InputMenu.Items[10].Available = Program.IsFrozen;
 
-                InputMenu.Items[12].Available = (YTextSourceOnly || !u.MultipleSources) && intersects && ModifierKeys == Keys.Shift;
+                InputMenu.Items[12].Available = knownInterface && (YTextSourceOnly || !u.MultipleSources) && intersects && ModifierKeys == Keys.Shift;
 
                 InputMenu.Items.AutoSeparators();
 
