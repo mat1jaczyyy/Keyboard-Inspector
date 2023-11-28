@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -62,9 +63,9 @@ namespace Keyboard_Inspector {
             string title = Result.IsEmpty(Program.Result)? "" : Program.Result.GetTitle();
             Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
 
-            save.Enabled = split.Visible = !Result.IsEmpty(Program.Result);
+            labelN.Text = "";
 
-            labelN.Text = Result.IsEmpty(Program.Result)? "" : $"Events: {Program.Result.Events.Count}";
+            save.Enabled = split.Visible = !Result.IsEmpty(Program.Result);
 
             screen.LoadData(Program.Result);
 
@@ -147,6 +148,12 @@ namespace Keyboard_Inspector {
             Program.Result.Analysis.HPS = (int)hps.Value;
             Program.Result.Analysis.ReanalyzeFromHPS();
         }
+
+        public void SetEventCount(int n)
+            => labelN.Text = $"{n} input events";
+
+        public void UpdateFrozen()
+            => frozen.Visible = Program.IsFrozen;
 
         public List<Chart> Charts { get; private set; }
         public List<Chart> tCharts { get; private set; }
@@ -340,6 +347,15 @@ namespace Keyboard_Inspector {
         private void captureDontClose(object sender, ToolStripDropDownClosingEventArgs e) {
             if (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked)
                 e.Cancel = true;
+        }
+
+        private void split_Paint(object sender, PaintEventArgs e) {
+            float y = split.SplitterDistance + split.SplitterWidth / 2;
+            e.Graphics.DrawLine(new Pen(Color.FromArgb(44, 44, 44)), 10, y, split.Width - 10, y);
+        }
+
+        private void split_Layout(object sender, LayoutEventArgs e) {
+            split.Invalidate(new Rectangle(0, split.SplitterDistance, split.Width, split.SplitterWidth));
         }
     }
 }

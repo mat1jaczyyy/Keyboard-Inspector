@@ -224,6 +224,8 @@ namespace Keyboard_Inspector {
 
             List<Event> events = Result.AllVisibleEvents();
 
+            MainForm.Instance.SetEventCount(events.Count);
+
             CalcDiffs(events);
             CalcCompound(events);
             CalcCircular(events);

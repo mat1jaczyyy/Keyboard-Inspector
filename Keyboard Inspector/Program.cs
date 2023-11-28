@@ -52,11 +52,13 @@ namespace Keyboard_Inspector {
         public static void Freeze() {
             FrozenInputs = Result.Inputs;
             FrozenSources = Result.Sources;
+            MainForm.Instance.UpdateFrozen();
         }
 
         public static void Unfreeze() {
             FrozenInputs = null;
             FrozenSources = null;
+            MainForm.Instance.UpdateFrozen();
         }
 
         [STAThread]
