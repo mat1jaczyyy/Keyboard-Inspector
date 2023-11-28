@@ -39,8 +39,13 @@ namespace Keyboard_Inspector {
             list.Insert(to, i);
         }
 
-        public static void SortByKey<T, K>(this List<T> list, Func<T, K> selector) {
-            var sorted = list.OrderBy(selector).ToList();
+        public static void SortByKey<T>(this List<T> list, Func<T, dynamic> orderBy, params Func<T, dynamic>[] thenBy) {
+            var sorting = list.OrderBy(orderBy);
+
+            foreach (var i in thenBy)
+                sorting = sorting.ThenBy(i);
+
+            var sorted = sorting.ToList();
             list.Clear();
             list.AddRange(sorted);
         }
