@@ -30,12 +30,6 @@ namespace Keyboard_Inspector {
             this.status = new DarkUI.Controls.DarkLabel();
             this.split = new System.Windows.Forms.SplitContainer();
             this.tlpCharts = new System.Windows.Forms.TableLayoutPanel();
-            this.tDiffs = new Keyboard_Inspector.Chart();
-            this.tCompound = new Keyboard_Inspector.Chart();
-            this.tCircular = new Keyboard_Inspector.Chart();
-            this.fDiffs = new Keyboard_Inspector.Chart();
-            this.fCompound = new Keyboard_Inspector.Chart();
-            this.fCircular = new Keyboard_Inspector.Chart();
             this.analysisPanel = new System.Windows.Forms.Panel();
             this.lowCut = new DarkUI.Controls.DarkCheckBox();
             this.label25 = new DarkUI.Controls.DarkLabel();
@@ -46,7 +40,6 @@ namespace Keyboard_Inspector {
             this.tbPrecision = new DarkUI.Controls.DarkTextBox();
             this.label21 = new DarkUI.Controls.DarkLabel();
             this.label22 = new DarkUI.Controls.DarkLabel();
-            this.screen = new Keyboard_Inspector.Chart();
             this.screenPanel = new System.Windows.Forms.Panel();
             this.frozen = new DarkUI.Controls.DarkLabel();
             this.labelN = new DarkUI.Controls.DarkLabel();
@@ -59,7 +52,16 @@ namespace Keyboard_Inspector {
             this.captureKeyboard = new System.Windows.Forms.ToolStripMenuItem();
             this.captureGamepad = new System.Windows.Forms.ToolStripMenuItem();
             this.captureMouse = new System.Windows.Forms.ToolStripMenuItem();
+            this.help = new System.Windows.Forms.ToolStripMenuItem();
+            this.discord = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.tDiffs = new Keyboard_Inspector.Chart();
+            this.tCompound = new Keyboard_Inspector.Chart();
+            this.tCircular = new Keyboard_Inspector.Chart();
+            this.fDiffs = new Keyboard_Inspector.Chart();
+            this.fCompound = new Keyboard_Inspector.Chart();
+            this.fCircular = new Keyboard_Inspector.Chart();
+            this.screen = new Keyboard_Inspector.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
             this.split.Panel1.SuspendLayout();
             this.split.Panel2.SuspendLayout();
@@ -141,66 +143,6 @@ namespace Keyboard_Inspector {
             this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tlpCharts.Size = new System.Drawing.Size(1294, 534);
             this.tlpCharts.TabIndex = 0;
-            // 
-            // tDiffs
-            // 
-            this.tDiffs.AllowDrop = true;
-            this.tDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
-            this.tDiffs.Location = new System.Drawing.Point(3, 3);
-            this.tDiffs.Name = "tDiffs";
-            this.tDiffs.Size = new System.Drawing.Size(425, 261);
-            this.tDiffs.TabIndex = 0;
-            // 
-            // tCompound
-            // 
-            this.tCompound.AllowDrop = true;
-            this.tCompound.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
-            this.tCompound.Location = new System.Drawing.Point(434, 3);
-            this.tCompound.Name = "tCompound";
-            this.tCompound.Size = new System.Drawing.Size(425, 261);
-            this.tCompound.TabIndex = 1;
-            // 
-            // tCircular
-            // 
-            this.tCircular.AllowDrop = true;
-            this.tCircular.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
-            this.tCircular.Location = new System.Drawing.Point(865, 3);
-            this.tCircular.Name = "tCircular";
-            this.tCircular.Size = new System.Drawing.Size(426, 261);
-            this.tCircular.TabIndex = 2;
-            // 
-            // fDiffs
-            // 
-            this.fDiffs.AllowDrop = true;
-            this.fDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
-            this.fDiffs.Location = new System.Drawing.Point(3, 270);
-            this.fDiffs.Name = "fDiffs";
-            this.fDiffs.Size = new System.Drawing.Size(425, 261);
-            this.fDiffs.TabIndex = 3;
-            // 
-            // fCompound
-            // 
-            this.fCompound.AllowDrop = true;
-            this.fCompound.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
-            this.fCompound.Location = new System.Drawing.Point(434, 270);
-            this.fCompound.Name = "fCompound";
-            this.fCompound.Size = new System.Drawing.Size(425, 261);
-            this.fCompound.TabIndex = 4;
-            // 
-            // fCircular
-            // 
-            this.fCircular.AllowDrop = true;
-            this.fCircular.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
-            this.fCircular.Location = new System.Drawing.Point(865, 270);
-            this.fCircular.Name = "fCircular";
-            this.fCircular.Size = new System.Drawing.Size(426, 261);
-            this.fCircular.TabIndex = 5;
             // 
             // analysisPanel
             // 
@@ -324,16 +266,6 @@ namespace Keyboard_Inspector {
             this.label22.Text = "Hz";
             this.label22.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
-            // screen
-            // 
-            this.screen.AllowDrop = true;
-            this.screen.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.screen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
-            this.screen.Location = new System.Drawing.Point(0, 27);
-            this.screen.Name = "screen";
-            this.screen.Size = new System.Drawing.Size(1294, 220);
-            this.screen.TabIndex = 1;
-            // 
             // screenPanel
             // 
             this.screenPanel.Controls.Add(this.frozen);
@@ -418,7 +350,8 @@ namespace Keyboard_Inspector {
             this.mainmenu.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.mainmenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.recording,
-            this.capture});
+            this.capture,
+            this.help});
             this.mainmenu.Location = new System.Drawing.Point(0, 0);
             this.mainmenu.Name = "mainmenu";
             this.mainmenu.Padding = new System.Windows.Forms.Padding(3, 2, 0, 2);
@@ -470,6 +403,95 @@ namespace Keyboard_Inspector {
             this.captureMouse.Name = "captureMouse";
             this.captureMouse.Size = new System.Drawing.Size(171, 22);
             this.captureMouse.Text = "Mouse";
+            // 
+            // help
+            // 
+            this.help.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.discord});
+            this.help.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.help.Name = "help";
+            this.help.Size = new System.Drawing.Size(44, 20);
+            this.help.Text = "Help";
+            // 
+            // discord
+            // 
+            this.discord.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.discord.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.discord.Name = "discord";
+            this.discord.Size = new System.Drawing.Size(180, 22);
+            this.discord.Text = "Discord Server";
+            this.discord.Click += new System.EventHandler(this.DiscordLink);
+            // 
+            // tDiffs
+            // 
+            this.tDiffs.AllowDrop = true;
+            this.tDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
+            this.tDiffs.Location = new System.Drawing.Point(3, 3);
+            this.tDiffs.Name = "tDiffs";
+            this.tDiffs.Size = new System.Drawing.Size(425, 261);
+            this.tDiffs.TabIndex = 0;
+            // 
+            // tCompound
+            // 
+            this.tCompound.AllowDrop = true;
+            this.tCompound.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
+            this.tCompound.Location = new System.Drawing.Point(434, 3);
+            this.tCompound.Name = "tCompound";
+            this.tCompound.Size = new System.Drawing.Size(425, 261);
+            this.tCompound.TabIndex = 1;
+            // 
+            // tCircular
+            // 
+            this.tCircular.AllowDrop = true;
+            this.tCircular.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
+            this.tCircular.Location = new System.Drawing.Point(865, 3);
+            this.tCircular.Name = "tCircular";
+            this.tCircular.Size = new System.Drawing.Size(426, 261);
+            this.tCircular.TabIndex = 2;
+            // 
+            // fDiffs
+            // 
+            this.fDiffs.AllowDrop = true;
+            this.fDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
+            this.fDiffs.Location = new System.Drawing.Point(3, 270);
+            this.fDiffs.Name = "fDiffs";
+            this.fDiffs.Size = new System.Drawing.Size(425, 261);
+            this.fDiffs.TabIndex = 3;
+            // 
+            // fCompound
+            // 
+            this.fCompound.AllowDrop = true;
+            this.fCompound.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
+            this.fCompound.Location = new System.Drawing.Point(434, 270);
+            this.fCompound.Name = "fCompound";
+            this.fCompound.Size = new System.Drawing.Size(425, 261);
+            this.fCompound.TabIndex = 4;
+            // 
+            // fCircular
+            // 
+            this.fCircular.AllowDrop = true;
+            this.fCircular.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
+            this.fCircular.Location = new System.Drawing.Point(865, 270);
+            this.fCircular.Name = "fCircular";
+            this.fCircular.Size = new System.Drawing.Size(426, 261);
+            this.fCircular.TabIndex = 5;
+            // 
+            // screen
+            // 
+            this.screen.AllowDrop = true;
+            this.screen.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.screen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
+            this.screen.Location = new System.Drawing.Point(0, 27);
+            this.screen.Name = "screen";
+            this.screen.Size = new System.Drawing.Size(1294, 220);
+            this.screen.TabIndex = 1;
             // 
             // MainForm
             // 
@@ -542,5 +564,7 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.Panel screenPanel;
         private DarkUI.Controls.DarkLabel frozen;
         private DarkUI.Controls.DarkLabel labelN;
+        private System.Windows.Forms.ToolStripMenuItem help;
+        private System.Windows.Forms.ToolStripMenuItem discord;
     }
 }

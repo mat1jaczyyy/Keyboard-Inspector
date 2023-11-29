@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading;
@@ -356,6 +357,10 @@ namespace Keyboard_Inspector {
 
         private void split_Layout(object sender, LayoutEventArgs e) {
             split.Invalidate(new Rectangle(0, split.SplitterDistance, split.Width, split.SplitterWidth));
+        }
+
+        private void DiscordLink(object sender, EventArgs e) {
+            Process.Start("https://discord.gg/kX4cJQH5Zn"); // todo get relevant link from an API in the future
         }
     }
 }
