@@ -1380,7 +1380,29 @@ namespace Keyboard_Inspector {
                             Font, textBrush, cs.ShadowTextBrush, rect, StringAlignment.Far
                         );
 
-                        e.Graphics.DrawLine(cs.YPen, u.SourceOnlyArea.Right, u.KeyText[from].Y, u.SourceOnlyArea.Right, u.KeyText[to - 1].Bottom);
+                        const float spacing = 2f;
+
+                        float fromY = u.KeyText[from].Y;
+                        if (from > 0) {
+                            float diff = fromY - u.KeyText[from - 1].Bottom;
+                            if (diff < spacing / 2) {
+                                fromY += (spacing - diff) / 2;
+                            }
+                        }
+
+                        float toY = u.KeyText[to - 1].Bottom;
+                        if (to < visible.Count) {
+                            float diff = u.KeyText[to].Y - toY;
+                            if (diff < spacing / 2) {
+                                toY -= (spacing - diff) / 2;
+                            }
+                        }
+
+                        e.Graphics.DrawLine(
+                            cs.YPen,
+                            u.SourceOnlyArea.Right, fromY,
+                            u.SourceOnlyArea.Right, toY
+                        );
                     }
 
                     for (int i = 0, v = 0; i < KeyHistory.Inputs.Count; i++) {
