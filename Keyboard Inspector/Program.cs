@@ -47,18 +47,12 @@ namespace Keyboard_Inspector {
         public static List<InputInfo> FrozenInputs { get; private set; }
         public static Dictionary<long, Source> FrozenSources { get; private set; }
 
-        public static bool IsFrozen => FrozenInputs != null;
-
-        public static void Freeze() {
-            FrozenInputs = Result.Inputs;
-            FrozenSources = Result.Sources;
-            MainForm.Instance.UpdateFrozen();
-        }
-
-        public static void Unfreeze() {
-            FrozenInputs = null;
-            FrozenSources = null;
-            MainForm.Instance.UpdateFrozen();
+        public static bool IsFrozen {
+            get => FrozenInputs != null;
+            set {
+                FrozenInputs = value? Result.Inputs : null;
+                FrozenSources = value? Result.Sources : null;
+            }
         }
 
         [STAThread]

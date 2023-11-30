@@ -96,7 +96,7 @@ namespace Keyboard_Inspector {
         }
 
         public string GetTitle()
-            => string.IsNullOrWhiteSpace(Title)? $"{GetBestSource(0.66)?.Name?? "Untitled"} on {Recorded:MM/dd/yyyy, h:mm:ss tt}" : Title;
+            => string.IsNullOrWhiteSpace(Title)? $"{GetBestSource(0.66)?.Name?? "Multiple devices"} on {Recorded:MM/dd/yyyy, h:mm:ss tt}" : Title;
 
         public Source GetBestSource(double threshold = 0) {
             Source best = null;

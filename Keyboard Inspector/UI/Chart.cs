@@ -33,14 +33,14 @@ namespace Keyboard_Inspector {
                 new ToolStripMenuItem("Change &Color..."),
                 new ToolStripMenuItem("&Reset Color"),
                 new ToolStripSeparator(),
+                new ToolStripMenuItem("Change &Color..."),
+                new ToolStripMenuItem("&Reset Color"),
+                new ToolStripSeparator(),
                 new ToolStripMenuItem("&Hide Input"),
                 new ToolStripMenuItem("Hide &Device"),
                 new ToolStripSeparator(),
                 new ToolStripMenuItem("&Sort by Device"),
                 new ToolStripMenuItem("Show &All Inputs"),
-                new ToolStripSeparator(),
-                new ToolStripMenuItem("&Freeze"),
-                new ToolStripMenuItem("Un&freeze"),
                 new ToolStripSeparator(),
                 new ToolStripMenuItem("Copy &Interface")
             });
@@ -72,8 +72,45 @@ namespace Keyboard_Inspector {
                 Invalidate();
             };
 
-            // Hide Input
+            // Change Color (Device)
             InputMenu.Items[3].Click += (_, __) => {
+                if (!HasHistory) return;
+                if (!(InputMenu.Tag is int k)) return;
+
+                InputMenu.Tag = null;
+
+                var source = KeyHistory.Inputs[k].Input.Source;
+
+                ColorDialog cd = new ColorDialog();
+                cd.Color = KeyHistory.Inputs[k].Color;
+
+                if (cd.ShowDialog() == DialogResult.OK) {
+                    foreach (var i in KeyHistory.Inputs)
+                        if (i.Input.Source == source)
+                            i.Color = cd.Color;
+
+                    Invalidate();
+                }
+            };
+
+            // Reset Color (Device)
+            InputMenu.Items[4].Click += (_, __) => {
+                if (!HasHistory) return;
+                if (!(InputMenu.Tag is int k)) return;
+
+                InputMenu.Tag = null;
+
+                var source = KeyHistory.Inputs[k].Input.Source;
+                
+                foreach (var i in KeyHistory.Inputs)
+                    if (i.Input.Source == source)
+                        i.Color = Input.DefaultColor;
+
+                Invalidate();
+            };
+
+            // Hide Input
+            InputMenu.Items[6].Click += (_, __) => {
                 if (!HasHistory) return;
                 if (!(InputMenu.Tag is int k)) return;
 
@@ -88,7 +125,7 @@ namespace Keyboard_Inspector {
             };
 
             // Hide Device
-            InputMenu.Items[4].Click += (_, __) => {
+            InputMenu.Items[7].Click += (_, __) => {
                 if (!HasHistory) return;
                 if (!(InputMenu.Tag is int k)) return;
 
@@ -108,7 +145,7 @@ namespace Keyboard_Inspector {
             };
 
             // Sort by Device
-            InputMenu.Items[6].Click += (_, __) => {
+            InputMenu.Items[9].Click += (_, __) => {
                 if (!HasHistory) return;
 
                 InputMenu.Tag = null;
@@ -119,7 +156,7 @@ namespace Keyboard_Inspector {
             };
 
             // Show All Inputs
-            InputMenu.Items[7].Click += (_, __) => {
+            InputMenu.Items[10].Click += (_, __) => {
                 if (!HasHistory) return;
 
                 InputMenu.Tag = null;
@@ -132,28 +169,6 @@ namespace Keyboard_Inspector {
                 Invalidate();
 
                 KeyHistory.Analysis.Analyze();
-            };
-
-            // Freeze
-            InputMenu.Items[9].Click += (_, __) => {
-                if (!HasHistory) return;
-
-                InputMenu.Tag = null;
-
-                Program.Freeze();
-
-                Invalidate();
-            };
-
-            // Unfreeze
-            InputMenu.Items[10].Click += (_, __) => {
-                if (!HasHistory) return;
-
-                InputMenu.Tag = null;
-
-                Program.Unfreeze();
-
-                Invalidate();
             };
 
             // Copy Device Interface
@@ -791,19 +806,23 @@ namespace Keyboard_Inspector {
 
                 bool multipleInputs = KeyHistory.VisibleInputs().Count() > 1;
 
-                bool knownInterface = !string.IsNullOrWhiteSpace(KeyHistory.Sources[KeyHistory.Inputs[k].Input.Source].DeviceInterface);
+                var sourceNo = KeyHistory.Inputs[k].Input.Source;
+                var source = KeyHistory.Sources[sourceNo];
+
+                bool anyColorsDifferent = KeyHistory.Inputs.Where(i => i.Input.Source == sourceNo).Any(i => i.Color != Input.DefaultColor);
+                bool knownInterface = !string.IsNullOrWhiteSpace(source.DeviceInterface);
 
                 InputMenu.Items[0].Available = !YTextSourceOnly && intersects;
                 InputMenu.Items[1].Available = !YTextSourceOnly && intersects && KeyHistory.Inputs[k].Color != Input.DefaultColor;
 
-                InputMenu.Items[3].Available = !YTextSourceOnly && intersects && multipleInputs;
-                InputMenu.Items[4].Available = intersects && multipleInputs && u.MultipleSources;
+                InputMenu.Items[3].Available = YTextSourceOnly && intersects;
+                InputMenu.Items[4].Available = YTextSourceOnly && intersects && anyColorsDifferent;
 
-                InputMenu.Items[6].Available = multipleInputs && u.MultipleSources;
-                InputMenu.Items[7].Available = KeyHistory.Inputs.Any(i => !i.Visible);
+                InputMenu.Items[6].Available = !YTextSourceOnly && intersects && multipleInputs;
+                InputMenu.Items[7].Available = intersects && multipleInputs && u.MultipleSources;
 
-                InputMenu.Items[9].Available = !Program.IsFrozen;
-                InputMenu.Items[10].Available = Program.IsFrozen;
+                InputMenu.Items[9].Available = multipleInputs && u.MultipleSources;
+                InputMenu.Items[10].Available = KeyHistory.Inputs.Any(i => !i.Visible);
 
                 InputMenu.Items[12].Available = knownInterface && (YTextSourceOnly || !u.MultipleSources) && intersects && ModifierKeys == Keys.Shift;
 

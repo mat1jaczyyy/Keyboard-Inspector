@@ -144,8 +144,11 @@ namespace Keyboard_Inspector {
                     has |= item.Available;
 
                 } else if (item is ToolStripSeparator) {
-                    lastSep = item;
                     item.Available = has;
+
+                    if (has)
+                        lastSep = item;
+
                     has = false;
                 }
             }

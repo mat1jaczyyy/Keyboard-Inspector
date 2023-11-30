@@ -94,68 +94,6 @@ namespace Keyboard_Inspector {
             ResultLoaded();
         }
 
-        bool silent;
-
-        void SetPrecisionSilently() {
-            silent = true;
-            tbPrecision.Text = Program.Result.Analysis.Precision.ToString();
-            silent = false;
-        }
-
-        void SetHPSSilently() {
-            silent = true;
-            hps.Value = Program.Result.Analysis.HPS;
-            silent = false;
-        }
-
-        void SetLowCutSilently() {
-            silent = true;
-            lowCut.Checked = Program.Result.Analysis.LowCut;
-            silent = false;
-        }
-
-        void tbPrecision_TextChanged(object sender, EventArgs e) {
-            if (silent) return;
-
-            if (!int.TryParse(tbPrecision.Text, out int precision)) return;
-            Program.Result.Analysis.Precision = precision;
-
-            SetPrecisionSilently();
-            tbPrecision.Refresh();
-
-            Program.Result.Analysis.ReanalyzeFromCache();
-        }
-
-        void precisionDouble_Click(object sender, EventArgs e) {
-            Program.Result.Analysis.Precision *= 2;
-            tbPrecision.Text = Program.Result.Analysis.Precision.ToString();
-        }
-
-        void precisionHalf_Click(object sender, EventArgs e) {
-            Program.Result.Analysis.Precision /= 2;
-            tbPrecision.Text = Program.Result.Analysis.Precision.ToString();
-        }
-
-        void lowCut_CheckedChanged(object sender, EventArgs e) {
-            if (silent) return;
-
-            Program.Result.Analysis.LowCut = lowCut.Checked;
-            Program.Result.Analysis.ReanalyzeFromLowCut();
-        }
-
-        void hps_ValueChanged(object sender, EventArgs e) {
-            if (silent) return;
-
-            Program.Result.Analysis.HPS = (int)hps.Value;
-            Program.Result.Analysis.ReanalyzeFromHPS();
-        }
-
-        public void SetEventCount(int n)
-            => labelN.Text = $"{n} input events";
-
-        public void UpdateFrozen()
-            => frozen.Visible = Program.IsFrozen;
-
         public List<Chart> Charts { get; private set; }
         public List<Chart> tCharts { get; private set; }
         public List<Chart> fCharts { get; private set; }
@@ -242,13 +180,11 @@ namespace Keyboard_Inspector {
             ResultLoaded();
         }
 
-        async Task LoadFile(string filename, FileFormat format = null) {
-            UpdateState(UIState.Parsing);
-
-            var load = await FileSystem.Open(filename, format);
-
+        void LoadFinished(FileSystem.FileResult load) {
             if (load.Error == null) {
-                Program.Unfreeze();
+                SetFreezeSilently(false);
+                Program.IsFrozen = false;
+
                 Program.Result = load.Result;
                 ResultLoaded();
             }
@@ -257,22 +193,19 @@ namespace Keyboard_Inspector {
             status.Text = load.Error;
         }
 
+        async Task LoadFile(string filename, FileFormat format = null) {
+            UpdateState(UIState.Parsing);
+
+            LoadFinished(await FileSystem.Open(filename, format));
+        }
+
         CancellationTokenSource ctsLoadURL = null;
 
         async Task LoadURL(Uri url, FileFormat format) {
             UpdateState(UIState.Downloading);
+
             ctsLoadURL = new CancellationTokenSource();
-
-            var load = await FileSystem.Import(url, format, ctsLoadURL.Token);
-
-            if (load.Error == null) {
-                Program.Unfreeze();
-                Program.Result = load.Result;
-                ResultLoaded();
-            }
-
-            UpdateState(UIState.None);
-            status.Text = load.Error;
+            LoadFinished(await FileSystem.Import(url, format, ctsLoadURL.Token));
             ctsLoadURL = null;
         }
 
@@ -306,6 +239,10 @@ namespace Keyboard_Inspector {
                 CloseFile();
                 await LoadURL(url, format);
             }
+        }
+
+        private void discord_Click(object sender, EventArgs e) {
+            Process.Start("https://discord.gg/kX4cJQH5Zn"); // todo get relevant link from an API in the future
         }
 
         bool ValidateFileDrag(DragEventArgs e, out string result) {
@@ -345,22 +282,87 @@ namespace Keyboard_Inspector {
             }
         }
 
-        private void captureDontClose(object sender, ToolStripDropDownClosingEventArgs e) {
-            if (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked)
-                e.Cancel = true;
-        }
-
-        private void split_Paint(object sender, PaintEventArgs e) {
+        void split_Paint(object sender, PaintEventArgs e) {
             float y = split.SplitterDistance + split.SplitterWidth / 2;
             e.Graphics.DrawLine(new Pen(Color.FromArgb(44, 44, 44)), 10, y, split.Width - 10, y);
         }
 
-        private void split_Layout(object sender, LayoutEventArgs e) {
+        void split_Layout(object sender, LayoutEventArgs e) {
             split.Invalidate(new Rectangle(0, split.SplitterDistance, split.Width, split.SplitterWidth));
         }
 
-        private void DiscordLink(object sender, EventArgs e) {
-            Process.Start("https://discord.gg/kX4cJQH5Zn"); // todo get relevant link from an API in the future
+        public void SetEventCount(int n)
+            => labelN.Text = $"{n} input events";
+
+        bool silent;
+
+        void SetFreezeSilently(bool value) {
+            silent = true;
+            frozen.Checked = value;
+            silent = false;
+
+            frozen.ForeColor = value? DefaultForeColor : Color.FromArgb(142, 192, 212);
+        }
+
+        void frozen_CheckedChanged(object sender, EventArgs e) {
+            if (silent) return;
+
+            SetFreezeSilently(frozen.Checked);
+            Program.IsFrozen = frozen.Checked;
+        }
+
+        void SetPrecisionSilently() {
+            silent = true;
+            tbPrecision.Text = Program.Result.Analysis.Precision.ToString();
+            silent = false;
+        }
+
+        void SetHPSSilently() {
+            silent = true;
+            hps.Value = Program.Result.Analysis.HPS;
+            silent = false;
+        }
+
+        void SetLowCutSilently() {
+            silent = true;
+            lowCut.Checked = Program.Result.Analysis.LowCut;
+            silent = false;
+        }
+
+        void tbPrecision_TextChanged(object sender, EventArgs e) {
+            if (silent) return;
+
+            if (!int.TryParse(tbPrecision.Text, out int precision)) return;
+            Program.Result.Analysis.Precision = precision;
+
+            SetPrecisionSilently();
+            tbPrecision.Refresh();
+
+            Program.Result.Analysis.ReanalyzeFromCache();
+        }
+
+        void precisionDouble_Click(object sender, EventArgs e) {
+            Program.Result.Analysis.Precision *= 2;
+            tbPrecision.Text = Program.Result.Analysis.Precision.ToString();
+        }
+
+        void precisionHalf_Click(object sender, EventArgs e) {
+            Program.Result.Analysis.Precision /= 2;
+            tbPrecision.Text = Program.Result.Analysis.Precision.ToString();
+        }
+
+        void lowCut_CheckedChanged(object sender, EventArgs e) {
+            if (silent) return;
+
+            Program.Result.Analysis.LowCut = lowCut.Checked;
+            Program.Result.Analysis.ReanalyzeFromLowCut();
+        }
+
+        void hps_ValueChanged(object sender, EventArgs e) {
+            if (silent) return;
+
+            Program.Result.Analysis.HPS = (int)hps.Value;
+            Program.Result.Analysis.ReanalyzeFromHPS();
         }
     }
 }
