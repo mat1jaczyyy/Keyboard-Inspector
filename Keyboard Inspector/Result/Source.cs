@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Keyboard_Inspector {
     class Source: IBinary {
-        public readonly int Count;
-        public readonly string Name;
-        public readonly string DeviceInterface;
+        public int Count {get; private set; }
+        public string Name {get; private set; }
+        public string DeviceInterface {get; private set; }
 
         public Source(int count, string name, string device_interface = "") {
             Count = count;
@@ -125,6 +125,10 @@ namespace Keyboard_Inspector {
             }
 
             return new Source(count, name, interface_name);
+        }
+
+        public void AppendIndex(int i) {
+            Name += $" [{i + 1}]";
         }
 
         public override string ToString() => Name;

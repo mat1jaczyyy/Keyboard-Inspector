@@ -41,7 +41,15 @@ namespace Keyboard_Inspector {
 
             IsRecording = false;
 
-            return new Result("", DateTime.Now, ElapsedPrecise, events, sources.Keys.ToDictionary(i => i, i => Source.FromHandle(i, sources[i])));
+            var resolvedSources = sources.Keys.ToDictionary(i => i, i => Source.FromHandle(i, sources[i]));
+
+            foreach (var duplicates in resolvedSources.GroupBy(i => i.Value.Name).Where(i => i.Count() > 1)) {
+                int i = 0;
+                foreach (var source in duplicates)
+                    source.Value.AppendIndex(i++);
+            }
+
+            return new Result("", DateTime.Now, ElapsedPrecise, events, resolvedSources);
         }
 
         public static void RecordInput(bool pressed, Input input)
