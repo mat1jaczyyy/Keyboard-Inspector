@@ -150,7 +150,7 @@ namespace Keyboard_Inspector {
 
                 InputMenu.Tag = null;
 
-                KeyHistory.Inputs.SortByKey(i => KeyHistory.Sources[i.Input.Source].Name, i => i.Input.Source);
+                KeyHistory.SortInputsByDevice();
 
                 Invalidate();
             };

@@ -49,7 +49,11 @@ namespace Keyboard_Inspector {
                     source.Value.AppendIndex(i++);
             }
 
-            return new Result("", DateTime.Now, ElapsedPrecise, events, resolvedSources);
+            var result = new Result("", DateTime.Now, ElapsedPrecise, events, resolvedSources);
+
+            result.SortInputsByDevice();
+
+            return result;
         }
 
         public static void RecordInput(bool pressed, Input input)

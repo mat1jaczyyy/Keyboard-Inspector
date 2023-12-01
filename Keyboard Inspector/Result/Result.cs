@@ -129,6 +129,10 @@ namespace Keyboard_Inspector {
             return Events.Where(i => visible.Contains(i.Input)).ToList();
         }
 
+        public void SortInputsByDevice() {
+            Inputs.SortByKey(i => Sources[i.Input.Source].Name, i => i.Input.Source);
+        }
+
         public void ToBinary(BinaryWriter bw) {
             bw.Write(Header);
             bw.Write(FileVersion);
