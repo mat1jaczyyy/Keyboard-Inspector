@@ -20,14 +20,30 @@ namespace Keyboard_Inspector {
 
             InitializeComponent();
             InitializeCharts();
+
+            InitializeDropFocusClick(this);
         }
+
+        void InitializeDropFocusClick(Control ctrl) {
+            foreach (Control child in ctrl.Controls) {
+                child.MouseDown += DropFocus;
+                InitializeDropFocusClick(child);
+            }
+        }
+
+        void DropFocus(object sender, MouseEventArgs e) {
+            if (sender is Control ctrl && ctrl.Focused) return;
+            
+            ActiveControl = null;
+        }
+
 
         enum UIState {
             None, Recording, Parsing, Downloading
         }
 
         void UpdateState(UIState state) {
-            mainmenu.Enabled = state == UIState.None;
+            mainmenu.Enabled = frozen.Enabled = state == UIState.None;
 
             if (state == UIState.Recording) {
                 rec.Text = "Stop Recording";
@@ -130,7 +146,7 @@ namespace Keyboard_Inspector {
         void InitializeCharts() {
             Charts = tlpCharts.Controls.OfType<Chart>().ToList();
             tCharts = Charts.Where(i => tlpCharts.GetRow(i) == 0).ToList();
-            fCharts = Charts.Where(i => tlpCharts.GetRow(i) == 1).ToList();
+            fCharts = Charts.Where(i => tlpCharts.GetRow(i) == 2).ToList();
 
             foreach (var chart in Charts) {
                 chart.Spotlight += (_, __) => {
@@ -154,8 +170,8 @@ namespace Keyboard_Inspector {
                 };
 
                 chart.Tag = new ChartTitles() { 
-                    Primary = PrimaryTitles[tlpCharts.GetColumn(chart)],
-                    Secondary = SecondaryTitles[tlpCharts.GetRow(chart)],
+                    Primary = PrimaryTitles[tlpCharts.GetColumn(chart) / 2],
+                    Secondary = SecondaryTitles[tlpCharts.GetRow(chart) / 2],
                 };
             }
 
