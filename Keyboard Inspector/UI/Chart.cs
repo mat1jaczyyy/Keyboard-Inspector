@@ -224,9 +224,6 @@ namespace Keyboard_Inspector {
         }
 
         string _title = "";
-        [Category("Appearance")]
-        [Description("The title of the chart.")]
-        [DefaultValue("")]
         public string Title {
             get => _title;
             set {
@@ -976,7 +973,7 @@ namespace Keyboard_Inspector {
             });
         }
 
-        class Units {
+        internal class Units {
             public RectangleF Title, Chart, XAxis, YAxis, SourceArea, SourceOnlyArea, ScrollBarArea, ScrollBar, ScrollBarJumpLeft, ScrollBarJumpRight, NotchLeft, NotchRight;
             public RectangleF[] KeyDrag, KeyHover, KeyMenu, KeyText;
             public double TextHeight, Space, XUnit, YUnit, Min, Max, CrampedZoom;
@@ -1151,57 +1148,63 @@ namespace Keyboard_Inspector {
             return u;
         }
 
-        // TODO Remove unused
-        class ColorSet {
+        public class ColorSet {
             public Color LineColor;
-            public Brush TextBrush, BackBrush, ShadowBrush, ShadowTextBrush, HoverBrush, CapturedBrush, ScrollBarBrush, ScrollBarHoverBrush, ScrollBarCapturedBrush;
+            public Brush TextBrush, BackBrush, ShadowBrush, ShadowTextBrush, HoverBrush, SubtextBrush, ScrollBarBrush, ScrollBarHoverBrush, ScrollBarCapturedBrush;
             public LinearGradientBrush PointBrush;
             public Pen GradientPen, XPen, YPen, CapturedPen;
-        }
 
-        ColorSet GetColorSet(Units u) {
-            ColorSet cs = new ColorSet();
+            public static ColorSet Get(Control ctrl)
+                => Get(ctrl, null);
 
-            Color TextColor, BGColor, PointColor, CapturedColor;
-            LinearGradientBrush GradientBrush;
+            internal static ColorSet Get(Control ctrl, Units u) {
+                ColorSet cs = new ColorSet();
 
-            TextColor = Color.FromArgb(160, 160, 160);
-            BGColor = BackColor.Blend(Color.Black, 0.9);
-            cs.LineColor = ForeColor;
-            PointColor = ForeColor.Blend(Color.White, 0.6);
-            CapturedColor = Color.FromArgb(158, 177, 195);
+                Color TextColor, BGColor, CapturedColor;
+                LinearGradientBrush GradientBrush;
 
-            cs.TextBrush = new SolidBrush(TextColor);
-            cs.BackBrush = new SolidBrush(BGColor);
+                TextColor = Color.FromArgb(160, 160, 160);
+                BGColor = ctrl.BackColor.Blend(Color.Black, 0.9);
+                cs.LineColor = ctrl.ForeColor;
+                CapturedColor = Color.FromArgb(158, 177, 195);
 
-            var blend = new ColorBlend();
-            blend.Positions = new float[] { 0, 0.5f, 1 };
+                cs.TextBrush = new SolidBrush(TextColor);
+                cs.BackBrush = new SolidBrush(BGColor);
 
-            u.Chart.Inflate(1, 1);
-            GradientBrush = new LinearGradientBrush(u.Chart, Color.Transparent, Color.Transparent, LinearGradientMode.Vertical);
-            cs.PointBrush = new LinearGradientBrush(u.Chart, Color.Transparent, Color.Transparent, LinearGradientMode.Vertical);
-            u.Chart.Inflate(-1, -1);
+                var blend = new ColorBlend();
+                blend.Positions = new float[] { 0, 0.5f, 1 };
 
-            blend.Colors = new Color[] { cs.LineColor, cs.LineColor, ForeColor.Blend(BGColor, 0.5) };
-            GradientBrush.InterpolationColors = blend;
+                if (u != null) {
+                    Color PointColor = ctrl.ForeColor.Blend(Color.White, 0.6);
 
-            blend.Colors = new Color[] { PointColor, PointColor, cs.LineColor };
-            cs.PointBrush.InterpolationColors = blend;
+                    u.Chart.Inflate(1, 1);
+                    GradientBrush = new LinearGradientBrush(u.Chart, Color.Transparent, Color.Transparent, LinearGradientMode.Vertical);
+                    cs.PointBrush = new LinearGradientBrush(u.Chart, Color.Transparent, Color.Transparent, LinearGradientMode.Vertical);
+                    u.Chart.Inflate(-1, -1);
 
-            cs.ShadowBrush = new SolidBrush(BGColor.WithAlpha(200));
-            cs.ShadowTextBrush = new SolidBrush(BackColor.Blend(Color.Black, 0.75).WithAlpha(224));
-            cs.HoverBrush = new SolidBrush(TextColor.Blend(Color.SkyBlue, 0.3));
-            cs.CapturedBrush = new SolidBrush(TextColor.Blend(BackColor, 0.4));
-            cs.ScrollBarBrush = new SolidBrush(Color.FromArgb(92, 92, 92));
-            cs.ScrollBarHoverBrush = new SolidBrush(Color.FromArgb(122, 128, 132));
-            cs.ScrollBarCapturedBrush = new SolidBrush(CapturedColor);
+                    blend.Colors = new Color[] { cs.LineColor, cs.LineColor, ctrl.ForeColor.Blend(BGColor, 0.5) };
+                    GradientBrush.InterpolationColors = blend;
 
-            cs.GradientPen = new Pen(GradientBrush);
-            cs.XPen = new Pen(Color.FromArgb(20, 20, 20));
-            cs.YPen = new Pen(Color.FromArgb(44, 44, 44));
-            cs.CapturedPen = new Pen(CapturedColor.WithAlpha(150));
+                    blend.Colors = new Color[] { PointColor, PointColor, cs.LineColor };
+                    cs.PointBrush.InterpolationColors = blend;
 
-            return cs;
+                    cs.GradientPen = new Pen(GradientBrush);
+                }
+
+                cs.ShadowBrush = new SolidBrush(BGColor.WithAlpha(200));
+                cs.ShadowTextBrush = new SolidBrush(ctrl.BackColor.Blend(Color.Black, 0.75).WithAlpha(224));
+                cs.HoverBrush = new SolidBrush(TextColor.Blend(Color.SkyBlue, 0.3));
+                cs.SubtextBrush = new SolidBrush(TextColor.Blend(ctrl.BackColor, 0.4));
+                cs.ScrollBarBrush = new SolidBrush(Color.FromArgb(92, 92, 92));
+                cs.ScrollBarHoverBrush = new SolidBrush(Color.FromArgb(122, 128, 132));
+                cs.ScrollBarCapturedBrush = new SolidBrush(CapturedColor);
+
+                cs.XPen = new Pen(Color.FromArgb(20, 20, 20));
+                cs.YPen = new Pen(Color.FromArgb(44, 44, 44));
+                cs.CapturedPen = new Pen(CapturedColor.WithAlpha(150));
+
+                return cs;
+            }
         }
 
         protected override void OnPaint(PaintEventArgs e) {
@@ -1212,7 +1215,7 @@ namespace Keyboard_Inspector {
             if (!HasAny) return;
 
             Units u = GetUnits();
-            ColorSet cs = GetColorSet(u);
+            ColorSet cs = ColorSet.Get(this, u);
 
             PointF ToPointF(int index) => new PointF(
                 (float)((GetX(index) - u.Min) * u.XUnit - 0.5) + u.Chart.X,
@@ -1417,7 +1420,7 @@ namespace Keyboard_Inspector {
 
                         if (i == YTextHovering && YTextDragging == -1) textBrush = cs.HoverBrush;
                         if (i == YTextDragging) textBrush = cs.TextBrush;
-                        if (i == YTextMenu) textBrush = cs.CapturedBrush;
+                        if (i == YTextMenu) textBrush = cs.SubtextBrush;
 
                         v++;
                     }
@@ -1433,8 +1436,8 @@ namespace Keyboard_Inspector {
 
                     if (!YTextSourceOnly) {
                         if (i == YTextHovering) textBrush = cs.HoverBrush;
-                        if (i == YTextDragging) textBrush = cs.CapturedBrush;
-                        if (i == YTextMenu) textBrush = cs.CapturedBrush;
+                        if (i == YTextDragging) textBrush = cs.SubtextBrush;
+                        if (i == YTextMenu) textBrush = cs.SubtextBrush;
                     }
 
                     e.Graphics.DrawShadowString(
