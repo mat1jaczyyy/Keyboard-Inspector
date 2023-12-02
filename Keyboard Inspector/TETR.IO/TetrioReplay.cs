@@ -96,5 +96,8 @@ namespace Keyboard_Inspector {
 
         public static string GetUserID(dynamic ctx)
             => ctx.id()? ctx.id : ctx.user._id;
+
+        public static string GetScore(dynamic ctx)
+            => ctx.points.primary.ToString();
     }
 }

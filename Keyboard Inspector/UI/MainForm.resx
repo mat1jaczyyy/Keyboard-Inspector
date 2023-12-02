@@ -131,6 +131,11 @@ Useful in situations where the fundamental frequency isn't obvious due to excess
 It is recommended to leave this checked as devices typically operate at higher sampling rates.
 Uncheck only if analyzing a device with an extremely low sampling rate.</value>
   </data>
+  <data name="tbBinRate.ToolTip" xml:space="preserve">
+    <value>Specifies the rate at which to bin observed data for the time domain histograms.
+Higher values will group the data into smaller bins and thus be able to analyze higher device sampling rates.
+Increasing the value won't yield any additional precision for lower device sampling rates.</value>
+  </data>
   <metadata name="mainmenu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>259, 17</value>
   </metadata>

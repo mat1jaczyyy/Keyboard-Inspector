@@ -158,6 +158,7 @@ namespace Keyboard_Inspector {
             this.tDiffs.Size = new System.Drawing.Size(429, 260);
             this.tDiffs.TabIndex = 0;
             this.tDiffs.TabStop = false;
+            this.tDiffs.Title = "";
             // 
             // tCompound
             // 
@@ -170,6 +171,7 @@ namespace Keyboard_Inspector {
             this.tCompound.Size = new System.Drawing.Size(429, 260);
             this.tCompound.TabIndex = 1;
             this.tCompound.TabStop = false;
+            this.tCompound.Title = "";
             // 
             // tCircular
             // 
@@ -182,6 +184,7 @@ namespace Keyboard_Inspector {
             this.tCircular.Size = new System.Drawing.Size(430, 260);
             this.tCircular.TabIndex = 2;
             this.tCircular.TabStop = false;
+            this.tCircular.Title = "";
             // 
             // fDiffs
             // 
@@ -194,6 +197,7 @@ namespace Keyboard_Inspector {
             this.fDiffs.Size = new System.Drawing.Size(429, 260);
             this.fDiffs.TabIndex = 3;
             this.fDiffs.TabStop = false;
+            this.fDiffs.Title = "";
             // 
             // fCompound
             // 
@@ -206,6 +210,7 @@ namespace Keyboard_Inspector {
             this.fCompound.Size = new System.Drawing.Size(429, 260);
             this.fCompound.TabIndex = 4;
             this.fCompound.TabStop = false;
+            this.fCompound.Title = "";
             // 
             // fCircular
             // 
@@ -218,6 +223,7 @@ namespace Keyboard_Inspector {
             this.fCircular.Size = new System.Drawing.Size(430, 260);
             this.fCircular.TabIndex = 5;
             this.fCircular.TabStop = false;
+            this.fCircular.Title = "";
             // 
             // analysisPanel
             // 
@@ -330,9 +336,7 @@ namespace Keyboard_Inspector {
             this.tbBinRate.Size = new System.Drawing.Size(56, 20);
             this.tbBinRate.TabIndex = 3;
             this.tbBinRate.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.toolTip1.SetToolTip(this.tbBinRate, "Specifies the rate at which to bin observed data for the time domain histograms.\r" +
-        "\nHigher values will group the data into smaller bins and thus be able to analyze" +
-        " higher device sampling rates.");
+            this.toolTip1.SetToolTip(this.tbBinRate, resources.GetString("tbBinRate.ToolTip"));
             this.tbBinRate.TextChanged += new System.EventHandler(this.tbBinRate_TextChanged);
             // 
             // lblBinRate
@@ -366,6 +370,7 @@ namespace Keyboard_Inspector {
             this.screen.Name = "screen";
             this.screen.Size = new System.Drawing.Size(1294, 251);
             this.screen.TabIndex = 1;
+            this.screen.Title = "";
             // 
             // recording
             // 
