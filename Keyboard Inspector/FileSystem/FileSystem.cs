@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,19 +21,19 @@ namespace Keyboard_Inspector {
         static FileSystem() {
             HttpClient.DefaultRequestHeaders.UserAgent.Add(
                 new ProductInfoHeaderValue(
-                    "KeyboardInspector",
-                    Assembly.GetEntryAssembly().GetName().Version.ToString(3)
+                    Regex.Replace(Constants.Name, @"\s+", ""),
+                    Constants.Version
                 )
             );
             HttpClient.DefaultRequestHeaders.UserAgent.Add(
                 new ProductInfoHeaderValue(
-                    "(+https://github.com/mat1jaczyyy/Keyboard-Inspector)"
+                    $"(+{Constants.GitHubURL})"
                 )
             );
         }
 
         public static FileFormat[] Formats { get; private set; } = new FileFormat[] {
-            new FileFormat("Keyboard Inspector File", new string[] { "kbi" },
+            new FileFormat($"{Constants.Name} File", new string[] { "kbi" },
                 Result.FromStream,
                 (result, path) => {
                     using (MemoryStream ms = new MemoryStream()) {
@@ -58,8 +57,8 @@ namespace Keyboard_Inspector {
                 disclaimer:
                 "You are analyzing a TETR.IO replay file.\n\nTETR.IO downsamples input data to 600 Hz to fit it onto the subframe grid which " +
                 "you will notice as a peak at 600 Hz in the frequency domain. This adds another \"sampling rate\" (in addition to the usual " +
-                "USB poll rate and matrix scan rate) to the process.\n\nThis is unlike a regular Keyboard Inspector recording which tries to " +
-                "get the most accurate real-time timestamp it can without any additional downsampling.\n\nYou may still analyze the recording, " +
+               $"USB poll rate and matrix scan rate) to the process.\n\nThis is unlike a regular {Constants.Name} recording which tries to get " +
+                "the most accurate real-time timestamp it can without any additional downsampling.\n\nYou may still analyze the recording, " +
                 "but be vary of the limitations of the TETR.IO replay format."
             ),
         };

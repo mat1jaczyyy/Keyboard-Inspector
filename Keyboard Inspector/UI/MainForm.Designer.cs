@@ -61,6 +61,7 @@ namespace Keyboard_Inspector {
             this.discord = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.frozen = new DarkUI.Controls.DarkCheckBox();
+            this.github = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
             this.split.Panel1.SuspendLayout();
             this.split.Panel2.SuspendLayout();
@@ -79,7 +80,6 @@ namespace Keyboard_Inspector {
             this.rec.Padding = new System.Windows.Forms.Padding(5);
             this.rec.Size = new System.Drawing.Size(122, 24);
             this.rec.TabIndex = 2;
-            this.rec.Text = "Start Recording";
             this.rec.Click += new System.EventHandler(this.rec_Click);
             // 
             // status
@@ -475,7 +475,8 @@ namespace Keyboard_Inspector {
             // 
             this.help.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.discord});
+            this.discord,
+            this.github});
             this.help.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.help.Name = "help";
             this.help.Size = new System.Drawing.Size(41, 20);
@@ -486,7 +487,7 @@ namespace Keyboard_Inspector {
             this.discord.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.discord.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.discord.Name = "discord";
-            this.discord.Size = new System.Drawing.Size(144, 22);
+            this.discord.Size = new System.Drawing.Size(180, 22);
             this.discord.Text = "Discord Server";
             this.discord.Click += new System.EventHandler(this.discord_Click);
             // 
@@ -499,6 +500,15 @@ namespace Keyboard_Inspector {
             this.frozen.Text = "Freeze";
             this.frozen.UseMnemonic = false;
             this.frozen.CheckedChanged += new System.EventHandler(this.frozen_CheckedChanged);
+            // 
+            // github
+            // 
+            this.github.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.github.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.github.Name = "github";
+            this.github.Size = new System.Drawing.Size(180, 22);
+            this.github.Text = "GitHub Repository";
+            this.github.Click += new System.EventHandler(this.github_Click);
             // 
             // MainForm
             // 
@@ -515,7 +525,6 @@ namespace Keyboard_Inspector {
             this.MainMenuStrip = this.mainmenu;
             this.MinimumSize = new System.Drawing.Size(1310, 875);
             this.Name = "MainForm";
-            this.Text = "Keyboard Inspector";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.Shown += new System.EventHandler(this.MainForm_Shown);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.MainForm_DragDrop);
@@ -571,5 +580,6 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.ToolStripMenuItem help;
         private System.Windows.Forms.ToolStripMenuItem discord;
         private DarkUI.Controls.DarkCheckBox frozen;
+        private System.Windows.Forms.ToolStripMenuItem github;
     }
 }

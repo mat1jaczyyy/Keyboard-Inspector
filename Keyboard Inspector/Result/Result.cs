@@ -47,7 +47,7 @@ namespace Keyboard_Inspector {
                 }
             }
 
-            if (Program.IsFrozen) {
+            if (Program.IsFrozen && Program.FrozenInputs != null) {
                 Program.FrozenInputs.KeepOnly(i => i.Visible);
 
                 foreach (var i in Program.FrozenInputs)
@@ -92,6 +92,10 @@ namespace Keyboard_Inspector {
                         i.Visible = Sources[i.Input.Source] == best;
                     }
                 }
+            }
+
+            if (Program.IsFrozen && Program.FrozenInputs == null) {
+                Program.SetFreeze(true);
             }
         }
 

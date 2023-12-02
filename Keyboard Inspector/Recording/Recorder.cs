@@ -19,9 +19,8 @@ namespace Keyboard_Inspector {
             if (IsRecording)
                 StopRecording();
 
-            // TODO maybe increase initial capacity?
-            events = new List<Event>();
-            sources = new Dictionary<long, int>();
+            events = new List<Event>(200000);
+            sources = new Dictionary<long, int>(50);
 
             time?.Stop();
             time = new Stopwatch();

@@ -9,9 +9,6 @@ using FFTW.NET;
 
 namespace Keyboard_Inspector {
     static class Program {
-        public static readonly string DataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "Keyboard Inspector");
-        public static readonly string WisdomFile = Path.Combine(DataDir, "wisdom");
-
         public static string[] Args = null;
 
         class InputMessageFilter: IMessageFilter {
@@ -47,22 +44,25 @@ namespace Keyboard_Inspector {
         public static List<InputInfo> FrozenInputs { get; private set; }
         public static Dictionary<long, Source> FrozenSources { get; private set; }
 
-        public static bool IsFrozen {
-            get => FrozenInputs != null;
-            set {
-                FrozenInputs = value? Result.Inputs : null;
-                FrozenSources = value? Result.Sources : null;
-            }
+        public static bool IsFrozen { get; private set; } = false;
+
+        public static void SetFreeze(bool value) {
+            IsFrozen = value;
+
+            bool canFreeze = value && !Result.IsEmpty(Result);
+
+            FrozenInputs = canFreeze? Result.Inputs : null;
+            FrozenSources = canFreeze? Result.Sources : null;
         }
 
         [STAThread]
         static void Main(string[] args) {
             Args = args;
 
-            if (!Directory.Exists(DataDir))
-                Directory.CreateDirectory(DataDir);
+            if (!Directory.Exists(Constants.DataDir))
+                Directory.CreateDirectory(Constants.DataDir);
 
-            DFT.Wisdom.Import(WisdomFile);
+            DFT.Wisdom.Import(Constants.WisdomFile);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

@@ -22,6 +22,8 @@ namespace Keyboard_Inspector {
             InitializeCharts();
 
             InitializeDropFocusClick(this);
+
+            ResultLoaded();
         }
 
         void InitializeDropFocusClick(Control ctrl) {
@@ -78,9 +80,9 @@ namespace Keyboard_Inspector {
             UpdateState(Recorder.IsRecording? UIState.Recording : UIState.None);
 
             string title = Result.IsEmpty(Program.Result)? "" : Program.Result.GetTitle();
-            Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} - ") + "Keyboard Inspector";
+            Text = (string.IsNullOrWhiteSpace(title)? "" : $"{title} – ") + $"{Constants.Name} {Constants.Version}";
 
-            labelN.Text = "";
+            SetEventCount(null);
 
             save.Enabled = split.Visible = !Result.IsEmpty(Program.Result);
 
@@ -199,7 +201,7 @@ namespace Keyboard_Inspector {
         void LoadFinished(FileSystem.FileResult load) {
             if (load.Error == null) {
                 SetFreezeSilently(false);
-                Program.IsFrozen = false;
+                Program.SetFreeze(false);
 
                 Program.Result = load.Result;
                 ResultLoaded();
@@ -258,7 +260,11 @@ namespace Keyboard_Inspector {
         }
 
         private void discord_Click(object sender, EventArgs e) {
-            Process.Start("https://discord.gg/kX4cJQH5Zn"); // todo get relevant link from an API in the future
+            Process.Start(Constants.DiscordURL);
+        }
+
+        private void github_Click(object sender, EventArgs e) {
+            Process.Start(Constants.GitHubURL);
         }
 
         bool ValidateFileDrag(DragEventArgs e, out string result) {
@@ -307,8 +313,8 @@ namespace Keyboard_Inspector {
             split.Invalidate(new Rectangle(0, split.SplitterDistance, split.Width, split.SplitterWidth));
         }
 
-        public void SetEventCount(int n)
-            => labelN.Text = $"{n} input events";
+        public void SetEventCount(int? n)
+            => labelN.Text = n == null? null : $"{n} input events";
 
         bool silent;
 
@@ -316,15 +322,13 @@ namespace Keyboard_Inspector {
             silent = true;
             frozen.Checked = value;
             silent = false;
-
-            frozen.ForeColor = value? DefaultForeColor : Color.FromArgb(142, 192, 212);
         }
 
         void frozen_CheckedChanged(object sender, EventArgs e) {
             if (silent) return;
 
             SetFreezeSilently(frozen.Checked);
-            Program.IsFrozen = frozen.Checked;
+            Program.SetFreeze(frozen.Checked);
         }
 
         void SetPrecisionSilently() {

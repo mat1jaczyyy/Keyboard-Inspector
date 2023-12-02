@@ -201,7 +201,7 @@ namespace Keyboard_Inspector {
 
             string estimate = "";
             if (EstimatePeak(data, out int peak))
-                estimate = $" - peak at {(int)Math.Round(peak * hpsFactor)} Hz";
+                estimate = $" – peak at {(int)Math.Round(peak * hpsFactor)} Hz";
 
             DrawGraph(chart, data, hpsFactor, estimate);
         }
@@ -243,7 +243,7 @@ namespace Keyboard_Inspector {
                 RunGraphJob(circular, MainForm.Instance.tCircular, MainForm.Instance.fCircular, CircularRotationFix);
             });
 
-            DFT.Wisdom.Export(Program.WisdomFile);
+            DFT.Wisdom.Export(Constants.WisdomFile);
         }
 
         public void ReanalyzeFromLowCut() {
