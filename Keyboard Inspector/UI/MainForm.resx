@@ -120,10 +120,16 @@
   <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>369, 17</value>
   </metadata>
+  <data name="hps.ToolTip" xml:space="preserve">
+    <value>Higher frequency harmonics will appear at multiples of the device sampling rate's fundamental frequency.
+This is because it's still possible for higher sampling rates to have generated the observed data, albeit less likely.
+The Harmonic Product Spectrum algorithm attempts to eliminate these harmonics using displaced downsampled partials.
+Useful in situations where the fundamental frequency isn't obvious due to excessive noise.</value>
+  </data>
   <data name="lowCut.ToolTip" xml:space="preserve">
-    <value>Cuts out frequencies below ~50 Hz.
-It is recommended to leave this checked as keyboards typically operate at higher sampling rates.
-Uncheck only if analyzing a keyboard with an extremely low sampling rate.</value>
+    <value>Cuts out frequencies below ~50 Hz, which usually represent the raised floor of the time domain histograms.
+It is recommended to leave this checked as devices typically operate at higher sampling rates.
+Uncheck only if analyzing a device with an extremely low sampling rate.</value>
   </data>
   <metadata name="mainmenu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>259, 17</value>

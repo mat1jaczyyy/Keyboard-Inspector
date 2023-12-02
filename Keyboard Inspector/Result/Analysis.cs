@@ -10,12 +10,12 @@ namespace Keyboard_Inspector {
         const int pLow = 20;
         const int pHigh = 128000;
 
-        int _precision = 4000;
-        public int Precision {
-            get => _precision;
-            set => _precision = value.Clamp(0, pHigh);
+        int _binrate = 4000;
+        public int BinRate {
+            get => _binrate;
+            set => _binrate = value.Clamp(0, pHigh);
         }
-        public bool PrecisionValid => Precision >= pLow;
+        public bool BinRateValid => BinRate >= pLow;
 
         int _hps = 0;
         public int HPS {
@@ -26,7 +26,7 @@ namespace Keyboard_Inspector {
         public bool LowCut = true;
 
         public void ToBinary(BinaryWriter bw) {
-            bw.Write(Precision);
+            bw.Write(BinRate);
             bw.Write(HPS);
             bw.Write(LowCut);
         }
@@ -34,7 +34,7 @@ namespace Keyboard_Inspector {
         public static Analysis FromBinary(BinaryReader br, uint fileVersion) {
             var ret = new Analysis();
 
-            ret.Precision = br.ReadInt32();
+            ret.BinRate = br.ReadInt32();
             ret.HPS = br.ReadInt32();
             ret.LowCut = br.ReadBoolean();
 
@@ -160,16 +160,16 @@ namespace Keyboard_Inspector {
         void RunGraphJob(List<double> source, Chart timeChart, Chart freqChart, Func<AlignedArrayDouble, IEnumerable<double>> timeTransform = null) {
             timeTransform = timeTransform ?? DefaultTimeTransform;
 
-            AlignedArrayDouble data = new AlignedArrayDouble(64, Result.Analysis.Precision);
+            AlignedArrayDouble data = new AlignedArrayDouble(64, Result.Analysis.BinRate);
             for (int i = 0; i < source.Count; i++) {
                 double v = source[i];
                 if (v.InRangeIE(0, 1))
-                    data[(int)Math.Round(v * Result.Analysis.Precision)] += 1;
+                    data[(int)Math.Round(v * Result.Analysis.BinRate)] += 1;
             }
 
-            DrawGraph(timeChart, timeTransform(data), 1000.0 / Result.Analysis.Precision);
+            DrawGraph(timeChart, timeTransform(data), 1000.0 / Result.Analysis.BinRate);
 
-            AlignedArrayComplex input = new AlignedArrayComplex(64, Result.Analysis.Precision / 2 + 1);
+            AlignedArrayComplex input = new AlignedArrayComplex(64, Result.Analysis.BinRate / 2 + 1);
             DFT.FFT(data, input, PlannerFlags.Estimate, Environment.ProcessorCount);
 
             double[] freq = new double[input.Length];
@@ -235,7 +235,7 @@ namespace Keyboard_Inspector {
 
         public void ReanalyzeFromCache() {
             if (Result.IsEmpty(Result)) return;
-            if (!Result.Analysis.PrecisionValid) return;
+            if (!Result.Analysis.BinRateValid) return;
 
             RunChartsSuspendedAction(MainForm.Instance.Charts, () => {
                 RunGraphJob(diffs, MainForm.Instance.tDiffs, MainForm.Instance.fDiffs);

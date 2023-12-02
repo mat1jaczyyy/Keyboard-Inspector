@@ -42,10 +42,10 @@ namespace Keyboard_Inspector {
             this.hps = new DarkUI.Controls.DarkNumericUpDown();
             this.lblHPS = new DarkUI.Controls.DarkLabel();
             this.lowCut = new DarkUI.Controls.DarkCheckBox();
-            this.precisionDouble = new DarkUI.Controls.DarkButton();
-            this.precisionHalf = new DarkUI.Controls.DarkButton();
-            this.tbPrecision = new DarkUI.Controls.DarkTextBox();
-            this.lblPrecision = new DarkUI.Controls.DarkLabel();
+            this.binRateDouble = new DarkUI.Controls.DarkButton();
+            this.binRateHalf = new DarkUI.Controls.DarkButton();
+            this.tbBinRate = new DarkUI.Controls.DarkTextBox();
+            this.lblBinRate = new DarkUI.Controls.DarkLabel();
             this.lblHz = new DarkUI.Controls.DarkLabel();
             this.screen = new Keyboard_Inspector.Chart();
             this.recording = new System.Windows.Forms.ToolStripMenuItem();
@@ -59,9 +59,9 @@ namespace Keyboard_Inspector {
             this.captureMouse = new System.Windows.Forms.ToolStripMenuItem();
             this.help = new System.Windows.Forms.ToolStripMenuItem();
             this.discord = new System.Windows.Forms.ToolStripMenuItem();
+            this.github = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.frozen = new DarkUI.Controls.DarkCheckBox();
-            this.github = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
             this.split.Panel1.SuspendLayout();
             this.split.Panel2.SuspendLayout();
@@ -226,10 +226,10 @@ namespace Keyboard_Inspector {
             this.analysisPanel.Controls.Add(this.hps);
             this.analysisPanel.Controls.Add(this.lblHPS);
             this.analysisPanel.Controls.Add(this.lowCut);
-            this.analysisPanel.Controls.Add(this.precisionDouble);
-            this.analysisPanel.Controls.Add(this.precisionHalf);
-            this.analysisPanel.Controls.Add(this.tbPrecision);
-            this.analysisPanel.Controls.Add(this.lblPrecision);
+            this.analysisPanel.Controls.Add(this.binRateDouble);
+            this.analysisPanel.Controls.Add(this.binRateHalf);
+            this.analysisPanel.Controls.Add(this.tbBinRate);
+            this.analysisPanel.Controls.Add(this.lblBinRate);
             this.analysisPanel.Controls.Add(this.lblHz);
             this.analysisPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.analysisPanel.Location = new System.Drawing.Point(0, 526);
@@ -251,7 +251,7 @@ namespace Keyboard_Inspector {
             // 
             this.partials.AutoSize = true;
             this.partials.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.partials.Location = new System.Drawing.Point(592, 5);
+            this.partials.Location = new System.Drawing.Point(566, 5);
             this.partials.Name = "partials";
             this.partials.Size = new System.Drawing.Size(40, 13);
             this.partials.TabIndex = 12;
@@ -260,7 +260,7 @@ namespace Keyboard_Inspector {
             // 
             // hps
             // 
-            this.hps.Location = new System.Drawing.Point(520, 3);
+            this.hps.Location = new System.Drawing.Point(494, 3);
             this.hps.Maximum = new decimal(new int[] {
             9,
             0,
@@ -270,24 +270,25 @@ namespace Keyboard_Inspector {
             this.hps.Size = new System.Drawing.Size(71, 20);
             this.hps.TabIndex = 7;
             this.hps.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.toolTip1.SetToolTip(this.hps, resources.GetString("hps.ToolTip"));
             this.hps.ValueChanged += new System.EventHandler(this.hps_ValueChanged);
             // 
             // lblHPS
             // 
+            this.lblHPS.AutoSize = true;
             this.lblHPS.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lblHPS.Location = new System.Drawing.Point(396, 5);
+            this.lblHPS.Location = new System.Drawing.Point(375, 5);
             this.lblHPS.Name = "lblHPS";
-            this.lblHPS.Size = new System.Drawing.Size(123, 13);
+            this.lblHPS.Size = new System.Drawing.Size(117, 13);
             this.lblHPS.TabIndex = 9;
             this.lblHPS.Text = "HPS Partial Elimination:";
-            this.lblHPS.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lowCut
             // 
             this.lowCut.AutoSize = true;
             this.lowCut.Checked = true;
             this.lowCut.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.lowCut.Location = new System.Drawing.Point(287, 3);
+            this.lowCut.Location = new System.Drawing.Point(261, 3);
             this.lowCut.Name = "lowCut";
             this.lowCut.Size = new System.Drawing.Size(90, 17);
             this.lowCut.TabIndex = 6;
@@ -296,56 +297,59 @@ namespace Keyboard_Inspector {
             this.lowCut.UseMnemonic = false;
             this.lowCut.CheckedChanged += new System.EventHandler(this.lowCut_CheckedChanged);
             // 
-            // precisionDouble
+            // binRateDouble
             // 
-            this.precisionDouble.Location = new System.Drawing.Point(221, 3);
-            this.precisionDouble.Name = "precisionDouble";
-            this.precisionDouble.Padding = new System.Windows.Forms.Padding(5, 3, 5, 5);
-            this.precisionDouble.Size = new System.Drawing.Size(29, 20);
-            this.precisionDouble.TabIndex = 5;
-            this.precisionDouble.Tag = "";
-            this.precisionDouble.Text = "* 2";
-            this.precisionDouble.Click += new System.EventHandler(this.precisionDouble_Click);
+            this.binRateDouble.Location = new System.Drawing.Point(195, 3);
+            this.binRateDouble.Name = "binRateDouble";
+            this.binRateDouble.Padding = new System.Windows.Forms.Padding(5, 3, 5, 5);
+            this.binRateDouble.Size = new System.Drawing.Size(29, 20);
+            this.binRateDouble.TabIndex = 5;
+            this.binRateDouble.Tag = "";
+            this.binRateDouble.Text = "* 2";
+            this.binRateDouble.Click += new System.EventHandler(this.binRateDouble_Click);
             // 
-            // precisionHalf
+            // binRateHalf
             // 
-            this.precisionHalf.Location = new System.Drawing.Point(192, 3);
-            this.precisionHalf.Name = "precisionHalf";
-            this.precisionHalf.Padding = new System.Windows.Forms.Padding(5, 3, 5, 5);
-            this.precisionHalf.Size = new System.Drawing.Size(29, 20);
-            this.precisionHalf.TabIndex = 4;
-            this.precisionHalf.Tag = "";
-            this.precisionHalf.Text = "/ 2";
-            this.precisionHalf.Click += new System.EventHandler(this.precisionHalf_Click);
+            this.binRateHalf.Location = new System.Drawing.Point(166, 3);
+            this.binRateHalf.Name = "binRateHalf";
+            this.binRateHalf.Padding = new System.Windows.Forms.Padding(5, 3, 5, 5);
+            this.binRateHalf.Size = new System.Drawing.Size(29, 20);
+            this.binRateHalf.TabIndex = 4;
+            this.binRateHalf.Tag = "";
+            this.binRateHalf.Text = "/ 2";
+            this.binRateHalf.Click += new System.EventHandler(this.binRateHalf_Click);
             // 
-            // tbPrecision
+            // tbBinRate
             // 
-            this.tbPrecision.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
-            this.tbPrecision.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.tbPrecision.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.tbPrecision.Location = new System.Drawing.Point(109, 3);
-            this.tbPrecision.MaxLength = 7;
-            this.tbPrecision.Name = "tbPrecision";
-            this.tbPrecision.Size = new System.Drawing.Size(56, 20);
-            this.tbPrecision.TabIndex = 3;
-            this.tbPrecision.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.tbPrecision.TextChanged += new System.EventHandler(this.tbPrecision_TextChanged);
+            this.tbBinRate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
+            this.tbBinRate.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.tbBinRate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.tbBinRate.Location = new System.Drawing.Point(83, 3);
+            this.tbBinRate.MaxLength = 7;
+            this.tbBinRate.Name = "tbBinRate";
+            this.tbBinRate.Size = new System.Drawing.Size(56, 20);
+            this.tbBinRate.TabIndex = 3;
+            this.tbBinRate.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.toolTip1.SetToolTip(this.tbBinRate, "Specifies the rate at which to bin observed data for the time domain histograms.\r" +
+        "\nHigher values will group the data into smaller bins and thus be able to analyze" +
+        " higher device sampling rates.");
+            this.tbBinRate.TextChanged += new System.EventHandler(this.tbBinRate_TextChanged);
             // 
-            // lblPrecision
+            // lblBinRate
             // 
-            this.lblPrecision.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lblPrecision.Location = new System.Drawing.Point(12, 5);
-            this.lblPrecision.Name = "lblPrecision";
-            this.lblPrecision.Size = new System.Drawing.Size(97, 13);
-            this.lblPrecision.TabIndex = 4;
-            this.lblPrecision.Text = "Analysis Precision:";
-            this.lblPrecision.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblBinRate.AutoSize = true;
+            this.lblBinRate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.lblBinRate.Location = new System.Drawing.Point(12, 5);
+            this.lblBinRate.Name = "lblBinRate";
+            this.lblBinRate.Size = new System.Drawing.Size(71, 13);
+            this.lblBinRate.TabIndex = 4;
+            this.lblBinRate.Text = "Binning Rate:";
             // 
             // lblHz
             // 
             this.lblHz.AutoSize = true;
             this.lblHz.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lblHz.Location = new System.Drawing.Point(166, 5);
+            this.lblHz.Location = new System.Drawing.Point(140, 5);
             this.lblHz.Name = "lblHz";
             this.lblHz.Size = new System.Drawing.Size(20, 13);
             this.lblHz.TabIndex = 6;
@@ -487,9 +491,18 @@ namespace Keyboard_Inspector {
             this.discord.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.discord.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.discord.Name = "discord";
-            this.discord.Size = new System.Drawing.Size(180, 22);
+            this.discord.Size = new System.Drawing.Size(160, 22);
             this.discord.Text = "Discord Server";
             this.discord.Click += new System.EventHandler(this.discord_Click);
+            // 
+            // github
+            // 
+            this.github.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.github.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.github.Name = "github";
+            this.github.Size = new System.Drawing.Size(160, 22);
+            this.github.Text = "GitHub Repository";
+            this.github.Click += new System.EventHandler(this.github_Click);
             // 
             // frozen
             // 
@@ -498,17 +511,10 @@ namespace Keyboard_Inspector {
             this.frozen.Size = new System.Drawing.Size(56, 17);
             this.frozen.TabIndex = 1;
             this.frozen.Text = "Freeze";
+            this.toolTip1.SetToolTip(this.frozen, "If checked, the currently visible inputs from the input history view will be pres" +
+        "erved for the next recording.");
             this.frozen.UseMnemonic = false;
             this.frozen.CheckedChanged += new System.EventHandler(this.frozen_CheckedChanged);
-            // 
-            // github
-            // 
-            this.github.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.github.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.github.Name = "github";
-            this.github.Size = new System.Drawing.Size(180, 22);
-            this.github.Text = "GitHub Repository";
-            this.github.Click += new System.EventHandler(this.github_Click);
             // 
             // MainForm
             // 
@@ -550,11 +556,11 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.SplitContainer split;
         private System.Windows.Forms.TableLayoutPanel tlpCharts;
         private System.Windows.Forms.Panel analysisPanel;
-        private DarkUI.Controls.DarkTextBox tbPrecision;
-        private DarkUI.Controls.DarkLabel lblPrecision;
+        private DarkUI.Controls.DarkTextBox tbBinRate;
+        private DarkUI.Controls.DarkLabel lblBinRate;
         private DarkUI.Controls.DarkLabel lblHz;
-        private DarkUI.Controls.DarkButton precisionHalf;
-        private DarkUI.Controls.DarkButton precisionDouble;
+        private DarkUI.Controls.DarkButton binRateHalf;
+        private DarkUI.Controls.DarkButton binRateDouble;
         private DarkUI.Controls.DarkLabel lblHPS;
         private DarkUI.Controls.DarkNumericUpDown hps;
         private DarkUI.Controls.DarkLabel partials;

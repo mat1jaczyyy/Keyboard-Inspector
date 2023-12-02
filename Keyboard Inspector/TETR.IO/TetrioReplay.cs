@@ -87,7 +87,7 @@ namespace Keyboard_Inspector {
                 data.frames / 60.0,
                 events,
                 new Dictionary<long, Source>() {{0, new Source(events.Count, "TETR.IO Replay")}},
-                new Analysis() { Precision = 600 }
+                new Analysis() { BinRate = 600 }
             );
         }
 

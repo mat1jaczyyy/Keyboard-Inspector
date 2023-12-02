@@ -90,7 +90,7 @@ namespace Keyboard_Inspector {
 
             if (Result.IsEmpty(Program.Result)) return;
 
-            SetPrecisionSilently();
+            SetBinRateSilently();
             SetHPSSilently();
             SetLowCutSilently();
 
@@ -331,9 +331,9 @@ namespace Keyboard_Inspector {
             Program.SetFreeze(frozen.Checked);
         }
 
-        void SetPrecisionSilently() {
+        void SetBinRateSilently() {
             silent = true;
-            tbPrecision.Text = Program.Result.Analysis.Precision.ToString();
+            tbBinRate.Text = Program.Result.Analysis.BinRate.ToString();
             silent = false;
         }
 
@@ -349,26 +349,26 @@ namespace Keyboard_Inspector {
             silent = false;
         }
 
-        void tbPrecision_TextChanged(object sender, EventArgs e) {
+        void tbBinRate_TextChanged(object sender, EventArgs e) {
             if (silent) return;
 
-            if (!int.TryParse(tbPrecision.Text, out int precision)) return;
-            Program.Result.Analysis.Precision = precision;
+            if (!int.TryParse(tbBinRate.Text, out int rate)) return;
+            Program.Result.Analysis.BinRate = rate;
 
-            SetPrecisionSilently();
-            tbPrecision.Refresh();
+            SetBinRateSilently();
+            tbBinRate.Refresh();
 
             Program.Result.Analysis.ReanalyzeFromCache();
         }
 
-        void precisionDouble_Click(object sender, EventArgs e) {
-            Program.Result.Analysis.Precision *= 2;
-            tbPrecision.Text = Program.Result.Analysis.Precision.ToString();
+        void binRateDouble_Click(object sender, EventArgs e) {
+            Program.Result.Analysis.BinRate *= 2;
+            tbBinRate.Text = Program.Result.Analysis.BinRate.ToString();
         }
 
-        void precisionHalf_Click(object sender, EventArgs e) {
-            Program.Result.Analysis.Precision /= 2;
-            tbPrecision.Text = Program.Result.Analysis.Precision.ToString();
+        void binRateHalf_Click(object sender, EventArgs e) {
+            Program.Result.Analysis.BinRate /= 2;
+            tbBinRate.Text = Program.Result.Analysis.BinRate.ToString();
         }
 
         void lowCut_CheckedChanged(object sender, EventArgs e) {
