@@ -6,13 +6,17 @@ using System.Windows.Forms;
 namespace Keyboard_Inspector {
     static class Constants {
         public static readonly string Name, Version, GitHubURL, DiscordURL, DataDir, WisdomFile;
+        public static readonly string VersionSuffix = null;
 
         static Constants() {
             Name = Application.ProductName;
 
             var ver = Assembly.GetEntryAssembly().GetName().Version;
             Version = ver.ToString(ver.Build > 0? 3 : 2);
-            
+
+            if (!string.IsNullOrWhiteSpace(VersionSuffix))
+                Version += $"-{VersionSuffix}";
+
             #if DEBUG
                 Version += "-debug";
             #endif
