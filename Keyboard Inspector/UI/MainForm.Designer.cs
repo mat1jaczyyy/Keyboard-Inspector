@@ -511,6 +511,7 @@ namespace Keyboard_Inspector {
             // 
             // frozen
             // 
+            this.frozen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.frozen.Location = new System.Drawing.Point(1102, 3);
             this.frozen.Name = "frozen";
             this.frozen.Size = new System.Drawing.Size(56, 17);
