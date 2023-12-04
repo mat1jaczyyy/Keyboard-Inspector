@@ -96,14 +96,16 @@ namespace Keyboard_Inspector {
             name = null;
 
             var hFile = Native.CreateFile(interface_name, 0, 3, IntPtr.Zero, 3, 0, IntPtr.Zero);
-            if (hFile != IntPtr.Zero) {
-                try {
-                    if (!Native.HidD_GetProductString(hFile, productString, productString.Capacity))
-                        return false;
 
-                } finally {
-                    Native.CloseHandle(hFile);
-                }
+            if (hFile == IntPtr.Zero)
+                return false;
+
+            try {
+                if (!Native.HidD_GetProductString(hFile, productString, productString.Capacity))
+                    return false;
+
+            } finally {
+                Native.CloseHandle(hFile);
             }
 
             name = productString.ToString();
