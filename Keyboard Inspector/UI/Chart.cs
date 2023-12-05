@@ -1318,7 +1318,7 @@ namespace Keyboard_Inspector {
                     if (point.Y < yMin) yMin = point.Y;
                     if (point.Y > yMax) yMax = point.Y;
 
-                    if (diff < cutoff) {
+                    if (i < count - 1 && diff < cutoff) {
                         useYLine = true;
                         continue;
                     }
