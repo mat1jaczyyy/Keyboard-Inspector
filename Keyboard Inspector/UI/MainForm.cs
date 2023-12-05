@@ -104,6 +104,7 @@ namespace Keyboard_Inspector {
             } else if (!Recorder.IsRecording) {
                 Program.Result = null;
                 Recorder.StartRecording();
+                ActiveControl = null;
 
             } else {
                 Program.Result = Recorder.StopRecording();
