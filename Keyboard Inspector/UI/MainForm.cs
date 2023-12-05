@@ -260,12 +260,20 @@ namespace Keyboard_Inspector {
             }
         }
 
-        private void discord_Click(object sender, EventArgs e) {
+        void docs_Click(object sender, EventArgs e) {
+            Process.Start($"{Constants.GitHubURL}/tree/master/doc");
+        }
+
+        void updates_Click(object sender, EventArgs e) {
+            Process.Start($"{Constants.GitHubURL}/releases");
+        }
+
+        void discord_Click(object sender, EventArgs e) {
             Process.Start(Constants.DiscordURL);
         }
 
-        private void github_Click(object sender, EventArgs e) {
-            Process.Start(Constants.GitHubURL);
+        void donate_Click(object sender, EventArgs e) {
+            Process.Start(Constants.PayPalURL);
         }
 
         bool ValidateFileDrag(DragEventArgs e, out string result) {

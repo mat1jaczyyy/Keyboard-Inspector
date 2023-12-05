@@ -51,6 +51,7 @@ namespace Keyboard_Inspector {
             this.recording = new System.Windows.Forms.ToolStripMenuItem();
             this.open = new System.Windows.Forms.ToolStripMenuItem();
             this.save = new System.Windows.Forms.ToolStripMenuItem();
+            this.sep1 = new System.Windows.Forms.ToolStripSeparator();
             this.import = new System.Windows.Forms.ToolStripMenuItem();
             this.mainmenu = new DarkUI.Controls.DarkMenuStrip();
             this.capture = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,8 +59,11 @@ namespace Keyboard_Inspector {
             this.captureGamepad = new System.Windows.Forms.ToolStripMenuItem();
             this.captureMouse = new System.Windows.Forms.ToolStripMenuItem();
             this.help = new System.Windows.Forms.ToolStripMenuItem();
+            this.docs = new System.Windows.Forms.ToolStripMenuItem();
+            this.updates = new System.Windows.Forms.ToolStripMenuItem();
             this.discord = new System.Windows.Forms.ToolStripMenuItem();
-            this.github = new System.Windows.Forms.ToolStripMenuItem();
+            this.sep2 = new System.Windows.Forms.ToolStripSeparator();
+            this.donate = new System.Windows.Forms.ToolStripMenuItem();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.frozen = new DarkUI.Controls.DarkCheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
@@ -149,7 +153,6 @@ namespace Keyboard_Inspector {
             // 
             // tDiffs
             // 
-            this.tDiffs.AllowDrop = true;
             this.tDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
             this.tDiffs.Location = new System.Drawing.Point(0, 0);
@@ -162,7 +165,6 @@ namespace Keyboard_Inspector {
             // 
             // tCompound
             // 
-            this.tCompound.AllowDrop = true;
             this.tCompound.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
             this.tCompound.Location = new System.Drawing.Point(432, 0);
@@ -175,7 +177,6 @@ namespace Keyboard_Inspector {
             // 
             // tCircular
             // 
-            this.tCircular.AllowDrop = true;
             this.tCircular.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
             this.tCircular.Location = new System.Drawing.Point(864, 0);
@@ -188,7 +189,6 @@ namespace Keyboard_Inspector {
             // 
             // fDiffs
             // 
-            this.fDiffs.AllowDrop = true;
             this.fDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.fDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
             this.fDiffs.Location = new System.Drawing.Point(0, 263);
@@ -201,7 +201,6 @@ namespace Keyboard_Inspector {
             // 
             // fCompound
             // 
-            this.fCompound.AllowDrop = true;
             this.fCompound.Dock = System.Windows.Forms.DockStyle.Fill;
             this.fCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
             this.fCompound.Location = new System.Drawing.Point(432, 263);
@@ -214,7 +213,6 @@ namespace Keyboard_Inspector {
             // 
             // fCircular
             // 
-            this.fCircular.AllowDrop = true;
             this.fCircular.Dock = System.Windows.Forms.DockStyle.Fill;
             this.fCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
             this.fCircular.Location = new System.Drawing.Point(864, 263);
@@ -362,7 +360,6 @@ namespace Keyboard_Inspector {
             // 
             // screen
             // 
-            this.screen.AllowDrop = true;
             this.screen.Dock = System.Windows.Forms.DockStyle.Fill;
             this.screen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
             this.screen.Location = new System.Drawing.Point(0, 4);
@@ -378,6 +375,7 @@ namespace Keyboard_Inspector {
             this.recording.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.open,
             this.save,
+            this.sep1,
             this.import});
             this.recording.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.recording.Name = "recording";
@@ -405,6 +403,14 @@ namespace Keyboard_Inspector {
             this.save.Size = new System.Drawing.Size(158, 22);
             this.save.Text = "&Save As...";
             this.save.Click += new System.EventHandler(this.save_Click);
+            // 
+            // sep1
+            // 
+            this.sep1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.sep1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.sep1.Margin = new System.Windows.Forms.Padding(0, 0, 0, 1);
+            this.sep1.Name = "sep1";
+            this.sep1.Size = new System.Drawing.Size(155, 6);
             // 
             // import
             // 
@@ -484,30 +490,59 @@ namespace Keyboard_Inspector {
             // 
             this.help.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.docs,
+            this.updates,
             this.discord,
-            this.github});
+            this.sep2,
+            this.donate});
             this.help.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.help.Name = "help";
             this.help.Size = new System.Drawing.Size(41, 20);
             this.help.Text = "Help";
+            // 
+            // docs
+            // 
+            this.docs.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.docs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.docs.Name = "docs";
+            this.docs.Size = new System.Drawing.Size(181, 22);
+            this.docs.Text = "Official &Documentation";
+            this.docs.Click += new System.EventHandler(this.docs_Click);
+            // 
+            // updates
+            // 
+            this.updates.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.updates.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.updates.Name = "updates";
+            this.updates.Size = new System.Drawing.Size(181, 22);
+            this.updates.Text = "Check for &Updates";
+            this.updates.Click += new System.EventHandler(this.updates_Click);
             // 
             // discord
             // 
             this.discord.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
             this.discord.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.discord.Name = "discord";
-            this.discord.Size = new System.Drawing.Size(160, 22);
-            this.discord.Text = "Discord Server";
+            this.discord.Size = new System.Drawing.Size(181, 22);
+            this.discord.Text = "Discord &Server";
             this.discord.Click += new System.EventHandler(this.discord_Click);
             // 
-            // github
+            // sep2
             // 
-            this.github.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.github.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.github.Name = "github";
-            this.github.Size = new System.Drawing.Size(160, 22);
-            this.github.Text = "GitHub Repository";
-            this.github.Click += new System.EventHandler(this.github_Click);
+            this.sep2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.sep2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.sep2.Margin = new System.Windows.Forms.Padding(0, 0, 0, 1);
+            this.sep2.Name = "sep2";
+            this.sep2.Size = new System.Drawing.Size(178, 6);
+            // 
+            // donate
+            // 
+            this.donate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
+            this.donate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
+            this.donate.Name = "donate";
+            this.donate.Size = new System.Drawing.Size(181, 22);
+            this.donate.Text = "Donate via &PayPal";
+            this.donate.Click += new System.EventHandler(this.donate_Click);
             // 
             // frozen
             // 
@@ -592,6 +627,10 @@ namespace Keyboard_Inspector {
         private System.Windows.Forms.ToolStripMenuItem help;
         private System.Windows.Forms.ToolStripMenuItem discord;
         private DarkUI.Controls.DarkCheckBox frozen;
-        private System.Windows.Forms.ToolStripMenuItem github;
+        private System.Windows.Forms.ToolStripMenuItem updates;
+        private System.Windows.Forms.ToolStripMenuItem docs;
+        private System.Windows.Forms.ToolStripSeparator sep2;
+        private System.Windows.Forms.ToolStripMenuItem donate;
+        private System.Windows.Forms.ToolStripSeparator sep1;
     }
 }
