@@ -143,6 +143,8 @@ namespace Keyboard_Inspector {
             try {
                 return new FileResult(await Task.Run(() => format.Read(stream)));
 
+            } catch (IBinaryException ex) {
+                return new FileResult($"Unable to parse the file. {ex.Message}");
             } catch {
                 return new FileResult("Unable to parse the file. It is likely corrupt, or it is in an unsupported format.");
             }

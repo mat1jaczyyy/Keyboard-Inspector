@@ -6,7 +6,9 @@ using System.Linq;
 namespace Keyboard_Inspector {
     class Result: IBinary {
         static readonly char[] Header = new char[] { 'K', 'B', 'I', '\0' };
-        static readonly uint FileVersion = 2;
+        static readonly uint FileVersion = 3;
+
+        public string Creator; // internal for now
 
         public string Title;
         public DateTime Recorded;
@@ -19,7 +21,7 @@ namespace Keyboard_Inspector {
 
         public List<InputInfo> Inputs { get; private set; }
 
-        public Result(string title, DateTime recorded, double time, List<Event> events, Dictionary<long, Source> sources, Analysis analysis = null, List<InputInfo> inputs = null) {
+        public Result(string title, DateTime recorded, double time, List<Event> events, Dictionary<long, Source> sources, Analysis analysis = null, List<InputInfo> inputs = null, string creator = null) {
             Dictionary<Input, InputInfo> groups = new Dictionary<Input, InputInfo>();
 
             for (int i = 0; i < events.Count; i++) {
@@ -83,7 +85,8 @@ namespace Keyboard_Inspector {
             Analysis = analysis?? new Analysis();
             Analysis.Result = this;
             Inputs = inputs;
-            
+            Creator = creator?? $"{Constants.Name} {Constants.Version}";
+
             if (!Program.IsFrozen) {
                 Source best = GetBestSource(0.8);
 
@@ -140,6 +143,7 @@ namespace Keyboard_Inspector {
         public void ToBinary(BinaryWriter bw) {
             bw.Write(Header);
             bw.Write(FileVersion);
+            bw.Write(Creator);
 
             bw.Write(Title);
             bw.Write(Recorded.ToBinary());
@@ -163,6 +167,18 @@ namespace Keyboard_Inspector {
                 throw new Exception("Invalid header");
 
             uint fileVersion = br.ReadUInt32();
+
+            string creator;
+
+            if (fileVersion < 3) {
+                creator = "Keyboard Inspector 0.5.0";
+
+            } else {
+                creator = br.ReadString();
+            }
+
+            if (fileVersion > FileVersion)
+                throw new IBinaryException($"This file was created in a newer version ({creator}).");
 
             string title = br.ReadString();
             DateTime recorded = DateTime.FromBinary(br.ReadInt64());
@@ -196,7 +212,7 @@ namespace Keyboard_Inspector {
                 inputs = Utility.ListFromBinary(br, fileVersion, InputInfo.FromBinary);
             }
 
-            return new Result(title, recorded, time, events, sources, analysis, inputs);
+            return new Result(title, recorded, time, events, sources, analysis, inputs, creator);
         }
 
         public static Result FromStream(Stream stream) {
