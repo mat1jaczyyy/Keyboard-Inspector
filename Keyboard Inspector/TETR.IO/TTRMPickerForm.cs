@@ -127,9 +127,6 @@ namespace Keyboard_Inspector {
                 int bp1 = TetrioReplay.GetUserID(round.board[0]) == p1id? 0 : 1;
                 int bp2 = TetrioReplay.GetUserID(round.board[1]) == p2id? 1 : 0;
 
-                var opts1 = Last(round.replays[0].events).data.export.options;
-                var opts2 = Last(round.replays[1].events).data.export.options;
-
                 int rp1 = Last(round.replays[0].events).data.export.options.username.ToLower() == p1name.ToLower()? 0 : 1;
                 int rp2 = Last(round.replays[1].events).data.export.options.username.ToLower() == p2name.ToLower()? 1 : 0;
 
