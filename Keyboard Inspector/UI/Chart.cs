@@ -752,7 +752,7 @@ namespace Keyboard_Inspector {
             HighlightPoint = win;
         }
 
-        public event EventHandler Spotlight;
+        public Action<Chart> Spotlight;
 
         protected override void OnMouseDoubleClick(MouseEventArgs e) {
             base.OnMouseDoubleClick(e);
@@ -773,7 +773,7 @@ namespace Keyboard_Inspector {
                 Units u = GetUnits();
 
                 if (clicks == 2 && u.Chart.ContainsIX(e.Location)) {
-                    Spotlight?.Invoke(Parent, EventArgs.Empty);
+                    Spotlight?.Invoke(this);
                     clicks = 0;
                     return;
                 }
@@ -932,6 +932,9 @@ namespace Keyboard_Inspector {
                 StopUIAction();
         }
 
+
+        public Action<DragEventArgs> FailDragOver, FailDragDrop;
+
         bool ValidateDrag(DragEventArgs e, out int result) {
             result = -1;
             if (!e.Data.GetDataPresent("System.Int32")) return false;
@@ -940,15 +943,25 @@ namespace Keyboard_Inspector {
             return result.InRangeIE(0, KeyHistory.Inputs.Count) && KeyHistory.Inputs[result].Visible;
         }
 
-        void DragCheck(DragEventArgs e, Action<int, int> success) {
-            if (!HasHistory) return;
+        void DragCheck(DragEventArgs e, Action<int, int> success, Action<DragEventArgs> failure) {
+            if (!HasHistory) {
+                failure?.Invoke(e);
+                return;
+            }
 
-            if (!ValidateDrag(e, out int f)) return;
+            if (!ValidateDrag(e, out int f)) {
+                failure?.Invoke(e);
+                return;
+            }
 
             YTextHovering = f;
 
-            if (IntersectYText(PointToClient(new Point(e.X, e.Y)), YTextIntent.Drag, out int k))
-                success(f, k);
+            if (IntersectYText(PointToClient(new Point(e.X, e.Y)), YTextIntent.Drag, out int k)) {
+                success?.Invoke(f, k);
+
+            } else {
+                failure?.Invoke(e);
+            }
         }
 
         protected override void OnDragOver(DragEventArgs e) {
@@ -956,21 +969,27 @@ namespace Keyboard_Inspector {
 
             e.Effect = DragDropEffects.None;
 
-            DragCheck(e, (f, k) => {
-                YTextHovering = k;
-                Invalidate();
+            DragCheck(e,
+                (f, k) => {
+                    YTextHovering = k;
+                    Invalidate();
 
-                e.Effect = DragDropEffects.Move;
-            });
+                    e.Effect = DragDropEffects.Move;
+                },
+                FailDragOver
+            );
         }
 
         protected override void OnDragDrop(DragEventArgs e) {
             base.OnDragDrop(e);
 
-            DragCheck(e, (f, k) => {
-                KeyHistory.Inputs.Move(f, k);
-                Invalidate();
-            });
+            DragCheck(e,
+                (f, k) => {
+                    KeyHistory.Inputs.Move(f, k);
+                    Invalidate();
+                },
+                FailDragDrop
+            );
         }
 
         internal class Units {

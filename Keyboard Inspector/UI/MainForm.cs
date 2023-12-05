@@ -146,37 +146,44 @@ namespace Keyboard_Inspector {
             return Math.Pow(2, i - 18) * 1800;
         }
 
+        void HandleSpotlight(Chart sender) {
+            if (sender.Parent == tlpCharts) {
+                sender.SuspendLayout();
+
+                tlpCharts.Controls.Remove(sender);
+                split.Panel1.Controls.Add(sender);
+                split.Panel1.Controls.SetChildIndex(sender, 0);
+
+                sender.ResumeLayout();
+
+            } else if (sender.Parent == split.Panel1) {
+                sender.SuspendLayout();
+
+                split.Panel1.Controls.Remove(sender);
+                tlpCharts.Controls.Add(sender);
+
+                sender.ResumeLayout();
+            }
+        }
+
         void InitializeCharts() {
             Charts = tlpCharts.Controls.OfType<Chart>().ToList();
             tCharts = Charts.Where(i => tlpCharts.GetRow(i) == 0).ToList();
             fCharts = Charts.Where(i => tlpCharts.GetRow(i) == 2).ToList();
 
             foreach (var chart in Charts) {
-                chart.Spotlight += (_, __) => {
-                    if (chart.Parent == tlpCharts) {
-                        chart.SuspendLayout();
-
-                        tlpCharts.Controls.Remove(chart);
-                        split.Panel1.Controls.Add(chart);
-                        split.Panel1.Controls.SetChildIndex(chart, 0);
-
-                        chart.ResumeLayout();
-
-                    } else if (chart.Parent == split.Panel1) {
-                        chart.SuspendLayout();
-
-                        split.Panel1.Controls.Remove(chart);
-                        tlpCharts.Controls.Add(chart);
-
-                        chart.ResumeLayout();
-                    }
-                };
-
-                chart.Tag = new ChartTitles() { 
+                chart.Tag = new ChartTitles() {
                     Primary = PrimaryTitles[tlpCharts.GetColumn(chart) / 2],
                     Secondary = SecondaryTitles[tlpCharts.GetRow(chart) / 2],
                 };
+
+                chart.Spotlight = HandleSpotlight;
+                chart.FailDragOver = e => MainForm_DragOver(chart, e);
+                chart.FailDragDrop = e => MainForm_DragDrop(chart, e);
             }
+
+            screen.FailDragOver = e => MainForm_DragOver(screen, e);
+            screen.FailDragDrop = e => MainForm_DragDrop(screen, e);
 
             foreach (var chart in tCharts) {
                 chart.ScopeDefaultX = 100;
