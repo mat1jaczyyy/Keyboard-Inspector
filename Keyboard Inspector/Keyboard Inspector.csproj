@@ -13,25 +13,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>Keyboard_Inspector.Program</StartupObject>
@@ -39,16 +22,41 @@
   <PropertyGroup>
     <ApplicationIcon>keyboard.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MathNet.Numerics, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MathNet.Numerics.5.0.0\lib\net461\MathNet.Numerics.dll</HintPath>
+    <Reference Include="DarkUI, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DarkUI.2.0.2\lib\DarkUI.dll</HintPath>
+    </Reference>
+    <Reference Include="DynaJson, Version=2.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynaJson.2.2.0\lib\net45\DynaJson.dll</HintPath>
+    </Reference>
+    <Reference Include="FFTW.NET, Version=1.0.6239.19771, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\FFTW.NET.1.0.0\lib\net46\FFTW.NET.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Windows.Forms.DataVisualization" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -60,32 +68,45 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DeltaForm.cs">
+    <Compile Include="FileSystem\Format.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Result\Analysis.cs" />
+    <Compile Include="Benchmark.cs" />
+    <Compile Include="Result\InputInfo.cs" />
+    <Compile Include="UI\Chart.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Result\Source.cs" />
+    <Compile Include="Result\Event.cs" />
+    <Compile Include="FileSystem\FileSystem.cs" />
+    <Compile Include="Result\Input.cs" />
+    <Compile Include="Result\IBinary.cs" />
+    <Compile Include="UI\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DeltaForm.Designer.cs">
-      <DependentUpon>DeltaForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Event.cs" />
-    <Compile Include="Input.cs" />
-    <Compile Include="IXML.cs" />
-    <Compile Include="Keyboard\KeyInput.cs" />
-    <Compile Include="Keyboard\KeyListener.cs" />
-    <Compile Include="Keyboard\Win32 Hook.cs" />
-    <Compile Include="MainForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainForm.Designer.cs">
+    <Compile Include="UI\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Poll.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Recorder.cs" />
-    <Compile Include="Result.cs" />
-    <Compile Include="Wiitar\WiitarInput.cs" />
-    <Compile Include="Wiitar\WiitarListener.cs" />
-    <Compile Include="Wiitar\Win32 RawInput.cs" />
+    <Compile Include="Recording\Recorder.cs" />
+    <Compile Include="Result\Result.cs" />
+    <Compile Include="TETR.IO\TTRMPickerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TETR.IO\TTRMPickerForm.Designer.cs">
+      <DependentUpon>TTRMPickerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TETR.IO\TetrioReplay.cs" />
+    <Compile Include="Recording\Listener.cs" />
+    <Compile Include="Recording\Native.cs" />
+    <Compile Include="FileSystem\ImportFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FileSystem\ImportFileDialog.Designer.cs">
+      <DependentUpon>ImportFileDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -95,12 +116,25 @@
     <None Include="keyboard.ico" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="DeltaForm.resx">
-      <DependentUpon>DeltaForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
+    <EmbeddedResource Include="UI\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TETR.IO\TTRMPickerForm.resx">
+      <DependentUpon>TTRMPickerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FileSystem\ImportFileDialog.resx">
+      <DependentUpon>ImportFileDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\FFTW.NET.1.0.0\build\FFTW.NET.targets" Condition="Exists('..\packages\FFTW.NET.1.0.0\build\FFTW.NET.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\FFTW.NET.1.0.0\build\FFTW.NET.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\FFTW.NET.1.0.0\build\FFTW.NET.targets'))" />
+  </Target>
 </Project>

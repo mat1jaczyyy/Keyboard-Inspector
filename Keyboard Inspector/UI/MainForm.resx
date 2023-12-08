@@ -117,14 +117,30 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="t.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>102, 17</value>
+  <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>369, 17</value>
   </metadata>
-  <metadata name="keymenu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>158, 17</value>
-  </metadata>
+  <data name="hps.ToolTip" xml:space="preserve">
+    <value>Higher frequency harmonics will appear at multiples of the device sampling rate's fundamental frequency.
+This is because it's still possible for higher sampling rates to have generated the observed data, albeit less likely.
+The Harmonic Product Spectrum algorithm attempts to eliminate these harmonics using displaced downsampled partials.
+Useful in situations where the fundamental frequency isn't obvious due to excessive noise.</value>
+  </data>
+  <data name="lowCut.ToolTip" xml:space="preserve">
+    <value>Cuts out frequencies below ~50 Hz, which usually represent the raised floor of the time domain histograms.
+It is recommended to leave this checked as devices typically operate at higher sampling rates.
+Uncheck only if analyzing a device with an extremely low sampling rate.</value>
+  </data>
+  <data name="tbBinRate.ToolTip" xml:space="preserve">
+    <value>Specifies the rate at which to bin observed data for the time domain histograms.
+Higher values will group the data into smaller bins and thus be able to analyze higher device sampling rates.
+Increasing the value won't yield any additional precision for lower device sampling rates.</value>
+  </data>
   <metadata name="mainmenu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>259, 17</value>
+  </metadata>
+  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>59</value>
   </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
