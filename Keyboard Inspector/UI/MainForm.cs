@@ -280,7 +280,7 @@ namespace Keyboard_Inspector {
         }
 
         void donate_Click(object sender, EventArgs e) {
-            Process.Start(Constants.PayPalURL);
+            Process.Start(Constants.KoFiURL);
         }
 
         bool ValidateFileDrag(DragEventArgs e, out string result) {

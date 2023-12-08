@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace Keyboard_Inspector {
     static class Constants {
-        public static readonly string Name, Version, GitHubURL, DiscordURL, PayPalURL, DataDir, WisdomFile;
+        public static readonly string Name, Version, GitHubURL, DiscordURL, KoFiURL, DataDir, WisdomFile;
         public static readonly string VersionSuffix = null;
 
         static Constants() {
@@ -24,7 +24,7 @@ namespace Keyboard_Inspector {
             // TODO get relevant links from an API in the future
             GitHubURL = "https://github.com/mat1jaczyyy/Keyboard-Inspector";
             DiscordURL = "https://discord.gg/kX4cJQH5Zn"; 
-            PayPalURL = "https://paypal.me/mat1jaczyyy";
+            KoFiURL = "https://ko-fi.com/mat1jaczyyy";
 
             DataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), Name);
             WisdomFile = Path.Combine(DataDir, "wisdom");

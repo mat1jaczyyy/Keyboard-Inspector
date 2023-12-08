@@ -541,7 +541,7 @@ namespace Keyboard_Inspector {
             this.donate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
             this.donate.Name = "donate";
             this.donate.Size = new System.Drawing.Size(181, 22);
-            this.donate.Text = "Donate via &PayPal";
+            this.donate.Text = "Donate via &Ko-fi";
             this.donate.Click += new System.EventHandler(this.donate_Click);
             // 
             // frozen
