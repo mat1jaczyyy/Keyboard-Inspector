@@ -26,7 +26,7 @@ Right click a device name to bring up a context menu which lets you change the c
 
 ## Analyzing input data
 
-The analysis portion of the interface is divided into a 3x2 grid of various useful charts. The first row contains time domain charts, and the second row contains frequency domain charts. Each column represents a different method of analyzing the data. These charts' viewports can be interacted with similarly to the Timeline. Below, some controls are available to tweak the analysis parameters.
+The analysis portion of the interface is divided into a 3x2 grid of various useful charts. The first row contains time domain charts, and the second row contains frequency domain charts. Each column represents a different method of analyzing the data. These charts' viewports can be interacted with similarly to the Timeline. Double click any chart to enlarge it. Below, some controls are available to tweak the analysis parameters.
 
 ### Time domain
 
