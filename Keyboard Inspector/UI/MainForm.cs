@@ -268,7 +268,7 @@ namespace Keyboard_Inspector {
         }
 
         void docs_Click(object sender, EventArgs e) {
-            Process.Start($"{Constants.GitHubURL}/tree/master/doc");
+            Process.Start($"{Constants.GitHubURL}/blob/master/DOCUMENTATION.md");
         }
 
         void updates_Click(object sender, EventArgs e) {
