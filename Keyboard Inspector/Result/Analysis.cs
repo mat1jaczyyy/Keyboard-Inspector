@@ -75,6 +75,26 @@ namespace Keyboard_Inspector {
                 circular.Add(e[i].Time % 1);
         }
 
+        AlignedArrayDouble Bin(List<double> source, bool modular = false) {
+            int len = Result.Analysis.BinRate;
+
+            AlignedArrayDouble ret = new AlignedArrayDouble(64, len);
+
+            for (int i = 0; i < source.Count; i++) {
+                double v = source[i];
+                int bin = (int)Math.Round(v * len);
+
+                if (bin >= len) {
+                    if (modular) bin %= len;
+                    else continue;
+                }
+
+                ret[bin] += 1;
+            }
+
+            return ret;
+        }
+
         IEnumerable<double> CircularRotationFix(AlignedArrayDouble arr) {
             double max = double.MinValue;
             int rot = -1;
@@ -157,15 +177,8 @@ namespace Keyboard_Inspector {
         Dictionary<Chart, double[]> beforeLowCut = new Dictionary<Chart, double[]>();
         Dictionary<Chart, double[]> beforeHPS = new Dictionary<Chart, double[]>();
 
-        void RunGraphJob(List<double> source, Chart timeChart, Chart freqChart, Func<AlignedArrayDouble, IEnumerable<double>> timeTransform = null) {
-            timeTransform = timeTransform ?? DefaultTimeTransform;
-
-            AlignedArrayDouble data = new AlignedArrayDouble(64, Result.Analysis.BinRate);
-            for (int i = 0; i < source.Count; i++) {
-                double v = source[i];
-                if (v.InRangeIE(0, 1))
-                    data[(int)Math.Round(v * Result.Analysis.BinRate)] += 1;
-            }
+        void RunGraphJob(AlignedArrayDouble data, Chart timeChart, Chart freqChart, Func<AlignedArrayDouble, IEnumerable<double>> timeTransform = null) {
+            timeTransform = timeTransform?? DefaultTimeTransform;
 
             DrawGraph(timeChart, timeTransform(data), 1000.0 / Result.Analysis.BinRate);
 
@@ -238,9 +251,9 @@ namespace Keyboard_Inspector {
             if (!Result.Analysis.BinRateValid) return;
 
             RunChartsSuspendedAction(MainForm.Instance.Charts, () => {
-                RunGraphJob(diffs, MainForm.Instance.tDiffs, MainForm.Instance.fDiffs);
-                RunGraphJob(compound, MainForm.Instance.tCompound, MainForm.Instance.fCompound);
-                RunGraphJob(circular, MainForm.Instance.tCircular, MainForm.Instance.fCircular, CircularRotationFix);
+                RunGraphJob(Bin(diffs),          MainForm.Instance.tDiffs,    MainForm.Instance.fDiffs);
+                RunGraphJob(Bin(compound),       MainForm.Instance.tCompound, MainForm.Instance.fCompound);
+                RunGraphJob(Bin(circular, true), MainForm.Instance.tCircular, MainForm.Instance.fCircular, CircularRotationFix);
             });
 
             DFT.Wisdom.Export(Constants.WisdomFile);
