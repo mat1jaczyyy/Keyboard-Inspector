@@ -793,35 +793,36 @@ namespace Keyboard_Inspector {
             if (e.Button == MouseButtons.Right) {
                 Units u = GetUnits();
 
-                YTextSourceOnly = HoveringSource(e.Location, u);
+                InputMenu.Items.SetAllUnavailable();
 
                 bool intersects = IntersectYText(e.Location, YTextIntent.Menu, out int k, u);
-                if (intersects) {
-                    InputMenu.Tag = k;
-                    YTextMenu = k;
-                }
+                YTextSourceOnly = HoveringSource(e.Location, u);
 
                 bool multipleInputs = KeyHistory.VisibleInputs().Count() > 1;
 
-                var sourceNo = KeyHistory.Inputs[k].Input.Source;
-                var source = KeyHistory.Sources[sourceNo];
+                if (intersects) {
+                    InputMenu.Tag = k;
+                    YTextMenu = k;
 
-                bool anyColorsDifferent = KeyHistory.Inputs.Where(i => i.Input.Source == sourceNo).Any(i => i.Color != Input.DefaultColor);
-                bool knownInterface = !string.IsNullOrWhiteSpace(source.DeviceInterface);
+                    var sourceNo = KeyHistory.Inputs[k].Input.Source;
 
-                InputMenu.Items[0].Available = !YTextSourceOnly && intersects;
-                InputMenu.Items[1].Available = !YTextSourceOnly && intersects && KeyHistory.Inputs[k].Color != Input.DefaultColor;
+                    bool anyColorsDifferent = KeyHistory.Inputs.Where(i => i.Input.Source == sourceNo).Any(i => i.Color != Input.DefaultColor);
+                    bool knownInterface = !string.IsNullOrWhiteSpace(KeyHistory.Sources[sourceNo].DeviceInterface);
 
-                InputMenu.Items[3].Available = YTextSourceOnly && intersects;
-                InputMenu.Items[4].Available = YTextSourceOnly && intersects && anyColorsDifferent;
+                    InputMenu.Items[0].Available = !YTextSourceOnly;
+                    InputMenu.Items[1].Available = !YTextSourceOnly&& KeyHistory.Inputs[k].Color != Input.DefaultColor;
 
-                InputMenu.Items[6].Available = !YTextSourceOnly && intersects && multipleInputs;
-                InputMenu.Items[7].Available = intersects && multipleInputs && u.MultipleSources;
+                    InputMenu.Items[3].Available = YTextSourceOnly;
+                    InputMenu.Items[4].Available = YTextSourceOnly && anyColorsDifferent;
+
+                    InputMenu.Items[6].Available = !YTextSourceOnly && multipleInputs;
+                    InputMenu.Items[7].Available = multipleInputs && u.MultipleSources;
+
+                    InputMenu.Items[12].Available = knownInterface && (YTextSourceOnly || !u.MultipleSources) && ModifierKeys == Keys.Shift;
+                }
 
                 InputMenu.Items[9].Available = multipleInputs && u.MultipleSources;
                 InputMenu.Items[10].Available = KeyHistory.Inputs.Any(i => !i.Visible);
-
-                InputMenu.Items[12].Available = knownInterface && (YTextSourceOnly || !u.MultipleSources) && intersects && ModifierKeys == Keys.Shift;
 
                 InputMenu.Items.AutoSeparators();
 

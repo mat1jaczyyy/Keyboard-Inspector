@@ -134,6 +134,11 @@ namespace Keyboard_Inspector {
             rect.Offset(-1, -1);
             g.DrawString(text, font, textBrush, rect, format);
         }
+        
+        public static void SetAllUnavailable(this ToolStripItemCollection items) {
+            foreach (ToolStripItem item in items)
+                item.Available = false;
+        }
 
         public static void AutoSeparators(this ToolStripItemCollection items) {
             bool has = false;
