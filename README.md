@@ -2,6 +2,10 @@
 
 Keyboard Inspector is a standalone tool for recording and analyzing input data captured from keyboards, joysticks/gamepads, and mice. It is essential for researchers, developers and gamers looking to empirically evaluate the internal workings of their input hardware.
 
+## Looking for contributors
+
+Keyboard Inspector can also parse and analyze replay files from various games or other file formats, so long as they contain raw input timestamps. We have TETR.IO replay file support built-in so far, and we're looking for contributors who can contribute more of these. (For example: osu .osr replays)
+
 ## Getting Started
 
 Download Keyboard Inspector from the [Releases](/releases) page, and extract to a folder of your choosing. Keyboard Inspector is a fully portable Windows application and no installation variant is offered.
