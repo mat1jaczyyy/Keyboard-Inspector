@@ -34,7 +34,7 @@ Finally, the timeline at the bottom is simply a visual diagram of all inputs rec
 
 ## Help and Support
 
-For more detailed information and additional functionality, read the [documentation](/doc).
+For more detailed information and additional functionality, read the [documentation](/DOCUMENTATION.md).
 
 If you need help interpreting analysis results, or have general feedback or criticism, join our [Discord server](https://discord.gg/kX4cJQH5Zn).
 
