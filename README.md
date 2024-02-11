@@ -1,3 +1,4 @@
+
 ![Keyboard Inspector](https://github.com/mat1jaczyyy/Keyboard-Inspector/assets/13300194/d9647439-2e20-4c43-9158-3a251cae4a40)
 
 Keyboard Inspector is a standalone tool for recording and analyzing input data captured from keyboards, joysticks/gamepads, and mice. It is essential for researchers, developers and gamers looking to empirically evaluate the internal workings of their input hardware.
@@ -8,7 +9,7 @@ Keyboard Inspector can also parse and analyze replay files from various games or
 
 ## Getting Started
 
-Download Keyboard Inspector from the [Releases](/releases) page, and extract to a folder of your choosing. Keyboard Inspector is a fully portable Windows application and no installation variant is offered.
+Download Keyboard Inspector from the [Releases](https://github.com/mat1jaczyyy/Keyboard-Inspector/releases) page, and extract to a folder of your choosing. Keyboard Inspector is a fully portable Windows application and no installation variant is offered.
 
 Begin by using the Start/Stop Recording button in the top-right corner of the user interface to start recording your inputs for analysis. Once stopped, results of the analysis will be shown immediately. The analysis interface has three main parts. 
 
