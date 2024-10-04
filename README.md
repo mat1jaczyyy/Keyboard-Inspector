@@ -23,7 +23,7 @@ At the top, three graphs show different methods of interpreting the data in the 
 
 Three more graphs are displayed under showing the frequency domains of these histograms by applying the discrete Fourier transform. Interpreting these can a be a little tricky and although not always the case, **the largest peak is generally the effective report rate of the device**. In most cases, this will coincide with the device's USB report rate.
 
-If the data is too noisy or has multiple peaks, recording more input data helps with increasing the sample size. Applying iterations of HPS partial elimination can help isolate the fundamental peak. If no clear peak presents itself, try increasing the binning rate, as it might be outside the range you're analyzing. 
+If the data is too noisy or has multiple peaks, recording more input data helps with increasing the sample size. Booting your system in safe mode is generally very effective in minimising noise in the recording. Applying iterations of HPS partial elimination can help isolate the fundamental peak. If no clear peak presents itself, try increasing the binning rate, as it might be outside the range you're analyzing. 
 
 The binning rate is set to 4000 Hz by default, which will let you comfortably analyze full speed USB devices (which support up to 1000 Hz). Increase this value if you need to analyze higher report rate devices such as high speed USB devices (which support up to 8000 Hz).
 
