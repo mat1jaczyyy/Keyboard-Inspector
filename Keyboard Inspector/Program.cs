@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading;
 using System.Windows.Forms;
 
 using DarkUI.Win32;
@@ -56,20 +55,13 @@ namespace Keyboard_Inspector {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            var thread = new Thread(ListenerThread);
-            thread.SetApartmentState(ApartmentState.STA);
-            thread.Start();
+            ListenerWindow.Create();
 
             Application.AddMessageFilter(new ControlScrollFilter());
 
             Application.Idle += OnIdle;
 
             Application.Run(new MainForm());
-        }
-
-        static void ListenerThread() {
-            Application.AddMessageFilter(new InputMessageFilter());
-            Application.Run(new ListenerForm());
         }
 
         static void OnIdle(object sender, EventArgs e) {
@@ -79,7 +71,7 @@ namespace Keyboard_Inspector {
             }
         }
 
-        [DllImport("User32.dll", CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern bool PeekMessage(out Message msg, IntPtr hWnd, uint messageFilterMin, uint messageFilterMax, uint flags);
     }
 }

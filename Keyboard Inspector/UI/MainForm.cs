@@ -68,11 +68,13 @@ namespace Keyboard_Inspector {
 
             screen.LoadData(Program.Result);
 
-            SetPrecisionSilently();
-            SetHPSSilently();
-            SetLowCutSilently();
+            if (!Result.IsEmpty(Program.Result)) {
+                SetPrecisionSilently();
+                SetHPSSilently();
+                SetLowCutSilently();
 
-            Program.Result.Analysis.Analyze();
+                Program.Result.Analysis.Analyze();
+            }
         }
 
         void rec_Click(object sender, EventArgs e) {

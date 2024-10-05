@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
 
 namespace Keyboard_Inspector {
     static class Recorder {
@@ -14,7 +12,7 @@ namespace Keyboard_Inspector {
         public static void StopRecording() {
             if (!IsRecording) return;
 
-            ListenerForm.Instance.InvokeIfRequired(() => ListenerForm.Instance.RegisterRawInput(false));
+            ListenerWindow.Instance.RegisterRawInput(false);
 
             time.Stop();
 
@@ -32,7 +30,7 @@ namespace Keyboard_Inspector {
             Recording = result;
             time.Start();
 
-            ListenerForm.Instance.InvokeIfRequired(() => ListenerForm.Instance.RegisterRawInput(true));
+            ListenerWindow.Instance.RegisterRawInput(true);
         }
 
         public static void RecordInput(double time, bool pressed, Input input)
