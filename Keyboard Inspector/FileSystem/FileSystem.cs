@@ -16,25 +16,9 @@ namespace Keyboard_Inspector {
     }
 
     static class FileSystem {
-        static readonly HttpClient HttpClient = new HttpClient();
-
         public static readonly string[] AllowedSchemes = new string[] {
             Uri.UriSchemeHttp, Uri.UriSchemeHttps
         };
-
-        static FileSystem() {
-            HttpClient.DefaultRequestHeaders.UserAgent.Add(
-                new ProductInfoHeaderValue(
-                    Regex.Replace(Constants.Name, @"\s+", ""),
-                    Constants.Version
-                )
-            );
-            HttpClient.DefaultRequestHeaders.UserAgent.Add(
-                new ProductInfoHeaderValue(
-                    $"(+{Constants.GitHubURL})"
-                )
-            );
-        }
 
         public static FileFormat[] Formats { get; private set; } = new FileFormat[] {
             new FileFormat($"{Constants.Name} File", new string[] { "kbi" },
@@ -169,7 +153,7 @@ namespace Keyboard_Inspector {
 
         public static async Task<FileResult> Import(Uri url, FileFormat format, CancellationToken ct) {
             try {
-                var res = await HttpClient.GetAsync(url, ct);
+                var res = await HTTP.Fetch(url, ct);
 
                 if (res.StatusCode != HttpStatusCode.OK)
                     return new FileResult($"Unable to download the file. Received status code {(int)res.StatusCode} ({res.StatusCode}).");
