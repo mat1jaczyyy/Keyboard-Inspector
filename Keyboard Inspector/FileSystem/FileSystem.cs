@@ -11,6 +11,10 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Keyboard_Inspector {
+    class ExplainableFileLoadException: IOException {
+        public ExplainableFileLoadException(string message): base(message) {}
+    }
+
     static class FileSystem {
         static readonly HttpClient HttpClient = new HttpClient();
 
@@ -143,8 +147,9 @@ namespace Keyboard_Inspector {
             try {
                 return new FileResult(await Task.Run(() => format.Read(stream)));
 
-            } catch (IBinaryException ex) {
+            } catch (ExplainableFileLoadException ex) {
                 return new FileResult($"Unable to parse the file. {ex.Message}");
+
             } catch {
                 return new FileResult("Unable to parse the file. It is likely corrupt, or it is in an unsupported format.");
             }

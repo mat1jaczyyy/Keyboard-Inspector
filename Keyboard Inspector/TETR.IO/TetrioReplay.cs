@@ -19,21 +19,31 @@ namespace Keyboard_Inspector {
     };
 
     static class TetrioReplay {
-        static Dictionary<string, string> gametypes = new Dictionary<string, string>() {
+        static Dictionary<string, string> gamemodes = new Dictionary<string, string>() {
             {"league", "TETRA LEAGUE"},
             {"40l", "40 LINES"},
             {"blitz", "BLITZ"},
+            {"zenith", "QUICK PLAY"},
+            {"zenithex", "EXPERT QUICK PLAY"}
         };
 
         public static Result StreamToResult(Stream stream) {
             dynamic ttr = JsonObject.Parse(stream);
 
+            int version = ttr.version()? (int)ttr.version : -1;
+
+            if (version < 1) {
+                throw new ExplainableFileLoadException("Only TETR.IO Beta replays are supported.");
+            }
+
             string title = "";
 
-            if (gametypes.TryGetValue(ttr.gametype()? ttr.gametype : "", out string gametype))
-                title = $"[{gametype}] ";
+            string gamemode = (ttr.gamemode()? ttr.gamemode : "")?? "";
 
-            bool isMulti = ttr.ismulti()? (ttr.ismulti == true) : false;
+            if (gamemodes.TryGetValue(gamemode, out string gamemodeStr))
+                title = $"[{gamemodeStr}] ";
+
+            bool isMulti = ttr.users()? (ttr.users.Count > 1) : false;
             dynamic data;
 
             if (isMulti) {
@@ -45,22 +55,23 @@ namespace Keyboard_Inspector {
                     return null;
                 }
 
-                int p1 = TetrioReplay.GetUserID(ttr.endcontext[0]) == form.SelectedPlayer? 0 : 1;
-                int p2 = TetrioReplay.GetUserID(ttr.endcontext[1]) == form.OtherPlayer? 1 : 0;
+                int p1 = ttr.replay.leaderboard[0].id == form.SelectedPlayer? 0 : 1;
+                int p2 = ttr.replay.leaderboard[1].id == form.OtherPlayer? 1 : 0;
 
-                title += $"{TetrioReplay.GetUsername(ttr.endcontext[p1])} ({ttr.endcontext[p1].wins}) versus ";
-                title += $"({ttr.endcontext[p2].wins}) {TetrioReplay.GetUsername(ttr.endcontext[p2])}, ";
-                title += $"round {form.SelectedIndex + 1}/{ttr.data.Count}, played ";
+                title += $"{ttr.replay.leaderboard[p1].username.ToUpper()} ({ttr.replay.leaderboard[p1].wins}) versus ";
+                title += $"({ttr.replay.leaderboard[p2].wins}) {ttr.replay.leaderboard[p2].username.ToUpper()}, ";
+                title += $"round {form.SelectedIndex + 1}/{ttr.replay.rounds.Count}, played ";
 
             } else {
-                if (gametype == "40 LINES") title += $"{ttr.endcontext.finalTime / 1000.0:0.000} ";
-                if (gametype == "BLITZ") title += $"{ttr.endcontext.score:0,000} ";
+                if (gamemode == "40l") title += $"{ttr.replay.results.stats.finaltime / 1000.0:0.000} ";
+                if (gamemode == "blitz") title += $"{ttr.replay.results.stats.score:#,##0} ";
+                if (gamemode == "zenith" || gamemode == "zenithex") title += $"{ttr.replay.results.stats.zenith.altitude:#,##0.0} m ";
 
-                var user = ttr.user.username;
+                var user = ttr.users[0].username;
                 if (!string.IsNullOrWhiteSpace(user))
                     title += $"played by {user.ToUpper()} ";
 
-                data = ttr.data;
+                data = ttr.replay;
             }
 
             DateTime ts = DateTime.Parse(ttr.ts, null, DateTimeStyles.RoundtripKind).ToLocalTime();
@@ -90,14 +101,5 @@ namespace Keyboard_Inspector {
                 new Analysis() { BinRate = 600 }
             );
         }
-
-        public static string GetUsername(dynamic ctx)
-            => (ctx.username()? ctx.username : ctx.user.username).ToUpper();
-
-        public static string GetUserID(dynamic ctx)
-            => ctx.id()? ctx.id : ctx.user._id;
-
-        public static string GetScore(dynamic ctx)
-            => ctx.points()? ctx.points.primary.ToString() : "0";
     }
 }

@@ -38,29 +38,21 @@ namespace Keyboard_Inspector {
                 inputs = statlist.Sum(s => s.inputs)
             };
 
-        static Stats RoundStats(dynamic events) {
+        static Stats RoundStats(dynamic round) {
             var stats = new Stats();
+            stats.pps = round.stats.pps;
+            stats.apm = round.stats.apm;
+            stats.vs = round.stats.vsscore;
+
             stats.inputs = 0;
-
-            foreach (var i in events) {
-                if (i.type.StartsWith("key") && !(i.data.hoisted() && i.data.hoisted == true))
-                    stats.inputs++;
-
-                if (i.type == "end") {
-                    stats.pps = i.data.export.aggregatestats.pps;
-                    stats.apm = i.data.export.aggregatestats.apm;
-                    stats.vs = i.data.export.aggregatestats.vsscore;
+            if (round.replay()) {
+                foreach (var i in round.replay.events) {
+                    if (i.type.StartsWith("key") && !(i.data.hoisted() && i.data.hoisted == true))
+                        stats.inputs++;
                 }
             }
 
             return stats;
-        }
-
-        static dynamic Last(dynamic arr) {
-            dynamic ret = null;
-            foreach (var i in arr)
-                ret = i;
-            return ret;
         }
 
         public TTRMPickerForm(dynamic ttr) {
@@ -69,20 +61,19 @@ namespace Keyboard_Inspector {
             panel1.BackColor = leftColor;
             panel2.BackColor = rightColor;
 
-            string p1name = TetrioReplay.GetUsername(ttr.endcontext[0]);
-            string p2name = TetrioReplay.GetUsername(ttr.endcontext[1]);
+            string p1name = ttr.replay.leaderboard[0].username.ToUpper();
+            string p2name = ttr.replay.leaderboard[1].username.ToUpper();
 
             p1lbl.Text = p1name;
             p2lbl.Text = p2name;
 
-            p1score.Text = TetrioReplay.GetScore(ttr.endcontext[0]);
-            p2score.Text = TetrioReplay.GetScore(ttr.endcontext[1]);
+            p1score.Text = ttr.replay.leaderboard[0].wins.ToString();
+            p2score.Text = ttr.replay.leaderboard[1].wins.ToString();
 
-            string p1id = TetrioReplay.GetUserID(ttr.endcontext[0]);
-            string p2id = TetrioReplay.GetUserID(ttr.endcontext[1]);
+            string p1id = ttr.replay.leaderboard[0].id;
+            string p2id = ttr.replay.leaderboard[1].id;
 
-            List<Stats> p1replaystats = new List<Stats>(ttr.data.Count);
-            List<Stats> p2replaystats = new List<Stats>(ttr.data.Count);
+            int N = ttr.replay.rounds.Count;
 
             int baseY = panel1.Bounds.Bottom + 10;
             int stretch = 25;
@@ -90,7 +81,7 @@ namespace Keyboard_Inspector {
             int height = 19;
             int spacing = 6;
 
-            for (int i = 0; i < ttr.data.Count; i++) {
+            for (int i = 0; i < N; i++) {
                 var left = new DarkLabel();
                 var leftInputs = new DarkLabel();
                 var right = new DarkLabel();
@@ -122,16 +113,13 @@ namespace Keyboard_Inspector {
                 time.Location = new Point(vs.Location.X, baseY + i * (height + spacing));
                 time.Size = new Size(vs.Width, height);
 
-                var round = ttr.data[i];
+                var round = ttr.replay.rounds[i];
 
-                int bp1 = TetrioReplay.GetUserID(round.board[0]) == p1id? 0 : 1;
-                int bp2 = TetrioReplay.GetUserID(round.board[1]) == p2id? 1 : 0;
+                int bp1 = round[0].id == p1id? 0 : 1;
+                int bp2 = round[1].id == p2id? 1 : 0;
 
-                int rp1 = Last(round.replays[0].events).data.export.options.username.ToLower() == p1name.ToLower()? 0 : 1;
-                int rp2 = Last(round.replays[1].events).data.export.options.username.ToLower() == p2name.ToLower()? 1 : 0;
-
-                Stats p1s = RoundStats(round.replays[rp1].events);
-                Stats p2s = RoundStats(round.replays[rp2].events);
+                Stats p1s = RoundStats(round[bp1]);
+                Stats p2s = RoundStats(round[bp2]);
 
                 left.Text = p1s.ToString();
                 right.Text = p2s.ToString();
@@ -141,13 +129,10 @@ namespace Keyboard_Inspector {
                 leftInputs.Text = p1s.Inputs();
                 rightInputs.Text = p2s.Inputs();
 
-                p1replaystats.Add(p1s);
-                p2replaystats.Add(p2s);
+                left.BackColor = leftInputs.BackColor = round[bp1].alive? leftWin : panel1.BackColor;
+                right.BackColor = rightInputs.BackColor = round[bp2].alive? rightWin : panel2.BackColor;
 
-                left.BackColor = leftInputs.BackColor = round.board[bp1].success? leftWin : panel1.BackColor;
-                right.BackColor = rightInputs.BackColor = round.board[bp2].success? rightWin : panel2.BackColor;
-
-                var seconds = (int)(Math.Min(round.replays[rp1].frames, round.replays[rp2].frames) / 60.0);
+                var seconds = (int)(Math.Min(round[bp1].replay.frames, round[bp2].replay.frames) / 60.0);
                 time.Text = $"{seconds / 60:0}:{seconds % 60:00}";
 
                 Controls.Add(left);
@@ -159,7 +144,7 @@ namespace Keyboard_Inspector {
                 int k = i;
 
                 void leftClick(object sender, EventArgs e) {
-                    SelectedReplay = round.replays[rp1];
+                    SelectedReplay = round[bp1].replay;
                     SelectedIndex = k;
                     SelectedPlayer = p1id;
                     OtherPlayer = p2id;
@@ -171,7 +156,7 @@ namespace Keyboard_Inspector {
                 leftInputs.Click += leftClick;
 
                 void rightClick(object sender, EventArgs e) {
-                    SelectedReplay = round.replays[rp2];
+                    SelectedReplay = round[bp2].replay;
                     SelectedIndex = k;
                     SelectedPlayer = p2id;
                     OtherPlayer = p1id;
@@ -183,10 +168,10 @@ namespace Keyboard_Inspector {
                 rightInputs.Click += rightClick;
             }
 
-            p1stats.Text = Avg(p1replaystats).ToString();
-            p2stats.Text = Avg(p2replaystats).ToString();
+            p1stats.Text = RoundStats(ttr.replay.leaderboard[0]).ToString();
+            p2stats.Text = RoundStats(ttr.replay.leaderboard[1]).ToString();
 
-            Height += ttr.data.Count * (height + spacing);
+            Height += N * (height + spacing);
         }
     }
 }

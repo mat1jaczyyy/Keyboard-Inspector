@@ -178,7 +178,7 @@ namespace Keyboard_Inspector {
             }
 
             if (fileVersion > FileVersion)
-                throw new IBinaryException($"This file was created in a newer version ({creator}).");
+                throw new ExplainableFileLoadException($"This file was created in a newer version ({creator}).");
 
             string title = br.ReadString();
             DateTime recorded = DateTime.FromBinary(br.ReadInt64());
