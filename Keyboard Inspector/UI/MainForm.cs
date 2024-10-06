@@ -329,8 +329,21 @@ namespace Keyboard_Inspector {
             split.Invalidate(new Rectangle(0, split.SplitterDistance, split.Width, split.SplitterWidth));
         }
 
-        public void SetEventCount(int? n)
-            => labelN.Text = n == null? null : $"{n} input events";
+        LinearGradient eventCountColor = new LinearGradient(
+            new Tuple<double, Color>(50, Color.FromArgb(0xEE, 0x00, 0x00)),
+            new Tuple<double, Color>(200, Color.FromArgb(0xEA, 0x77, 0x00)),
+            new Tuple<double, Color>(600, Color.FromArgb(0xDD, 0xDD, 0x00)),
+            new Tuple<double, Color>(1500, Color.FromArgb(0x00, 0xEE, 0x00))
+        );
+
+        public void SetEventCount(int? n) {
+            if (n == null) {
+                labelN.Text = null;
+            } else {
+                labelN.ForeColor = eventCountColor.Get(n.Value);
+                labelN.Text = $"{n} input events";
+            }
+        }
 
         bool silent;
 

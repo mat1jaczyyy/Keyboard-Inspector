@@ -84,6 +84,7 @@
     <Compile Include="FileSystem\FileSystem.cs" />
     <Compile Include="Result\Input.cs" />
     <Compile Include="Result\IBinary.cs" />
+    <Compile Include="UI\LinearGradient.cs" />
     <Compile Include="UI\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
