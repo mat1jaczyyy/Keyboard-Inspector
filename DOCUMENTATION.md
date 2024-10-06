@@ -46,7 +46,7 @@ Next, each histogram is transformed into the frequency domain by applying the [d
 
 A physical state change of a key switch usually goes through multiple different processing steps before reaching a Windows application: microcontroller key scanning (optionally with a debounce filter), USB reporting, computer OS input handling, task switching time, application response time. While the OS time can be treated as unpredictable continuous noise (as Windows is non-RTOS), the former processes have very strict sampling rates.
 
-The frequency domain is useful for detecting periodicity in the data, such as the key scanning rate and/or USB report rate. If the data is too noisy, increase the sample size by recording more data.
+The frequency domain is useful for detecting periodicity in the data, such as the key scanning rate and/or USB report rate. If the data is too noisy, increase the sample size by recording more data. Booting your system in safe mode is also very effective in minimizing noise in the recording.
 
 ### Analysis parameters
 
