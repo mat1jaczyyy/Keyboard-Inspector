@@ -166,12 +166,12 @@ namespace Keyboard_Inspector {
                 data[i] /= max;
         }
 
-        void DrawGraph(Chart chart, IEnumerable<double> data, double xFactor = 1, string estimate = "") {
+        void DrawGraph(Chart chart, IEnumerable<double> data, double xFactor = 1) {
             chart.LoadData(data, xFactor);
 
             var titles = chart.Tag as MainForm.ChartTitles;
 
-            chart.Title = $"{titles.Primary} ({titles.Secondary}{estimate})";
+            chart.Title = $"{titles.Primary} ({titles.Secondary})";
         }
 
         Dictionary<Chart, double[]> beforeLowCut = new Dictionary<Chart, double[]>();
@@ -212,11 +212,7 @@ namespace Keyboard_Inspector {
 
             double hpsFactor = 1.0 / (Result.Analysis.HPS + 1);
 
-            string estimate = "";
-            if (EstimatePeak(data, out int peak))
-                estimate = $" – peak at {(int)Math.Round(peak * hpsFactor)} Hz";
-
-            DrawGraph(chart, data, hpsFactor, estimate);
+            DrawGraph(chart, data, hpsFactor);
         }
         
         void RunChartsSuspendedAction(IEnumerable<Chart> charts, Action action) {
