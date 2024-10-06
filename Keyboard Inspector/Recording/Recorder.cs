@@ -5,8 +5,6 @@ using System.Linq;
 
 namespace Keyboard_Inspector {
     static class Recorder {
-        public delegate void RecordEventMethod(Event e);
-
         static Stopwatch time;
         static List<Event> events;
         static Dictionary<long, int> sources;
@@ -28,13 +26,13 @@ namespace Keyboard_Inspector {
 
             IsRecording = true;
 
-            Listener.Start();
+            ListenerWindow.Instance.Start();
         }
 
         public static Result StopRecording() {
             if (!IsRecording) return null;
 
-            Listener.Stop();
+            ListenerWindow.Instance.Stop();
 
             time.Stop();
 
@@ -54,9 +52,6 @@ namespace Keyboard_Inspector {
 
             return result;
         }
-
-        public static void RecordInput(bool pressed, Input input)
-            => RecordInput(ElapsedPrecise, pressed, input);
 
         public static void RecordInput(double precise, bool pressed, Input input) {
             events.Add(new Event(precise, pressed, input));

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Keyboard_Inspector {
     static class Native {
@@ -221,7 +222,9 @@ namespace Keyboard_Inspector {
             SimulationThrottle = 0xBB
         }
 
-        /// <summary>Enumeration containing flags for a raw input device.</summary>
+        /// <summary>
+        /// Enumeration containing flags for a raw input device.
+        /// </summary>
         [Flags()]
         public enum RawInputDeviceFlags {
             /// <summary>No flags.</summary>
@@ -244,7 +247,9 @@ namespace Keyboard_Inspector {
             AppKeys = 0x00000400
         }
 
-        /// <summary>Value type for raw input devices.</summary>
+        /// <summary>
+        /// Value type for raw input devices.
+        /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         public struct RAWINPUTDEVICE {
             /// <summary>Top level collection Usage page for the raw input device.</summary>
@@ -345,23 +350,9 @@ namespace Keyboard_Inspector {
         /// <param name="cbSizeHeader">Size of the header.</param>
         /// <returns>0 if successful if pData is null, otherwise number of bytes if pData is not null.</returns>
         [DllImport("user32.dll")]
-        static extern bool GetRawInputData(IntPtr hRawInput, RawInputCommand uiCommand, out RawKeyboard pData, out int pcbSize, int cbSizeHeader);
-
-        [DllImport("user32.dll")]
         static extern bool GetRawInputData(IntPtr hRawInput, RawInputCommand uiCommand, out RawHID pData, out int pcbSize, int cbSizeHeader);
 
-        [DllImport("user32.dll")]
-        static extern bool GetRawInputData(IntPtr hRawInput, RawInputCommand uiCommand, out RawMouse pData, out int pcbSize, int cbSizeHeader);
-
-        public static bool GetRawInputData(IntPtr hRawInput, out RawKeyboard pData)
-            => GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)))
-                && GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)));
-
         public static bool GetRawInputData(IntPtr hRawInput, out RawHID pData)
-            => GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)))
-                && GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)));
-
-        public static bool GetRawInputData(IntPtr hRawInput, out RawMouse pData)
             => GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)))
                 && GetRawInputData(hRawInput, RawInputCommand.Input, out pData, out _, Marshal.SizeOf(typeof(RawInputHeader)));
 
@@ -694,5 +685,77 @@ namespace Keyboard_Inspector {
         );
 
         public static Guid GUID_BUS_TYPE_HID = new Guid(0xeeaf37d0, 0x1963, 0x47c4, 0xaa, 0x48, 0x72, 0x47, 0x6d, 0xb7, 0xcf, 0x49);
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+        public struct WNDCLASSEX {
+            [MarshalAs(UnmanagedType.U4)]
+            public int cbSize;
+            [MarshalAs(UnmanagedType.U4)]
+            public int style;
+            public IntPtr lpfnWndProc;
+            public int cbClsExtra;
+            public int cbWndExtra;
+            public IntPtr hInstance;
+            public IntPtr hIcon;
+            public IntPtr hCursor;
+            public IntPtr hbrBackground;
+            public string lpszMenuName;
+            public string lpszClassName;
+            public IntPtr hIconSm;
+
+            public static WNDCLASSEX Build() {
+                var nw = new WNDCLASSEX();
+                nw.cbSize = Marshal.SizeOf(typeof(WNDCLASSEX));
+                return nw;
+            }
+        }
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.U2)]
+        public static extern short RegisterClassEx([In] ref WNDCLASSEX lpwcx);
+
+        public delegate IntPtr WndProc(IntPtr hWnd, uint msg, UIntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr DefWindowProc(IntPtr hWnd, uint msg, UIntPtr wParam, IntPtr lParam);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Ansi)]
+        public static extern IntPtr CreateWindowEx(uint dwExStyle, string lpClassName, string lpWindowName, uint dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
+
+        public const int CW_USEDEFAULT = unchecked((int)0x80000000);
+
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT {
+            public int X;
+            public int Y;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MSG {
+            public IntPtr hwnd;
+            public uint message;
+            public UIntPtr wParam;
+            public IntPtr lParam;
+            public int time;
+            public POINT pt;
+            public int lPrivate;
+        }
+
+        public const int WM_INPUT = 0x00FF;
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern bool PeekMessage(out Message msg, IntPtr hWnd, uint messageFilterMin, uint messageFilterMax, uint flags);
+
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        public static extern bool GetMessage(out MSG msg, IntPtr hWnd, uint messageFilterMin, uint messageFilterMax);
+
+        [DllImport("user32.dll")]
+        public static extern bool TranslateMessage([In] ref MSG msg);
+
+        [DllImport("user32.dll")]
+        public static extern bool DispatchMessage([In] ref MSG msg);
     }
 }

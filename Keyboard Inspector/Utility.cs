@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace Keyboard_Inspector {
@@ -60,6 +61,9 @@ namespace Keyboard_Inspector {
                     dict.Remove(i);
             }
         }
+
+        public static V GetOrDefault<K, V>(this Dictionary<K, V> dict, K key, V value = default)
+            => dict.ContainsKey(key)? dict[key] : value;
 
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> collection)
             => new HashSet<T>(collection);
@@ -160,6 +164,19 @@ namespace Keyboard_Inspector {
 
             if (!has && lastSep != null)
                 lastSep.Available = false;
+        }
+
+        public static T CopyMemoryTo<T>(this Native.RawHID raw) where T : struct {
+            int size = Marshal.SizeOf(raw);
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+
+            try {
+                Marshal.StructureToPtr(raw, ptr, true);
+                return (T)Marshal.PtrToStructure(ptr, typeof(T));
+
+            } finally {
+                Marshal.FreeHGlobal(ptr);
+            }
         }
     }
 }

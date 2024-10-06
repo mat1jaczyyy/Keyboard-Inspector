@@ -11,19 +11,6 @@ namespace Keyboard_Inspector {
     static class Program {
         public static string[] Args = null;
 
-        class InputMessageFilter: IMessageFilter {
-            const int WM_INPUT = 0x00FF;
-
-            public bool PreFilterMessage(ref Message m) {
-                if (m.Msg == WM_INPUT) {
-                    Listener.Process(ref m);
-                    return true;
-                }
-
-                return false;
-            }
-        }
-
         static bool _cursorVisible = true;
         public static bool CursorVisible {
             get => _cursorVisible;
@@ -67,9 +54,9 @@ namespace Keyboard_Inspector {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Application.AddMessageFilter(new InputMessageFilter());
-            Application.AddMessageFilter(new ControlScrollFilter());
+            ListenerWindow.Create();
 
+            Application.AddMessageFilter(new ControlScrollFilter());
             Application.Run(new MainForm());
         }
     }

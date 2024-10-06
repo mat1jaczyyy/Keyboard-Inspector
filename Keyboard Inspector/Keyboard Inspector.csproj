@@ -70,9 +70,12 @@
   <ItemGroup>
     <Compile Include="FileSystem\Format.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Recording\ListenerWindow.cs" />
+    <Compile Include="Recording\UnprocessedInput.cs" />
     <Compile Include="Result\Analysis.cs" />
     <Compile Include="Benchmark.cs" />
     <Compile Include="Result\InputInfo.cs" />
+    <Compile Include="Result\Keys.cs" />
     <Compile Include="UI\Chart.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -98,7 +101,6 @@
       <DependentUpon>TTRMPickerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="TETR.IO\TetrioReplay.cs" />
-    <Compile Include="Recording\Listener.cs" />
     <Compile Include="Recording\Native.cs" />
     <Compile Include="FileSystem\ImportFileDialog.cs">
       <SubType>Form</SubType>
