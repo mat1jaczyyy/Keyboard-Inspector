@@ -1284,7 +1284,7 @@ namespace Keyboard_Inspector {
                 int digits = Math.Min($"{interval:0.######}".Split('.').ElementAtOrDefault(1)?.Length?? 0, XAxisMicroDecimals);
 
                 double px = interval * factorToPx;
-                double offset = (float)Math.Round(Viewport * u.Chart.Width * Zoom);
+                double offset = Math.Round(Viewport * u.Chart.Width * Zoom);
                 int pos = (int)Math.Ceiling(Viewport * XMaxFactored / interval) - 1;
 
                 var textRect = new RectangleF(0, u.XAxis.Y + 7, 0, (float)u.TextHeight);
