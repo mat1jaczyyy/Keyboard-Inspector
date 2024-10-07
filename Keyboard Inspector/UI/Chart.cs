@@ -216,6 +216,9 @@ namespace Keyboard_Inspector {
         public Func<int, double> IntervalGenerator = i => Math.Pow(2, i - 10);
         public double? ScopeDefaultX = null;
 
+        public int XAxisMicroDecimals = 0;
+        public int HighlightXDecimals = 3;
+
         void ScopeReset() {
             Zoom = ScopeDefaultX == null? 1 : (XMaxFactored / ScopeDefaultX.Value);
             Viewport = 0;
@@ -1278,6 +1281,8 @@ namespace Keyboard_Inspector {
                     interval = IntervalGenerator(incIndex++);
                 } while (interval < lowest);
 
+                int digits = Math.Min($"{interval:0.######}".Split('.').ElementAtOrDefault(1)?.Length?? 0, XAxisMicroDecimals);
+
                 double px = interval * factorToPx;
                 double offset = (float)Math.Round(Viewport * u.Chart.Width * Zoom);
                 int pos = (int)Math.Ceiling(Viewport * XMaxFactored / interval) - 1;
@@ -1289,17 +1294,28 @@ namespace Keyboard_Inspector {
                 float GetS() => (float)(Math.Round(pos * px) - offset) + u.Chart.X;
 
                 for (float s = GetS();; pos++, s = GetS()) {
+                    double point = interval * pos;
+
+                    string text = point.ToString($"0.{new string('0', digits)}{new string('#', 6 - digits)}");
+                    var brush = cs.TextBrush;
+                    var pen = cs.XPen;
+
+                    if (text.Split('.').ElementAtOrDefault(1)?.Length > XAxisMicroDecimals) {
+                        text = $"{point * Math.Pow(10, XAxisMicroDecimals) % 1:.000}";
+                        brush = cs.SubtextBrush;
+                        pen = cs.YPen;
+                    }
+
                     if (s.InRangeII(u.Chart.X, u.Chart.Right)) {
                         float sr = (float)Math.Round(s);
-                        e.Graphics.DrawLine(cs.XPen, sr, u.Chart.Y - 0.5f, sr, u.XAxis.Y + 4.5f);
+                        e.Graphics.DrawLine(pen, sr, u.Chart.Y - 0.5f, sr, u.XAxis.Y + 4.5f);
                     }
-                    
-                    string text = $"{interval * pos:0.###}";
-                    textRect.Width = e.Graphics.MeasureString(text, Font).Width;
 
                     if (s.InRangeII(textLowS, textHighS)) {
+                        textRect.Width = e.Graphics.MeasureString(text, Font).Width;
                         textRect.X = (float)Math.Round(s.Clamp(u.XAxis.X, u.XAxis.Right) - textRect.Width / 2);
-                        e.Graphics.DrawShadowString(text, Font, cs.TextBrush, cs.ShadowTextBrush, textRect, StringAlignment.Center);
+
+                        e.Graphics.DrawShadowString(text, Font, brush, cs.ShadowTextBrush, textRect, StringAlignment.Center);
 
                     } else if (s >= u.XAxis.Right)
                         break;
@@ -1547,9 +1563,31 @@ namespace Keyboard_Inspector {
 
                 point = new PointF((float)Math.Round(point.X), (float)Math.Round(point.Y));
 
-                string text = $"({GetXFactored(HighlightPoint):0.###}, {GetValue(HighlightPoint):0.###})";
-                var textSize = e.Graphics.MeasureString(text, Font);
-                var textRect = new RectangleF(point.X + 9, point.Y - 1 - (float)Math.Ceiling(textSize.Height), textSize.Width, textSize.Height);
+                double x = GetXFactored(HighlightPoint);
+                double y = GetValue(HighlightPoint);
+
+                if (HighlightXDecimals >= 0)
+                    x = Math.Round(x, HighlightXDecimals);
+
+                string xstr = x.ToString(HighlightXDecimals < 0? "0.###" : $"0.{new string('0', HighlightXDecimals)}");
+
+                string[] text = xstr.Split('.').ElementAtOrDefault(1)?.Length > 3
+                    ? new string[] { $"({Math.Floor(x * 1000) / 1000:0.000}", $"{x * 1e3 % 1:.000}".Replace(".", ""), $", {y:0.###})" }
+                    : new string[] { $"({xstr}, {y:0.###})" };
+                
+                var textSize = text.Select(i => e.Graphics.MeasureString(i, Font)).ToArray();
+
+                for (int i = 0; i < textSize.Length - 1; i++) {
+                    var gap = (textSize[i].Width + textSize[i + 1].Width) - e.Graphics.MeasureString(text[i] + text[i + 1], Font).Width;
+                    textSize[i].Width -= gap;
+                }
+
+                var textRect = new RectangleF(
+                    point.X + 9,
+                    point.Y - 1 - (float)Math.Ceiling(textSize.Max(i => i.Height)),
+                    textSize.Sum(i => i.Width),
+                    textSize.Max(i => i.Height)
+                );
 
                 if (!u.Chart.Contains(textRect)) {
                     float dx = (float)Math.Round((point.X - textRect.X) * 2 - Math.Ceiling(textRect.Width)) + 2;
@@ -1571,7 +1609,11 @@ namespace Keyboard_Inspector {
                 var shadowRect = new RectangleF(textRect.X - 1.75f, textRect.Y - 3, textRect.Width + 2, textRect.Height + 2.5f);
 
                 e.Graphics.FillRectangle(cs.ShadowBrush, shadowRect);
-                e.Graphics.DrawShadowString(text, Font, cs.TextBrush, cs.ShadowTextBrush, textRect, StringAlignment.Center);
+
+                for (int i = 0; i < text.Length; i++) {
+                    e.Graphics.DrawShadowString(text[i], Font, i % 2 == 0? cs.TextBrush : cs.SubtextBrush, cs.ShadowTextBrush, textRect, StringAlignment.Near);
+                    textRect.X += textSize[i].Width;
+                }
             }
 
             /* Captured */

@@ -135,16 +135,16 @@ namespace Keyboard_Inspector {
         };
 
         static double ScreenInterval(int i) {
-            if (i <= 3) return Math.Pow(2, i) / 1000;
-            if (i <= 12) {
-                double ret = Math.Pow(10, (i / 3) - 3);
+            if (i <= 6) return Math.Pow(2, i - 3) / 1000;
+            if (i <= 15) {
+                double ret = Math.Pow(10, (i / 3) - 4);
                 if (i % 3 == 1) ret *= 2;
                 if (i % 3 == 2) ret *= 5;
                 return ret;
             }
-            if (i <= 15) return Math.Pow(2, i - 14) * 60;
-            if (i <= 17) return Math.Pow(2, i - 16) * 300;
-            return Math.Pow(2, i - 18) * 1800;
+            if (i <= 18) return Math.Pow(2, i - 17) * 60;
+            if (i <= 20) return Math.Pow(2, i - 19) * 300;
+            return Math.Pow(2, i - 21) * 1800;
         }
 
         void HandleSpotlight(Chart sender) {
@@ -187,7 +187,7 @@ namespace Keyboard_Inspector {
             screen.FailDragDrop = e => MainForm_DragDrop(screen, e);
 
             foreach (var chart in tCharts) {
-                chart.ScopeDefaultX = 100;
+                chart.ScopeDefaultX = 32;
                 chart.IntervalGenerator = i => ScreenInterval(i) * 1000;
             }
 
@@ -197,9 +197,12 @@ namespace Keyboard_Inspector {
                     if (i < 4) return (i - 1) * 25;
                     return Math.Pow(2, i - 4) * 125;
                 };
+                chart.HighlightXDecimals = -1;
             }
 
             screen.IntervalGenerator = ScreenInterval;
+            screen.XAxisMicroDecimals = 3;
+            screen.HighlightXDecimals = 6;
         }
 
         void CloseFile() {
