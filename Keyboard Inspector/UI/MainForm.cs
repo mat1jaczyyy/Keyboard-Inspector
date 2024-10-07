@@ -316,22 +316,23 @@ namespace Keyboard_Inspector {
             if (Program.Args.Length > 0)
                 await LoadFile(Program.Args[0]);
 
-            try {
-                var res = await HTTP.Fetch(Constants.GitHubURL + "/releases/latest");
-                if (res.StatusCode != HttpStatusCode.Found) return;
+            #if !DEBUG
+                try {
+                    var res = await HTTP.Fetch(Constants.GitHubURL + "/releases/latest");
+                    if (res.StatusCode != HttpStatusCode.Found) return;
                 
-                string url = res.Headers.Location.ToString();
-                if (!url.StartsWith(Constants.GitHubURL + "/releases/tag/")) return;
+                    string url = res.Headers.Location.ToString();
+                    if (!url.StartsWith(Constants.GitHubURL + "/releases/tag/")) return;
 
-                string version = url.Substring(url.LastIndexOf('/') + 1);
-                if (version == Constants.Version) return;
+                    string version = url.Substring(url.LastIndexOf('/') + 1);
+                    if (version == Constants.Version) return;
 
-                updates.Text = "Update available!";
+                    updates.Text = "Update available!";
 
-                help.DropDownItems.Remove(updates);
-                mainmenu.Items.Add(updates);
-
-            } catch {}
+                    help.DropDownItems.Remove(updates);
+                    mainmenu.Items.Add(updates);
+                } catch {}
+            #endif
         }
 
         void MainForm_FormClosing(object sender, FormClosingEventArgs e) {
