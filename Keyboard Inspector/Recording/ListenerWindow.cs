@@ -1,8 +1,8 @@
 ﻿using System;
-using System.CodeDom;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Keyboard_Inspector {
@@ -44,7 +44,7 @@ namespace Keyboard_Inspector {
 
             Native.RegisterClassEx(ref wc);
 
-            Task.Run(() => {
+            var thread = new Thread(() => {
                 hWnd = Native.CreateWindowEx(
                     0, CLASS_NAME, "Keyboard Inspector Listener", 0,
                     Native.CW_USEDEFAULT, Native.CW_USEDEFAULT, Native.CW_USEDEFAULT, Native.CW_USEDEFAULT,
@@ -63,6 +63,8 @@ namespace Keyboard_Inspector {
 
                 throw new Exception("ListenerWindow WM_QUIT");
             });
+            thread.Priority = ThreadPriority.Highest;
+            thread.Start();
         }
 
         IntPtr WindowProc(IntPtr hWnd, uint msg, UIntPtr wParam, IntPtr lParam) {
