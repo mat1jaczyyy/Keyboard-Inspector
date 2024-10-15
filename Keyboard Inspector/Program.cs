@@ -56,6 +56,8 @@ namespace Keyboard_Inspector {
 
             ListenerWindow.Create();
 
+            Application.ApplicationExit += (s, ea) => Environment.Exit(0);
+
             Application.AddMessageFilter(new ControlScrollFilter());
             Application.Run(new MainForm());
         }
