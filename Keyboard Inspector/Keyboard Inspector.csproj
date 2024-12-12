@@ -14,7 +14,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>keyboard.ico</ApplicationIcon>
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="UI\Chart.cs">
