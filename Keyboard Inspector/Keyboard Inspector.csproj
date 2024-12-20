@@ -3,38 +3,35 @@
     <TargetFramework>net9.0-windows</TargetFramework>
     <OutputType>WinExe</OutputType>
     <RootNamespace>Keyboard_Inspector</RootNamespace>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <StartupObject>Keyboard_Inspector.Program</StartupObject>
     <UseWindowsForms>true</UseWindowsForms>
     <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Platforms>x64</Platforms>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject>Keyboard_Inspector.Program</StartupObject>
-  </PropertyGroup>
-  <PropertyGroup>
-    <ApplicationIcon>keyboard.ico</ApplicationIcon>
     <PlatformTarget>x64</PlatformTarget>
-    <Nullable>enable</Nullable>
+    <ApplicationIcon>keyboard.ico</ApplicationIcon>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <NoWarn>1701;1702;WFO1000</NoWarn>
+  <PropertyGroup>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <Title>Keyboard Inspector</Title>
+    <Authors>mat1jaczyyy</Authors>
+    <Company>$(Authors)</Company>
+    <Copyright>Copyright © 2021 - 2024</Copyright>
+    <PackageProjectUrl>https://github.com/mat1jaczyyy/Keyboard-Inspector</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mat1jaczyyy/Keyboard-Inspector</RepositoryUrl>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <NoWarn>1701;1702;WFO1000</NoWarn>
-  </PropertyGroup>
-  <ItemGroup>
-    <Compile Update="UI\Chart.cs">
-      <SubType>Component</SubType>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Grille-DarkUI" Version="3.0.2" />
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DynaJson" Version="2.2.0" />
     <PackageReference Include="FFTW.NET" Version="1.0.1" />
+    <PackageReference Include="Grille-DarkUI" Version="3.0.2" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <EditorConfigFiles Remove="D:\Code\Keyboard Inspector\Keyboard Inspector\.editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="D:\Code\Keyboard Inspector\Keyboard Inspector\.editorconfig" />
   </ItemGroup>
 </Project>
