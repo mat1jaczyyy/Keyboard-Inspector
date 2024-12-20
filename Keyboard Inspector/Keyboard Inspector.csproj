@@ -31,9 +31,9 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup>
-    <EditorConfigFiles Remove="D:\Code\Keyboard Inspector\Keyboard Inspector\.editorconfig" />
+    <EditorConfigFiles Remove=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="D:\Code\Keyboard Inspector\Keyboard Inspector\.editorconfig" />
+    <None Include=".editorconfig" />
   </ItemGroup>
 </Project>
