@@ -45,6 +45,7 @@ namespace Keyboard_Inspector {
             Native.RegisterClassEx(ref wc);
 
             var thread = new Thread(() => {
+                // We set thread priority here, since .NET API doesn't expose Realtime priority
                 var nativeThread = Native.GetCurrentThread();
                 Native.SetThreadPriority(nativeThread, 15);
 
