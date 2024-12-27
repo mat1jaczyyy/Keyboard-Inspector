@@ -312,6 +312,17 @@ namespace Keyboard_Inspector {
             await LoadFile(filename);
         }
 
+        void MainForm_Load(object sender, EventArgs e) {
+            var screen = Screen.FromControl(this);
+            var workingArea = screen.WorkingArea;
+
+            if (this.Width > workingArea.Width || this.Height > workingArea.Height) {
+                this.Width = workingArea.Width;
+                this.Height = workingArea.Height;
+                this.WindowState = FormWindowState.Maximized;
+            }
+        }
+
         async void MainForm_Shown(object sender, EventArgs e) {
             if (Program.Args.Length > 0)
                 await LoadFile(Program.Args[0]);
