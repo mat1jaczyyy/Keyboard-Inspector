@@ -112,28 +112,6 @@ namespace Keyboard_Inspector {
             }
         }
 
-        bool EstimatePeak(double[] data, out int result) {
-            double max = double.MaxValue;
-            result = -1;
-
-            int i = 0;
-            for (; i < data.Length; i++) {
-                double v = data[i];
-                bool brk = v > max;
-                max = v;
-                if (brk) break;
-            }
-            for (; i < data.Length; i++) {
-                double v = data[i];
-                if (v >= max) {
-                    max = v;
-                    result = i;
-                }
-            }
-
-            return result != -1;
-        }
-
         IEnumerable<double> DefaultTimeTransform(AlignedArrayDouble arr) {
             for (int i = 0; i < arr.Length; i++)
                 yield return arr[i];
@@ -142,9 +120,25 @@ namespace Keyboard_Inspector {
         void ApplyLowCut(double[] data) {
             if (!Result.Analysis.LowCut) return;
 
-            // https://www.desmos.com/calculator/yukhgjz5g9
-            for (int i = 0; i < Math.Min(70, data.Length); i++)
-                data[i] /= 1 + Math.Pow(Math.E, -(i - 25) / 4.0);
+            double max = double.MaxValue;
+
+            int i = 0;
+            for (; i < data.Length; i++) {
+                double v = data[i];
+                bool brk = v > max;
+                max = v;
+                if (brk) break;
+            }
+
+            for (int j = 0; j < i; j++)
+                data[j] = 0;
+             
+            int smooth = Math.Max(15, i / 2);
+
+            for (int j = i; j < Math.Min(i + smooth, data.Length); j++) {
+                double x = (j - i) / (double)smooth;
+                data[j] *= (1 - Math.Cos(Math.PI * x)) / 2;
+            }
         }
 
         void HarmonicProduct(double[] data, double[] copy) {
