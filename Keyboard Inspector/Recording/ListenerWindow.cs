@@ -45,6 +45,10 @@ namespace Keyboard_Inspector {
             Native.RegisterClassEx(ref wc);
 
             var thread = new Thread(() => {
+                // .NET API doesn't expose this
+                var nativeThread = Native.GetCurrentThread();
+                Native.SetThreadPriority(nativeThread, 15); // THREAD_PRIORITY_TIME_CRITICAL
+
                 hWnd = Native.CreateWindowEx(
                     0, CLASS_NAME, "Keyboard Inspector Listener", 0,
                     Native.CW_USEDEFAULT, Native.CW_USEDEFAULT, Native.CW_USEDEFAULT, Native.CW_USEDEFAULT,
@@ -63,7 +67,6 @@ namespace Keyboard_Inspector {
 
                 throw new Exception("ListenerWindow WM_QUIT");
             });
-            thread.Priority = ThreadPriority.Highest;
             thread.Start();
         }
 

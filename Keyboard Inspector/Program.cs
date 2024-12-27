@@ -44,6 +44,10 @@ namespace Keyboard_Inspector {
 
         [STAThread]
         static void Main(string[] args) {
+            // .NET API doesn't expose this
+            var nativeProcess = Native.GetCurrentProcess();
+            Native.SetPriorityClass(nativeProcess, 0x100); // REALTIME_PRIORITY_CLASS
+
             Args = args;
 
             if (!Directory.Exists(Constants.DataDir))

@@ -757,5 +757,17 @@ namespace Keyboard_Inspector {
 
         [DllImport("user32.dll")]
         public static extern bool DispatchMessage([In] ref MSG msg);
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetCurrentThread();
+
+        [DllImport("kernel32.dll")]
+        public static extern bool SetThreadPriority(IntPtr hThread, int nPriority);
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetCurrentProcess();
+
+        [DllImport("kernel32.dll")]
+        public static extern bool SetPriorityClass(IntPtr hProcess, int dwPriorityClass);
     }
 }
