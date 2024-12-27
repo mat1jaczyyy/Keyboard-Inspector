@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Keyboard_Inspector {
     static class HTTP {
         static readonly HttpClient client = new HttpClient(
-            new WebRequestHandler() { AllowAutoRedirect = false }
+            new HttpClientHandler() { AllowAutoRedirect = false }
         );
 
         static HTTP() {

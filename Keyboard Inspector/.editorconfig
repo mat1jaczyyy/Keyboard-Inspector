@@ -1,0 +1,3 @@
+[*.cs]
+
+dotnet_diagnostic.WFO1000.severity = silent

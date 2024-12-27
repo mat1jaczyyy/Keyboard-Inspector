@@ -23,572 +23,573 @@ namespace Keyboard_Inspector {
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
-        private void InitializeComponent() {
-            this.components = new System.ComponentModel.Container();
+        private void InitializeComponent()
+        {
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            this.rec = new DarkUI.Controls.DarkButton();
-            this.status = new DarkUI.Controls.DarkLabel();
-            this.split = new System.Windows.Forms.SplitContainer();
-            this.tlpCharts = new System.Windows.Forms.TableLayoutPanel();
-            this.tDiffs = new Keyboard_Inspector.Chart();
-            this.tCompound = new Keyboard_Inspector.Chart();
-            this.tCircular = new Keyboard_Inspector.Chart();
-            this.fDiffs = new Keyboard_Inspector.Chart();
-            this.fCompound = new Keyboard_Inspector.Chart();
-            this.fCircular = new Keyboard_Inspector.Chart();
-            this.analysisPanel = new System.Windows.Forms.Panel();
-            this.labelN = new DarkUI.Controls.DarkLabel();
-            this.partials = new DarkUI.Controls.DarkLabel();
-            this.hps = new DarkUI.Controls.DarkNumericUpDown();
-            this.lblHPS = new DarkUI.Controls.DarkLabel();
-            this.lowCut = new DarkUI.Controls.DarkCheckBox();
-            this.binRateDouble = new DarkUI.Controls.DarkButton();
-            this.binRateHalf = new DarkUI.Controls.DarkButton();
-            this.tbBinRate = new DarkUI.Controls.DarkTextBox();
-            this.lblBinRate = new DarkUI.Controls.DarkLabel();
-            this.lblHz = new DarkUI.Controls.DarkLabel();
-            this.screen = new Keyboard_Inspector.Chart();
-            this.recording = new System.Windows.Forms.ToolStripMenuItem();
-            this.open = new System.Windows.Forms.ToolStripMenuItem();
-            this.save = new System.Windows.Forms.ToolStripMenuItem();
-            this.sep1 = new System.Windows.Forms.ToolStripSeparator();
-            this.import = new System.Windows.Forms.ToolStripMenuItem();
-            this.mainmenu = new DarkUI.Controls.DarkMenuStrip();
-            this.capture = new System.Windows.Forms.ToolStripMenuItem();
-            this.captureKeyboard = new System.Windows.Forms.ToolStripMenuItem();
-            this.captureGamepad = new System.Windows.Forms.ToolStripMenuItem();
-            this.captureMouse = new System.Windows.Forms.ToolStripMenuItem();
-            this.help = new System.Windows.Forms.ToolStripMenuItem();
-            this.docs = new System.Windows.Forms.ToolStripMenuItem();
-            this.updates = new System.Windows.Forms.ToolStripMenuItem();
-            this.discord = new System.Windows.Forms.ToolStripMenuItem();
-            this.sep2 = new System.Windows.Forms.ToolStripSeparator();
-            this.donate = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.frozen = new DarkUI.Controls.DarkCheckBox();
-            ((System.ComponentModel.ISupportInitialize)(this.split)).BeginInit();
-            this.split.Panel1.SuspendLayout();
-            this.split.Panel2.SuspendLayout();
-            this.split.SuspendLayout();
-            this.tlpCharts.SuspendLayout();
-            this.analysisPanel.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.hps)).BeginInit();
-            this.mainmenu.SuspendLayout();
-            this.SuspendLayout();
+            rec = new DarkUI.Controls.DarkButton();
+            status = new DarkUI.Controls.DarkLabel();
+            split = new System.Windows.Forms.SplitContainer();
+            tlpCharts = new System.Windows.Forms.TableLayoutPanel();
+            tDiffs = new Chart();
+            tCompound = new Chart();
+            tCircular = new Chart();
+            fDiffs = new Chart();
+            fCompound = new Chart();
+            fCircular = new Chart();
+            analysisPanel = new System.Windows.Forms.Panel();
+            labelN = new DarkUI.Controls.DarkLabel();
+            partials = new DarkUI.Controls.DarkLabel();
+            hps = new DarkUI.Controls.DarkNumericUpDown();
+            lblHPS = new DarkUI.Controls.DarkLabel();
+            lowCut = new DarkUI.Controls.DarkCheckBox();
+            binRateDouble = new DarkUI.Controls.DarkButton();
+            binRateHalf = new DarkUI.Controls.DarkButton();
+            tbBinRate = new DarkUI.Controls.DarkTextBox();
+            lblBinRate = new DarkUI.Controls.DarkLabel();
+            lblHz = new DarkUI.Controls.DarkLabel();
+            screen = new Chart();
+            recording = new System.Windows.Forms.ToolStripMenuItem();
+            open = new System.Windows.Forms.ToolStripMenuItem();
+            save = new System.Windows.Forms.ToolStripMenuItem();
+            sep1 = new System.Windows.Forms.ToolStripSeparator();
+            import = new System.Windows.Forms.ToolStripMenuItem();
+            mainmenu = new DarkUI.Controls.DarkMenuStrip();
+            capture = new System.Windows.Forms.ToolStripMenuItem();
+            captureKeyboard = new System.Windows.Forms.ToolStripMenuItem();
+            captureGamepad = new System.Windows.Forms.ToolStripMenuItem();
+            captureMouse = new System.Windows.Forms.ToolStripMenuItem();
+            help = new System.Windows.Forms.ToolStripMenuItem();
+            docs = new System.Windows.Forms.ToolStripMenuItem();
+            updates = new System.Windows.Forms.ToolStripMenuItem();
+            discord = new System.Windows.Forms.ToolStripMenuItem();
+            sep2 = new System.Windows.Forms.ToolStripSeparator();
+            donate = new System.Windows.Forms.ToolStripMenuItem();
+            toolTip1 = new System.Windows.Forms.ToolTip(components);
+            frozen = new DarkUI.Controls.DarkCheckBox();
+            ((System.ComponentModel.ISupportInitialize)split).BeginInit();
+            split.Panel1.SuspendLayout();
+            split.Panel2.SuspendLayout();
+            split.SuspendLayout();
+            tlpCharts.SuspendLayout();
+            analysisPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)hps).BeginInit();
+            mainmenu.SuspendLayout();
+            SuspendLayout();
             // 
             // rec
             // 
-            this.rec.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.rec.Location = new System.Drawing.Point(1172, 0);
-            this.rec.Name = "rec";
-            this.rec.Padding = new System.Windows.Forms.Padding(5);
-            this.rec.Size = new System.Drawing.Size(122, 24);
-            this.rec.TabIndex = 2;
-            this.rec.Click += new System.EventHandler(this.rec_Click);
+            rec.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            rec.Location = new System.Drawing.Point(1367, 0);
+            rec.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            rec.Name = "rec";
+            rec.Padding = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            rec.Size = new System.Drawing.Size(142, 28);
+            rec.TabIndex = 2;
+            rec.Click += rec_Click;
             // 
             // status
             // 
-            this.status.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.status.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.status.Location = new System.Drawing.Point(324, 5);
-            this.status.Name = "status";
-            this.status.Size = new System.Drawing.Size(646, 17);
-            this.status.TabIndex = 1;
-            this.status.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            status.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            status.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            status.Location = new System.Drawing.Point(378, 6);
+            status.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            status.Name = "status";
+            status.Size = new System.Drawing.Size(754, 20);
+            status.TabIndex = 1;
+            status.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // split
             // 
-            this.split.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.split.Location = new System.Drawing.Point(0, 24);
-            this.split.Margin = new System.Windows.Forms.Padding(0);
-            this.split.Name = "split";
-            this.split.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            split.Dock = System.Windows.Forms.DockStyle.Fill;
+            split.Location = new System.Drawing.Point(0, 24);
+            split.Margin = new System.Windows.Forms.Padding(0);
+            split.Name = "split";
+            split.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // split.Panel1
             // 
-            this.split.Panel1.Controls.Add(this.tlpCharts);
-            this.split.Panel1.Controls.Add(this.analysisPanel);
-            this.split.Panel1.Padding = new System.Windows.Forms.Padding(0, 3, 0, 2);
-            this.split.Panel1MinSize = 400;
+            split.Panel1.Controls.Add(tlpCharts);
+            split.Panel1.Controls.Add(analysisPanel);
+            split.Panel1.Padding = new System.Windows.Forms.Padding(0, 3, 0, 2);
+            split.Panel1MinSize = 400;
             // 
             // split.Panel2
             // 
-            this.split.Panel2.Controls.Add(this.screen);
-            this.split.Panel2.Padding = new System.Windows.Forms.Padding(0, 4, 0, 0);
-            this.split.Panel2MinSize = 125;
-            this.split.Size = new System.Drawing.Size(1294, 812);
-            this.split.SplitterDistance = 553;
-            this.split.TabIndex = 8;
-            this.split.TabStop = false;
-            this.split.Visible = false;
-            this.split.Paint += new System.Windows.Forms.PaintEventHandler(this.split_Paint);
-            this.split.Layout += new System.Windows.Forms.LayoutEventHandler(this.split_Layout);
+            split.Panel2.Controls.Add(screen);
+            split.Panel2.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
+            split.Panel2MinSize = 125;
+            split.Size = new System.Drawing.Size(1510, 821);
+            split.SplitterDistance = 559;
+            split.SplitterWidth = 5;
+            split.TabIndex = 8;
+            split.TabStop = false;
+            split.Visible = false;
+            split.Paint += split_Paint;
+            split.Layout += split_Layout;
             // 
             // tlpCharts
             // 
-            this.tlpCharts.ColumnCount = 5;
-            this.tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 3F));
-            this.tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
-            this.tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 3F));
-            this.tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
-            this.tlpCharts.Controls.Add(this.tDiffs, 0, 0);
-            this.tlpCharts.Controls.Add(this.tCompound, 2, 0);
-            this.tlpCharts.Controls.Add(this.tCircular, 4, 0);
-            this.tlpCharts.Controls.Add(this.fDiffs, 0, 2);
-            this.tlpCharts.Controls.Add(this.fCompound, 2, 2);
-            this.tlpCharts.Controls.Add(this.fCircular, 4, 2);
-            this.tlpCharts.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tlpCharts.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
-            this.tlpCharts.Location = new System.Drawing.Point(0, 3);
-            this.tlpCharts.Margin = new System.Windows.Forms.Padding(0);
-            this.tlpCharts.Name = "tlpCharts";
-            this.tlpCharts.RowCount = 3;
-            this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 3F));
-            this.tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tlpCharts.Size = new System.Drawing.Size(1294, 523);
-            this.tlpCharts.TabIndex = 0;
+            tlpCharts.ColumnCount = 5;
+            tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 4F));
+            tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
+            tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 4F));
+            tlpCharts.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            tlpCharts.Controls.Add(tDiffs, 0, 0);
+            tlpCharts.Controls.Add(tCompound, 2, 0);
+            tlpCharts.Controls.Add(tCircular, 4, 0);
+            tlpCharts.Controls.Add(fDiffs, 0, 2);
+            tlpCharts.Controls.Add(fCompound, 2, 2);
+            tlpCharts.Controls.Add(fCircular, 4, 2);
+            tlpCharts.Dock = System.Windows.Forms.DockStyle.Fill;
+            tlpCharts.GrowStyle = System.Windows.Forms.TableLayoutPanelGrowStyle.FixedSize;
+            tlpCharts.Location = new System.Drawing.Point(0, 3);
+            tlpCharts.Margin = new System.Windows.Forms.Padding(0);
+            tlpCharts.Name = "tlpCharts";
+            tlpCharts.RowCount = 3;
+            tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 3F));
+            tlpCharts.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            tlpCharts.Size = new System.Drawing.Size(1510, 525);
+            tlpCharts.TabIndex = 0;
             // 
             // tDiffs
             // 
-            this.tDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
-            this.tDiffs.Location = new System.Drawing.Point(0, 0);
-            this.tDiffs.Margin = new System.Windows.Forms.Padding(0);
-            this.tDiffs.Name = "tDiffs";
-            this.tDiffs.Size = new System.Drawing.Size(429, 260);
-            this.tDiffs.TabIndex = 0;
-            this.tDiffs.TabStop = false;
-            this.tDiffs.Title = "";
+            tDiffs.AllowDrop = true;
+            tDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
+            tDiffs.ForeColor = System.Drawing.Color.FromArgb(65, 140, 240);
+            tDiffs.Location = new System.Drawing.Point(0, 0);
+            tDiffs.Margin = new System.Windows.Forms.Padding(0);
+            tDiffs.Name = "tDiffs";
+            tDiffs.Size = new System.Drawing.Size(500, 261);
+            tDiffs.TabIndex = 0;
+            tDiffs.TabStop = false;
+            tDiffs.Title = "";
             // 
             // tCompound
             // 
-            this.tCompound.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
-            this.tCompound.Location = new System.Drawing.Point(432, 0);
-            this.tCompound.Margin = new System.Windows.Forms.Padding(0);
-            this.tCompound.Name = "tCompound";
-            this.tCompound.Size = new System.Drawing.Size(429, 260);
-            this.tCompound.TabIndex = 1;
-            this.tCompound.TabStop = false;
-            this.tCompound.Title = "";
+            tCompound.AllowDrop = true;
+            tCompound.Dock = System.Windows.Forms.DockStyle.Fill;
+            tCompound.ForeColor = System.Drawing.Color.FromArgb(65, 140, 240);
+            tCompound.Location = new System.Drawing.Point(504, 0);
+            tCompound.Margin = new System.Windows.Forms.Padding(0);
+            tCompound.Name = "tCompound";
+            tCompound.Size = new System.Drawing.Size(500, 261);
+            tCompound.TabIndex = 1;
+            tCompound.TabStop = false;
+            tCompound.Title = "";
             // 
             // tCircular
             // 
-            this.tCircular.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
-            this.tCircular.Location = new System.Drawing.Point(864, 0);
-            this.tCircular.Margin = new System.Windows.Forms.Padding(0);
-            this.tCircular.Name = "tCircular";
-            this.tCircular.Size = new System.Drawing.Size(430, 260);
-            this.tCircular.TabIndex = 2;
-            this.tCircular.TabStop = false;
-            this.tCircular.Title = "";
+            tCircular.AllowDrop = true;
+            tCircular.Dock = System.Windows.Forms.DockStyle.Fill;
+            tCircular.ForeColor = System.Drawing.Color.FromArgb(65, 140, 240);
+            tCircular.Location = new System.Drawing.Point(1008, 0);
+            tCircular.Margin = new System.Windows.Forms.Padding(0);
+            tCircular.Name = "tCircular";
+            tCircular.Size = new System.Drawing.Size(502, 261);
+            tCircular.TabIndex = 2;
+            tCircular.TabStop = false;
+            tCircular.Title = "";
             // 
             // fDiffs
             // 
-            this.fDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fDiffs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
-            this.fDiffs.Location = new System.Drawing.Point(0, 263);
-            this.fDiffs.Margin = new System.Windows.Forms.Padding(0);
-            this.fDiffs.Name = "fDiffs";
-            this.fDiffs.Size = new System.Drawing.Size(429, 260);
-            this.fDiffs.TabIndex = 3;
-            this.fDiffs.TabStop = false;
-            this.fDiffs.Title = "";
+            fDiffs.AllowDrop = true;
+            fDiffs.Dock = System.Windows.Forms.DockStyle.Fill;
+            fDiffs.ForeColor = System.Drawing.Color.FromArgb(240, 120, 0);
+            fDiffs.Location = new System.Drawing.Point(0, 264);
+            fDiffs.Margin = new System.Windows.Forms.Padding(0);
+            fDiffs.Name = "fDiffs";
+            fDiffs.Size = new System.Drawing.Size(500, 261);
+            fDiffs.TabIndex = 3;
+            fDiffs.TabStop = false;
+            fDiffs.Title = "";
             // 
             // fCompound
             // 
-            this.fCompound.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fCompound.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
-            this.fCompound.Location = new System.Drawing.Point(432, 263);
-            this.fCompound.Margin = new System.Windows.Forms.Padding(0);
-            this.fCompound.Name = "fCompound";
-            this.fCompound.Size = new System.Drawing.Size(429, 260);
-            this.fCompound.TabIndex = 4;
-            this.fCompound.TabStop = false;
-            this.fCompound.Title = "";
+            fCompound.AllowDrop = true;
+            fCompound.Dock = System.Windows.Forms.DockStyle.Fill;
+            fCompound.ForeColor = System.Drawing.Color.FromArgb(240, 120, 0);
+            fCompound.Location = new System.Drawing.Point(504, 264);
+            fCompound.Margin = new System.Windows.Forms.Padding(0);
+            fCompound.Name = "fCompound";
+            fCompound.Size = new System.Drawing.Size(500, 261);
+            fCompound.TabIndex = 4;
+            fCompound.TabStop = false;
+            fCompound.Title = "";
             // 
             // fCircular
             // 
-            this.fCircular.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fCircular.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(120)))), ((int)(((byte)(0)))));
-            this.fCircular.Location = new System.Drawing.Point(864, 263);
-            this.fCircular.Margin = new System.Windows.Forms.Padding(0);
-            this.fCircular.Name = "fCircular";
-            this.fCircular.Size = new System.Drawing.Size(430, 260);
-            this.fCircular.TabIndex = 5;
-            this.fCircular.TabStop = false;
-            this.fCircular.Title = "";
+            fCircular.AllowDrop = true;
+            fCircular.Dock = System.Windows.Forms.DockStyle.Fill;
+            fCircular.ForeColor = System.Drawing.Color.FromArgb(240, 120, 0);
+            fCircular.Location = new System.Drawing.Point(1008, 264);
+            fCircular.Margin = new System.Windows.Forms.Padding(0);
+            fCircular.Name = "fCircular";
+            fCircular.Size = new System.Drawing.Size(502, 261);
+            fCircular.TabIndex = 5;
+            fCircular.TabStop = false;
+            fCircular.Title = "";
             // 
             // analysisPanel
             // 
-            this.analysisPanel.Controls.Add(this.labelN);
-            this.analysisPanel.Controls.Add(this.partials);
-            this.analysisPanel.Controls.Add(this.hps);
-            this.analysisPanel.Controls.Add(this.lblHPS);
-            this.analysisPanel.Controls.Add(this.lowCut);
-            this.analysisPanel.Controls.Add(this.binRateDouble);
-            this.analysisPanel.Controls.Add(this.binRateHalf);
-            this.analysisPanel.Controls.Add(this.tbBinRate);
-            this.analysisPanel.Controls.Add(this.lblBinRate);
-            this.analysisPanel.Controls.Add(this.lblHz);
-            this.analysisPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.analysisPanel.Location = new System.Drawing.Point(0, 526);
-            this.analysisPanel.Name = "analysisPanel";
-            this.analysisPanel.Size = new System.Drawing.Size(1294, 25);
-            this.analysisPanel.TabIndex = 5;
+            analysisPanel.Controls.Add(labelN);
+            analysisPanel.Controls.Add(partials);
+            analysisPanel.Controls.Add(hps);
+            analysisPanel.Controls.Add(lblHPS);
+            analysisPanel.Controls.Add(lowCut);
+            analysisPanel.Controls.Add(binRateDouble);
+            analysisPanel.Controls.Add(binRateHalf);
+            analysisPanel.Controls.Add(tbBinRate);
+            analysisPanel.Controls.Add(lblBinRate);
+            analysisPanel.Controls.Add(lblHz);
+            analysisPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
+            analysisPanel.Location = new System.Drawing.Point(0, 528);
+            analysisPanel.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            analysisPanel.Name = "analysisPanel";
+            analysisPanel.Size = new System.Drawing.Size(1510, 29);
+            analysisPanel.TabIndex = 5;
             // 
             // labelN
             // 
-            this.labelN.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.labelN.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(160)))), ((int)(((byte)(160)))), ((int)(((byte)(160)))));
-            this.labelN.Location = new System.Drawing.Point(1105, 5);
-            this.labelN.Name = "labelN";
-            this.labelN.Size = new System.Drawing.Size(177, 13);
-            this.labelN.TabIndex = 4;
-            this.labelN.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            labelN.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            labelN.ForeColor = System.Drawing.Color.FromArgb(160, 160, 160);
+            labelN.Location = new System.Drawing.Point(1289, 6);
+            labelN.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            labelN.Name = "labelN";
+            labelN.Size = new System.Drawing.Size(206, 15);
+            labelN.TabIndex = 4;
+            labelN.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // partials
             // 
-            this.partials.AutoSize = true;
-            this.partials.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.partials.Location = new System.Drawing.Point(566, 5);
-            this.partials.Name = "partials";
-            this.partials.Size = new System.Drawing.Size(40, 13);
-            this.partials.TabIndex = 12;
-            this.partials.Text = "partials";
-            this.partials.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+            partials.AutoSize = true;
+            partials.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            partials.Location = new System.Drawing.Point(660, 6);
+            partials.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            partials.Name = "partials";
+            partials.Size = new System.Drawing.Size(45, 15);
+            partials.TabIndex = 12;
+            partials.Text = "partials";
+            partials.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // hps
             // 
-            this.hps.Location = new System.Drawing.Point(494, 3);
-            this.hps.Maximum = new decimal(new int[] {
-            9,
-            0,
-            0,
-            0});
-            this.hps.Name = "hps";
-            this.hps.Size = new System.Drawing.Size(71, 20);
-            this.hps.TabIndex = 7;
-            this.hps.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.toolTip1.SetToolTip(this.hps, resources.GetString("hps.ToolTip"));
-            this.hps.ValueChanged += new System.EventHandler(this.hps_ValueChanged);
+            hps.Location = new System.Drawing.Point(576, 3);
+            hps.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            hps.Maximum = new decimal(new int[] { 9, 0, 0, 0 });
+            hps.Name = "hps";
+            hps.Size = new System.Drawing.Size(83, 23);
+            hps.TabIndex = 7;
+            hps.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            toolTip1.SetToolTip(hps, resources.GetString("hps.ToolTip"));
+            hps.ValueChanged += hps_ValueChanged;
             // 
             // lblHPS
             // 
-            this.lblHPS.AutoSize = true;
-            this.lblHPS.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lblHPS.Location = new System.Drawing.Point(375, 5);
-            this.lblHPS.Name = "lblHPS";
-            this.lblHPS.Size = new System.Drawing.Size(117, 13);
-            this.lblHPS.TabIndex = 9;
-            this.lblHPS.Text = "HPS Partial Elimination:";
+            lblHPS.AutoSize = true;
+            lblHPS.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            lblHPS.Location = new System.Drawing.Point(438, 6);
+            lblHPS.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            lblHPS.Name = "lblHPS";
+            lblHPS.Size = new System.Drawing.Size(131, 15);
+            lblHPS.TabIndex = 9;
+            lblHPS.Text = "HPS Partial Elimination:";
             // 
             // lowCut
             // 
-            this.lowCut.AutoSize = true;
-            this.lowCut.Checked = true;
-            this.lowCut.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.lowCut.Location = new System.Drawing.Point(261, 3);
-            this.lowCut.Name = "lowCut";
-            this.lowCut.Size = new System.Drawing.Size(90, 17);
-            this.lowCut.TabIndex = 6;
-            this.lowCut.Text = "Low Cut Filter";
-            this.toolTip1.SetToolTip(this.lowCut, resources.GetString("lowCut.ToolTip"));
-            this.lowCut.UseMnemonic = false;
-            this.lowCut.CheckedChanged += new System.EventHandler(this.lowCut_CheckedChanged);
+            lowCut.AutoSize = true;
+            lowCut.Checked = true;
+            lowCut.CheckState = System.Windows.Forms.CheckState.Checked;
+            lowCut.Location = new System.Drawing.Point(304, 3);
+            lowCut.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            lowCut.Name = "lowCut";
+            lowCut.Size = new System.Drawing.Size(99, 19);
+            lowCut.TabIndex = 6;
+            lowCut.Text = "Low Cut Filter";
+            toolTip1.SetToolTip(lowCut, resources.GetString("lowCut.ToolTip"));
+            lowCut.UseMnemonic = false;
+            lowCut.CheckedChanged += lowCut_CheckedChanged;
             // 
             // binRateDouble
             // 
-            this.binRateDouble.Location = new System.Drawing.Point(195, 3);
-            this.binRateDouble.Name = "binRateDouble";
-            this.binRateDouble.Padding = new System.Windows.Forms.Padding(5, 3, 5, 5);
-            this.binRateDouble.Size = new System.Drawing.Size(29, 20);
-            this.binRateDouble.TabIndex = 5;
-            this.binRateDouble.Tag = "";
-            this.binRateDouble.Text = "* 2";
-            this.binRateDouble.Click += new System.EventHandler(this.binRateDouble_Click);
+            binRateDouble.Location = new System.Drawing.Point(227, 3);
+            binRateDouble.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            binRateDouble.Name = "binRateDouble";
+            binRateDouble.Padding = new System.Windows.Forms.Padding(6, 3, 6, 6);
+            binRateDouble.Size = new System.Drawing.Size(34, 23);
+            binRateDouble.TabIndex = 5;
+            binRateDouble.Tag = "";
+            binRateDouble.Text = "* 2";
+            binRateDouble.Click += binRateDouble_Click;
             // 
             // binRateHalf
             // 
-            this.binRateHalf.Location = new System.Drawing.Point(166, 3);
-            this.binRateHalf.Name = "binRateHalf";
-            this.binRateHalf.Padding = new System.Windows.Forms.Padding(5, 3, 5, 5);
-            this.binRateHalf.Size = new System.Drawing.Size(29, 20);
-            this.binRateHalf.TabIndex = 4;
-            this.binRateHalf.Tag = "";
-            this.binRateHalf.Text = "/ 2";
-            this.binRateHalf.Click += new System.EventHandler(this.binRateHalf_Click);
+            binRateHalf.Location = new System.Drawing.Point(194, 3);
+            binRateHalf.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            binRateHalf.Name = "binRateHalf";
+            binRateHalf.Padding = new System.Windows.Forms.Padding(6, 3, 6, 6);
+            binRateHalf.Size = new System.Drawing.Size(34, 23);
+            binRateHalf.TabIndex = 4;
+            binRateHalf.Tag = "";
+            binRateHalf.Text = "/ 2";
+            binRateHalf.Click += binRateHalf_Click;
             // 
             // tbBinRate
             // 
-            this.tbBinRate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(69)))), ((int)(((byte)(73)))), ((int)(((byte)(74)))));
-            this.tbBinRate.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.tbBinRate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.tbBinRate.Location = new System.Drawing.Point(83, 3);
-            this.tbBinRate.MaxLength = 7;
-            this.tbBinRate.Name = "tbBinRate";
-            this.tbBinRate.Size = new System.Drawing.Size(56, 20);
-            this.tbBinRate.TabIndex = 3;
-            this.tbBinRate.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.toolTip1.SetToolTip(this.tbBinRate, resources.GetString("tbBinRate.ToolTip"));
-            this.tbBinRate.TextChanged += new System.EventHandler(this.tbBinRate_TextChanged);
+            tbBinRate.BackColor = System.Drawing.Color.FromArgb(69, 73, 74);
+            tbBinRate.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            tbBinRate.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            tbBinRate.Location = new System.Drawing.Point(97, 3);
+            tbBinRate.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            tbBinRate.MaxLength = 7;
+            tbBinRate.Name = "tbBinRate";
+            tbBinRate.Size = new System.Drawing.Size(65, 23);
+            tbBinRate.TabIndex = 3;
+            tbBinRate.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            toolTip1.SetToolTip(tbBinRate, resources.GetString("tbBinRate.ToolTip"));
+            tbBinRate.TextChanged += tbBinRate_TextChanged;
             // 
             // lblBinRate
             // 
-            this.lblBinRate.AutoSize = true;
-            this.lblBinRate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lblBinRate.Location = new System.Drawing.Point(12, 5);
-            this.lblBinRate.Name = "lblBinRate";
-            this.lblBinRate.Size = new System.Drawing.Size(71, 13);
-            this.lblBinRate.TabIndex = 4;
-            this.lblBinRate.Text = "Binning Rate:";
+            lblBinRate.AutoSize = true;
+            lblBinRate.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            lblBinRate.Location = new System.Drawing.Point(14, 6);
+            lblBinRate.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            lblBinRate.Name = "lblBinRate";
+            lblBinRate.Size = new System.Drawing.Size(77, 15);
+            lblBinRate.TabIndex = 4;
+            lblBinRate.Text = "Binning Rate:";
             // 
             // lblHz
             // 
-            this.lblHz.AutoSize = true;
-            this.lblHz.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.lblHz.Location = new System.Drawing.Point(140, 5);
-            this.lblHz.Name = "lblHz";
-            this.lblHz.Size = new System.Drawing.Size(20, 13);
-            this.lblHz.TabIndex = 6;
-            this.lblHz.Text = "Hz";
-            this.lblHz.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+            lblHz.AutoSize = true;
+            lblHz.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            lblHz.Location = new System.Drawing.Point(163, 6);
+            lblHz.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            lblHz.Name = "lblHz";
+            lblHz.Size = new System.Drawing.Size(21, 15);
+            lblHz.TabIndex = 6;
+            lblHz.Text = "Hz";
+            lblHz.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
             // 
             // screen
             // 
-            this.screen.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.screen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(65)))), ((int)(((byte)(140)))), ((int)(((byte)(240)))));
-            this.screen.Location = new System.Drawing.Point(0, 4);
-            this.screen.Margin = new System.Windows.Forms.Padding(0);
-            this.screen.Name = "screen";
-            this.screen.Size = new System.Drawing.Size(1294, 251);
-            this.screen.TabIndex = 1;
-            this.screen.Title = "";
+            screen.AllowDrop = true;
+            screen.Dock = System.Windows.Forms.DockStyle.Fill;
+            screen.ForeColor = System.Drawing.Color.FromArgb(65, 140, 240);
+            screen.Location = new System.Drawing.Point(0, 5);
+            screen.Margin = new System.Windows.Forms.Padding(0);
+            screen.Name = "screen";
+            screen.Size = new System.Drawing.Size(1510, 252);
+            screen.TabIndex = 1;
+            screen.Title = "";
             // 
             // recording
             // 
-            this.recording.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.recording.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.open,
-            this.save,
-            this.sep1,
-            this.import});
-            this.recording.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.recording.Name = "recording";
-            this.recording.Size = new System.Drawing.Size(35, 20);
-            this.recording.Text = "&File";
+            recording.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            recording.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { open, save, sep1, import });
+            recording.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            recording.Name = "recording";
+            recording.Size = new System.Drawing.Size(35, 20);
+            recording.Text = "&File";
             // 
             // open
             // 
-            this.open.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.open.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.open.Name = "open";
-            this.open.ShortcutKeyDisplayString = "";
-            this.open.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.open.Size = new System.Drawing.Size(158, 22);
-            this.open.Text = "&Open...";
-            this.open.Click += new System.EventHandler(this.open_Click);
+            open.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            open.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            open.Name = "open";
+            open.ShortcutKeyDisplayString = "";
+            open.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O;
+            open.Size = new System.Drawing.Size(158, 22);
+            open.Text = "&Open...";
+            open.Click += open_Click;
             // 
             // save
             // 
-            this.save.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.save.Enabled = false;
-            this.save.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(153)))), ((int)(((byte)(153)))), ((int)(((byte)(153)))));
-            this.save.Name = "save";
-            this.save.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-            this.save.Size = new System.Drawing.Size(158, 22);
-            this.save.Text = "&Save As...";
-            this.save.Click += new System.EventHandler(this.save_Click);
+            save.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            save.Enabled = false;
+            save.ForeColor = System.Drawing.Color.FromArgb(153, 153, 153);
+            save.Name = "save";
+            save.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S;
+            save.Size = new System.Drawing.Size(158, 22);
+            save.Text = "&Save As...";
+            save.Click += save_Click;
             // 
             // sep1
             // 
-            this.sep1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.sep1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.sep1.Margin = new System.Windows.Forms.Padding(0, 0, 0, 1);
-            this.sep1.Name = "sep1";
-            this.sep1.Size = new System.Drawing.Size(155, 6);
+            sep1.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            sep1.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            sep1.Margin = new System.Windows.Forms.Padding(0, 0, 0, 1);
+            sep1.Name = "sep1";
+            sep1.Size = new System.Drawing.Size(155, 6);
             // 
             // import
             // 
-            this.import.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.import.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.import.Name = "import";
-            this.import.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
-            | System.Windows.Forms.Keys.O)));
-            this.import.ShowShortcutKeys = false;
-            this.import.Size = new System.Drawing.Size(158, 22);
-            this.import.Text = "&Import from URL...";
-            this.import.Click += new System.EventHandler(this.import_Click);
+            import.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            import.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            import.Name = "import";
+            import.ShortcutKeys = System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift | System.Windows.Forms.Keys.O;
+            import.ShowShortcutKeys = false;
+            import.Size = new System.Drawing.Size(158, 22);
+            import.Text = "&Import from URL...";
+            import.Click += import_Click;
             // 
             // mainmenu
             // 
-            this.mainmenu.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.mainmenu.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.mainmenu.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.mainmenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.recording,
-            this.capture,
-            this.help});
-            this.mainmenu.Location = new System.Drawing.Point(0, 0);
-            this.mainmenu.Name = "mainmenu";
-            this.mainmenu.Padding = new System.Windows.Forms.Padding(3, 2, 0, 2);
-            this.mainmenu.Size = new System.Drawing.Size(1294, 24);
-            this.mainmenu.TabIndex = 0;
-            this.mainmenu.TabStop = true;
-            this.mainmenu.Text = "menuStrip1";
+            mainmenu.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            mainmenu.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            mainmenu.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            mainmenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { recording, capture, help });
+            mainmenu.Location = new System.Drawing.Point(0, 0);
+            mainmenu.Name = "mainmenu";
+            mainmenu.Padding = new System.Windows.Forms.Padding(4, 2, 0, 2);
+            mainmenu.Size = new System.Drawing.Size(1510, 24);
+            mainmenu.TabIndex = 0;
+            mainmenu.TabStop = true;
+            mainmenu.Text = "menuStrip1";
             // 
             // capture
             // 
-            this.capture.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.capture.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.capture.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.captureKeyboard,
-            this.captureGamepad,
-            this.captureMouse});
-            this.capture.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.capture.Margin = new System.Windows.Forms.Padding(0, 0, 200, 0);
-            this.capture.Name = "capture";
-            this.capture.Size = new System.Drawing.Size(56, 20);
-            this.capture.Text = "Capture";
+            capture.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            capture.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            capture.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { captureKeyboard, captureGamepad, captureMouse });
+            capture.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            capture.Margin = new System.Windows.Forms.Padding(0, 0, 240, 0);
+            capture.Name = "capture";
+            capture.Size = new System.Drawing.Size(56, 20);
+            capture.Text = "Capture";
             // 
             // captureKeyboard
             // 
-            this.captureKeyboard.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.captureKeyboard.Checked = true;
-            this.captureKeyboard.CheckOnClick = true;
-            this.captureKeyboard.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.captureKeyboard.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.captureKeyboard.Name = "captureKeyboard";
-            this.captureKeyboard.Size = new System.Drawing.Size(163, 22);
-            this.captureKeyboard.Text = "Keyboard";
+            captureKeyboard.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            captureKeyboard.Checked = true;
+            captureKeyboard.CheckOnClick = true;
+            captureKeyboard.CheckState = System.Windows.Forms.CheckState.Checked;
+            captureKeyboard.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            captureKeyboard.Name = "captureKeyboard";
+            captureKeyboard.Size = new System.Drawing.Size(180, 22);
+            captureKeyboard.Text = "Keyboard";
             // 
             // captureGamepad
             // 
-            this.captureGamepad.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.captureGamepad.Checked = true;
-            this.captureGamepad.CheckOnClick = true;
-            this.captureGamepad.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.captureGamepad.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.captureGamepad.Name = "captureGamepad";
-            this.captureGamepad.Size = new System.Drawing.Size(163, 22);
-            this.captureGamepad.Text = "Gamepad/Joystick";
+            captureGamepad.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            captureGamepad.Checked = true;
+            captureGamepad.CheckOnClick = true;
+            captureGamepad.CheckState = System.Windows.Forms.CheckState.Checked;
+            captureGamepad.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            captureGamepad.Name = "captureGamepad";
+            captureGamepad.Size = new System.Drawing.Size(180, 22);
+            captureGamepad.Text = "Gamepad/Joystick";
             // 
             // captureMouse
             // 
-            this.captureMouse.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.captureMouse.CheckOnClick = true;
-            this.captureMouse.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.captureMouse.Name = "captureMouse";
-            this.captureMouse.Size = new System.Drawing.Size(163, 22);
-            this.captureMouse.Text = "Mouse";
+            captureMouse.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            captureMouse.CheckOnClick = true;
+            captureMouse.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            captureMouse.Name = "captureMouse";
+            captureMouse.Size = new System.Drawing.Size(180, 22);
+            captureMouse.Text = "Mouse";
             // 
             // help
             // 
-            this.help.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.docs,
-            this.updates,
-            this.discord,
-            this.sep2,
-            this.donate});
-            this.help.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.help.Name = "help";
-            this.help.Size = new System.Drawing.Size(41, 20);
-            this.help.Text = "Help";
+            help.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { docs, updates, discord, sep2, donate });
+            help.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            help.Name = "help";
+            help.Size = new System.Drawing.Size(41, 20);
+            help.Text = "Help";
             // 
             // docs
             // 
-            this.docs.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.docs.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.docs.Name = "docs";
-            this.docs.Size = new System.Drawing.Size(181, 22);
-            this.docs.Text = "Official &Documentation";
-            this.docs.Click += new System.EventHandler(this.docs_Click);
+            docs.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            docs.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            docs.Name = "docs";
+            docs.Size = new System.Drawing.Size(181, 22);
+            docs.Text = "Official &Documentation";
+            docs.Click += docs_Click;
             // 
             // updates
             // 
-            this.updates.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.updates.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.updates.Name = "updates";
-            this.updates.Size = new System.Drawing.Size(181, 22);
-            this.updates.Text = "Check for &Updates";
-            this.updates.Click += new System.EventHandler(this.updates_Click);
+            updates.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            updates.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            updates.Name = "updates";
+            updates.Size = new System.Drawing.Size(181, 22);
+            updates.Text = "Check for &Updates";
+            updates.Click += updates_Click;
             // 
             // discord
             // 
-            this.discord.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.discord.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.discord.Name = "discord";
-            this.discord.Size = new System.Drawing.Size(181, 22);
-            this.discord.Text = "Discord &Server";
-            this.discord.Click += new System.EventHandler(this.discord_Click);
+            discord.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            discord.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            discord.Name = "discord";
+            discord.Size = new System.Drawing.Size(181, 22);
+            discord.Text = "Discord &Server";
+            discord.Click += discord_Click;
             // 
             // sep2
             // 
-            this.sep2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.sep2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.sep2.Margin = new System.Windows.Forms.Padding(0, 0, 0, 1);
-            this.sep2.Name = "sep2";
-            this.sep2.Size = new System.Drawing.Size(178, 6);
+            sep2.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            sep2.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            sep2.Margin = new System.Windows.Forms.Padding(0, 0, 0, 1);
+            sep2.Name = "sep2";
+            sep2.Size = new System.Drawing.Size(178, 6);
             // 
             // donate
             // 
-            this.donate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(63)))), ((int)(((byte)(65)))));
-            this.donate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(220)))), ((int)(((byte)(220)))), ((int)(((byte)(220)))));
-            this.donate.Name = "donate";
-            this.donate.Size = new System.Drawing.Size(181, 22);
-            this.donate.Text = "Donate via &Ko-fi";
-            this.donate.Click += new System.EventHandler(this.donate_Click);
+            donate.BackColor = System.Drawing.Color.FromArgb(60, 63, 65);
+            donate.ForeColor = System.Drawing.Color.FromArgb(220, 220, 220);
+            donate.Name = "donate";
+            donate.Size = new System.Drawing.Size(181, 22);
+            donate.Text = "Donate via &Ko-fi";
+            donate.Click += donate_Click;
             // 
             // frozen
             // 
-            this.frozen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.frozen.Location = new System.Drawing.Point(1102, 3);
-            this.frozen.Name = "frozen";
-            this.frozen.Size = new System.Drawing.Size(56, 17);
-            this.frozen.TabIndex = 1;
-            this.frozen.Text = "Freeze";
-            this.toolTip1.SetToolTip(this.frozen, "If checked, the currently visible inputs from the input history view will be pres" +
-        "erved for the next recording.");
-            this.frozen.UseMnemonic = false;
-            this.frozen.CheckedChanged += new System.EventHandler(this.frozen_CheckedChanged);
+            frozen.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+            frozen.Location = new System.Drawing.Point(1286, 3);
+            frozen.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            frozen.Name = "frozen";
+            frozen.Size = new System.Drawing.Size(65, 20);
+            frozen.TabIndex = 1;
+            frozen.Text = "Freeze";
+            toolTip1.SetToolTip(frozen, "If checked, the currently visible inputs from the input history view will be preserved for the next recording.");
+            frozen.UseMnemonic = false;
+            frozen.CheckedChanged += frozen_CheckedChanged;
             // 
             // MainForm
             // 
-            this.AllowDrop = true;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1294, 836);
-            this.Controls.Add(this.frozen);
-            this.Controls.Add(this.split);
-            this.Controls.Add(this.rec);
-            this.Controls.Add(this.status);
-            this.Controls.Add(this.mainmenu);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MainMenuStrip = this.mainmenu;
-            this.MinimumSize = new System.Drawing.Size(1310, 875);
-            this.Name = "MainForm";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
-            this.Shown += new System.EventHandler(this.MainForm_Shown);
-            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.MainForm_DragDrop);
-            this.DragOver += new System.Windows.Forms.DragEventHandler(this.MainForm_DragOver);
-            this.split.Panel1.ResumeLayout(false);
-            this.split.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.split)).EndInit();
-            this.split.ResumeLayout(false);
-            this.tlpCharts.ResumeLayout(false);
-            this.analysisPanel.ResumeLayout(false);
-            this.analysisPanel.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.hps)).EndInit();
-            this.mainmenu.ResumeLayout(false);
-            this.mainmenu.PerformLayout();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AllowDrop = true;
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(1510, 845);
+            Controls.Add(frozen);
+            Controls.Add(split);
+            Controls.Add(rec);
+            Controls.Add(status);
+            Controls.Add(mainmenu);
+            Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            MainMenuStrip = mainmenu;
+            Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            MinimumSize = new System.Drawing.Size(1526, 822);
+            Name = "MainForm";
+            FormClosing += MainForm_FormClosing;
+            Shown += MainForm_Shown;
+            DragDrop += MainForm_DragDrop;
+            DragOver += MainForm_DragOver;
+            split.Panel1.ResumeLayout(false);
+            split.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)split).EndInit();
+            split.ResumeLayout(false);
+            tlpCharts.ResumeLayout(false);
+            analysisPanel.ResumeLayout(false);
+            analysisPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)hps).EndInit();
+            mainmenu.ResumeLayout(false);
+            mainmenu.PerformLayout();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
