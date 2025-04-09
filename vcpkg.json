@@ -1,0 +1,16 @@
+{
+  "name": "keyboard-inspector-recorder",
+  "version": "1.0.0",
+  "dependencies": [
+    "boost-container",
+    {
+      "name": "gameinput",
+      "platform": "windows"
+    },
+    {
+      "name": "wil",
+      "platform": "windows"
+    }
+  ],
+  "builtin-baseline": "36422343fec295c9b85428789feffa85980ab456"
+}
