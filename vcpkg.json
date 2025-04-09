@@ -1,6 +1,7 @@
 {
   "name": "keyboard-inspector-recorder",
   "version": "1.0.0",
+  "builtin-baseline": "ae64e8e0196c3cb1bcfff09dbfb30383fb12b80d",
   "dependencies": [
     "boost-container",
     {
@@ -10,7 +11,10 @@
     {
       "name": "wil",
       "platform": "windows"
+    },
+    {
+      "name": "libevdev",
+      "platform": "linux"
     }
-  ],
-  "builtin-baseline": "36422343fec295c9b85428789feffa85980ab456"
+  ]
 }
