@@ -3,7 +3,6 @@
 #include <wil/win32_result_macros.h>
 #include <boost/container/static_vector.hpp>
 #include <algorithm>
-#include <atomic>
 #include <chrono>
 #include <thread>
 #include <stop_token>
@@ -37,7 +36,7 @@ private:
     void _update_key_states(
         const std::string& id, std::uint64_t timestamp, const KeyStateArray& state
     );
-    std::atomic<bool> m_running = false;
+    bool m_running = false;
     std::jthread m_poll_thread;
     IGameInput *m_gameinput;
     std::uint64_t m_timestamp_ref;
@@ -113,6 +112,7 @@ void recorder::impl::start(bool keyboard, bool mouse, bool gamepad)
 {
     if (m_running)
         throw std::runtime_error("The recorder is already running");
+    m_running = true;
     THROW_IF_FAILED_MSG(GameInputCreate(&m_gameinput), "Failed to initialize GameInput");
     m_gameinput->SetFocusPolicy(GameInputDefaultFocusPolicy);
     GameInputKind kind = GameInputKind::GameInputKindUnknown;
@@ -127,13 +127,11 @@ void recorder::impl::start(bool keyboard, bool mouse, bool gamepad)
     m_inputs.clear();
     m_key_states.clear();
     m_poll_thread = std::jthread([&](std::stop_token stop) {
-        m_running = true;
         while (!stop.stop_requested())
         {
             if (!_gameinput_poll(kind))
                 std::this_thread::yield();
         }
-        m_running = false;
     });
 }
 
@@ -148,6 +146,7 @@ void recorder::impl::stop()
         m_gameinput->Release();
         m_gameinput = nullptr;
     }
+    m_running = false;
 }
 
 bool recorder::impl::recording() const
