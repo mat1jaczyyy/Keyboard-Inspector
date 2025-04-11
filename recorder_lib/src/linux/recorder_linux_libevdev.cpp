@@ -105,7 +105,7 @@ void recorder::impl::_init_scan_devices()
     }
     m_device_scan_thread = std::jthread([&](const std::stop_token& stop) {
         int notify_fd = inotify_init1(IN_NONBLOCK);
-        inotify_add_watch(notify_fd, "/dev/event", IN_CREATE | IN_DELETE);
+        inotify_add_watch(notify_fd, "/dev/input", IN_CREATE | IN_DELETE);
         pollfd poll_struct{
             .fd = notify_fd,
             .events = POLLIN
