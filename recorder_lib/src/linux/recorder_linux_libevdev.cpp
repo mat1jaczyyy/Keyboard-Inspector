@@ -163,7 +163,7 @@ void recorder::impl::_init_scan_devices()
 
 void recorder::impl::_init_poll(bool keyboard, bool mouse, bool gamepad)
 {
-    m_poll_thread = std::jthread([&](const std::stop_token& stop) {
+    m_poll_thread = std::jthread([=, this](const std::stop_token& stop) {
         timespec ref;
         clock_gettime(CLOCK_MONOTONIC, &ref);
         std::uint64_t ref_usec = ref.tv_sec * 1000000 + ref.tv_nsec / 1000;

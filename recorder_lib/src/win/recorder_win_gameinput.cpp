@@ -126,7 +126,7 @@ void recorder::impl::start(bool keyboard, bool mouse, bool gamepad)
     m_devices.clear();
     m_inputs.clear();
     m_key_states.clear();
-    m_poll_thread = std::jthread([&](std::stop_token stop) {
+    m_poll_thread = std::jthread([=](std::stop_token stop) {
         while (!stop.stop_requested())
         {
             if (!_gameinput_poll(kind))
