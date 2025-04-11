@@ -138,11 +138,11 @@ void recorder::impl::_init_scan_devices()
                         continue;
                     if (i->mask & IN_CREATE)
                     {
-                        added.emplace_back(path);
+                        added.emplace_back("/dev/input/"s.append(path));
                     }
                     else if (i->mask & IN_DELETE)
                     {
-                        removed.emplace_back(path);
+                        removed.emplace_back("/dev/input/"s.append(path));
                     }
                 }
                 m_evdev_devices.insert(
