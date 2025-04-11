@@ -267,6 +267,11 @@ void recorder::impl::stop()
     m_poll_thread.request_stop();
     m_device_scan_thread.join();
     m_poll_thread.join();
+    m_evdev_devices.visit_all([](evdev_device& dev) {
+        if (dev.dev)
+            evdev_close(dev.dev);
+    });
+    m_evdev_devices.clear();
     m_running = false;
 }
 
