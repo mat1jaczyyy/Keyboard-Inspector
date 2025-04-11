@@ -182,8 +182,13 @@ void recorder::impl::_init_poll(bool keyboard, bool mouse, bool gamepad)
                     dev.dev = evdev_open(path.data());
                     if (!dev.dev)
                         return true;
+                    // remove devices that don't send keys
+                    if (!libevdev_has_event_type(dev.dev, EV_KEY))
+                    {
+                        evdev_close(dev.dev);
+                        return true;
+                    }
                     // disable all events, and only enable the one we need
-                    libevdev_disable_event_type(dev.dev, EV_KEY);
                     libevdev_disable_event_type(dev.dev, EV_REL);
                     libevdev_disable_event_type(dev.dev, EV_ABS);
                     libevdev_disable_event_type(dev.dev, EV_MSC);
@@ -194,17 +199,17 @@ void recorder::impl::_init_poll(bool keyboard, bool mouse, bool gamepad)
                     libevdev_disable_event_type(dev.dev, EV_FF);
                     libevdev_disable_event_type(dev.dev, EV_PWR);
                     libevdev_disable_event_type(dev.dev, EV_FF_STATUS);
-                    if (keyboard)
+                    if (!keyboard)
                     {
                         for (auto code: code_keyboard)
-                            libevdev_enable_event_code(dev.dev, EV_KEY, code, nullptr);
+                            libevdev_disable_event_code(dev.dev, EV_KEY, code);
                     }
-                    if (mouse)
+                    if (!mouse)
                     {
                         for (auto code: code_mouse)
-                            libevdev_enable_event_code(dev.dev, EV_KEY, code, nullptr);
+                            libevdev_disable_event_code(dev.dev, EV_KEY, code);
                     }
-                    if (gamepad)
+                    if (!gamepad)
                     {
                         // TODO: fill in gamepad codes
                     }
