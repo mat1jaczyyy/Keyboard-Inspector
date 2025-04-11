@@ -208,6 +208,7 @@ void recorder::impl::_init_poll(bool keyboard, bool mouse, bool gamepad)
                     {
                         // TODO: fill in gamepad codes
                     }
+                    libevdev_set_clock_id(dev.dev, CLOCK_MONOTONIC);
                 }
                 devices.push_back(dev.dev);
                 return false;
