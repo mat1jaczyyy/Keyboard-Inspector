@@ -3,6 +3,7 @@
 #include <boost/container/static_vector.hpp>
 #include <boost/unordered/concurrent_flat_map.hpp>
 #include <boost/iterator/transform_iterator.hpp>
+#include <format>
 #include <thread>
 #include <string>
 #include <string_view>
@@ -223,9 +224,12 @@ void recorder::impl::_init_poll(bool keyboard, bool mouse, bool gamepad)
                     {
                         if (ev.type != EV_KEY || ev.value == 2)
                             continue;
-                        std::string id(libevdev_get_phys(device));
                         std::uint16_t vid = libevdev_get_id_vendor(device);
                         std::uint16_t pid = libevdev_get_id_product(device);
+                        std::uint16_t ver = libevdev_get_id_version(device);
+                        std::string name = libevdev_get_name(device);
+
+                        std::string id = std::format("{:04x}:{:04x}:{:04x}-{}", vid, pid, ver, name);
                         m_devices.try_emplace(id, vid, pid, ""s);
                         m_inputs[id].emplace_back(
                             ev.input_event_sec * 1000000ULL + ev.input_event_usec,
