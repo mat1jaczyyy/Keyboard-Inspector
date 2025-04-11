@@ -164,6 +164,9 @@ void recorder::impl::_init_scan_devices()
 void recorder::impl::_init_poll(bool keyboard, bool mouse, bool gamepad)
 {
     m_poll_thread = std::jthread([&](const std::stop_token& stop) {
+        timespec ref;
+        clock_gettime(CLOCK_MONOTONIC, &ref);
+        std::uint64_t ref_usec = ref.tv_sec * 1000000 + ref.tv_nsec / 1000;
         std::vector<libevdev*> devices;
         while (!stop.stop_requested())
         {
@@ -238,7 +241,7 @@ void recorder::impl::_init_poll(bool keyboard, bool mouse, bool gamepad)
                         std::string id = std::format("{:04x}:{:04x}:{:04x}-{}", vid, pid, ver, name);
                         m_devices.try_emplace(id, vid, pid, ""s);
                         m_inputs[id].emplace_back(
-                            ev.input_event_sec * 1000000ULL + ev.input_event_usec,
+                            ev.input_event_sec * 1000000ULL + ev.input_event_usec - ref_usec,
                             ev.value,
                             ev.code
                         );
