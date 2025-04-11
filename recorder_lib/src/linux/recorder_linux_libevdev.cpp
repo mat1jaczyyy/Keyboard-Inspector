@@ -268,6 +268,8 @@ void recorder::impl::start(bool keyboard, bool mouse, bool gamepad)
     if (m_running)
         throw std::runtime_error("The recorder is already running");
     m_running = true;
+    m_devices.clear();
+    m_inputs.clear();
     _init_scan_devices();
     _init_poll(keyboard, mouse, gamepad);
 }
