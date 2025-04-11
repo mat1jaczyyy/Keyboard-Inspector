@@ -4,6 +4,8 @@
   "builtin-baseline": "ae64e8e0196c3cb1bcfff09dbfb30383fb12b80d",
   "dependencies": [
     "boost-container",
+    "boost-unordered",
+    "boost-iterator",
     {
       "name": "gameinput",
       "platform": "windows"
